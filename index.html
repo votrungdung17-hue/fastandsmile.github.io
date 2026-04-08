@@ -89,10 +89,21 @@ input.uppercase { text-transform: uppercase; }
 <script>
 const API = "https://script.google.com/macros/s/AKfycbzRPO1gtnCDab5n5dOY9jSGF_lnCLtQrlwn1ShYmRNm7kg5uWn_sfMKR0SeZvPnXCt52A/exec"; // Thay bằng link deploy mới
 
-function formatDateForInput(iso) {
-  if(!iso) return "";
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function formatTimeForInput(val){
+  if(!val) return "";
+
+  // ✅ Nếu đã là dạng HH:mm thì giữ nguyên (QUAN TRỌNG)
+  if (typeof val === "string" && /^\d{2}:\d{2}$/.test(val)) {
+    return val;
+  }
+
+  // ✅ Nếu là ISO (có T hoặc Z) thì mới parse Date
+  if (typeof val === "string" && val.includes("T")) {
+    const d = new Date(val);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  return "";
 }
 
 function formatTimeForInput(iso){
