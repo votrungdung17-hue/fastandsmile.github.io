@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vietnam Airlines Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="login-box">
+      <img src="logo.png" alt="Logo" class="logo">
+
+      <h2>Đăng nhập</h2>
+
+      <form onsubmit="return login()">
+        <div class="input-group">
+          <input type="text" id="username" required>
+          <label>Tên đăng nhập</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" required>
+          <label>Mật khẩu</label>
+        </div>
+
+        <button type="submit">Đăng nhập</button>
+      </form>
+
+      <p class="footer">© Vietnam Airlines</p>
+    </div>
+  </div>
+
+  <script>
+  function login() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+
+    const users = [
+      { username: "admin", password: "123456", redirect: "index1.html" },
+      { username: "khaithac", password: "846721", redirect: "index2.html" }
+    ];
+
+    const foundUser = users.find(u => u.username === user && u.password === pass);
+
+    if (foundUser) {
+      window.location.href = foundUser.redirect;
+    } else {
+      alert("Sai tên đăng nhập hoặc mật khẩu!");
+    }
+
+    return false;
+  }
+  </script>
+</body>
+</html>
