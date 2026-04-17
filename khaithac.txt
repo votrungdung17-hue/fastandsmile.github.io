@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)file:///G:/My%20Drive/database/fastandsmile.github.io/admin6.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Flight Manager</title>
+<style>
+.container {
+  width: 300px;
+  height: 200px;
+  overflow: auto; /* hoặc scroll */
+  border: 1px solid #ccc;
+}
+.logo-fixed {
+  position: fixed;
+  bottom: 20px;   /* cách dưới */
+  right: 20px;    /* cách phải */
+  width: 120px;   /* chỉnh size */
+  opacity: 0.9;   /* hơi mờ cho đẹp */
+  z-index: 999;   /* luôn nổi trên cùng */
+  pointer-events: none; /* không click trúng */
+}
+.logo-inline {
+  width: 120px;        /* chỉnh size logo */
+  vertical-align: middle;
+  margin-left: 10px;  /* cách chữ MANAGER */
+  border-radius: 6px; /* bo góc nhẹ cho đẹp */
+}
+body { font-family: Arial; }
+input { margin:3px; padding:3px; }
+table { border-collapse: collapse; margin-top:20px; width:100%; }
+td, th { border:1px solid #ccc; padding:5px; text-align:center; }
+th { background:#eee; }
+button { margin:2px; cursor:pointer; }
+tr.editing { background:#fff3cd; }
+input.uppercase { text-transform: uppercase; }
+
+/* Blink & Solid Styles */
+.blink-red { animation: blinkRed 3s infinite; }
+@keyframes blinkRed { 0% { background:red;color:#fff;} 50% { background:transparent;color:red;} 100% {background:red;color:#fff;} }
+.blink-green { animation: blinkGreen 1s infinite; }
+@keyframes blinkGreen { 0% { background:#28a745;color:#fff;} 50% { background:transparent;color:#28a745;} 100% { background:#28a745;color:#fff;} }
+.solid-green { background-color:#28a745;color:#fff; }
+.solid-gold { background-color:gold;color:#000; }
+.solid-gray {
+  background-color: #d3d3d3; /* lightgray */
+  color: #000;              /* chữ đen */
+}
+.blink-gold { animation: blinkGold 1.5s infinite; }
+@keyframes blinkGold { 0%{background:#FFD700;color:#000;}50%{background:transparent;color:#FFD700;}100%{background:#FFD700;color:#000;} }
+/* Ngăn không cho text trong ô bị chọn khi click */
+#table td {
+  user-select: none;   /* không cho chọn text */
+  cursor: default;     /* con trỏ mặc định */
+}
+.selected-row {
+  background-color: #d3d3d3; /* màu xám nhạt */
+}
+#mvaBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+</style>
+<link rel="stylesheet" href="center-title.css">
+</head>
+<body>
+
+
+<h2 class="center-title">
+  PHU QUOC FLIGHT MANAGER
+  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg" class="logo-inline">
+</h2>
+<form id="form">
+    <label for="ngay">DATE</label>
+    <input id="ngay" type="date" required="">
+</form>
+
+<table id="table"><tbody><tr><th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th><th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th><th>GT</th><th>DELAY TIME</th><th>DELAY CODE</th><th>COOR</th><th>W&amp;B</th></tr></tbody></table>
+<div style="height: 500px;"></div>
+<script>
+let selectedDate = "";
+let selectedRowId = null;
+let selectedRowData = null;
+const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; // Thay bằng link deploy mới
+
+function formatDateForInput(iso) {
+  if(!iso) return "";
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatTimeForInput(val){
+  if(!val) return "";
+
+  // ✅ Nếu đã là dạng HH:mm thì giữ nguyên (QUAN TRỌNG)
+  if (typeof val === "string" && /^\d{2}:\d{2}$/.test(val)) {
+    return val;
+  }
+
+  // ✅ Nếu là ISO (có T hoặc Z) thì mới parse Date
+  if (typeof val === "string" && val.includes("T")) {
+    const d = new Date(val);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  return "";
+}
+ function autoFormatTime(input) {
+    let value = input.value.replace(/[^0-9]/g, ""); // chỉ giữ số
+
+    if (value.length === 4) {
+      let hours = parseInt(value.slice(0, 2), 10);
+      let minutes = parseInt(value.slice(2, 4), 10);
+
+      // Giới hạn giờ và phút
+      if (hours > 23) hours = 23;
+      if (minutes > 59) minutes = 59;
+
+      // Đảm bảo luôn có 2 chữ số
+      let hh = hours.toString().padStart(2, "0");
+      let mm = minutes.toString().padStart(2, "0");
+
+      input.value = hh + ":" + mm;
+    } else {
+      input.value = value;
+    }
+  }
+
+  // Gắn sự kiện cho tất cả ô nhập giờ
+  document.querySelectorAll('#sta, #eta,#landing, #ata, #std, #etd, #atd, #fht, #pushback,#takeoff, #delay')
+    .forEach(el => {
+      el.addEventListener('input', () => autoFormatTime(el));
+    });
+
+function applyBlinkEffect(cellElement, planned, actual){
+  cellElement.classList.remove("blink-red","blink-green","solid-green","blink-gold");
+  if(planned && actual){
+    if(actual > planned) cellElement.classList.add("blink-red");
+    else cellElement.classList.add("solid-green");
+  } else {
+    cellElement.classList.add("blink-gold");
+  }
+}
+
+function parseTime(str){
+  if(!str) return null;
+  const [h,m] = str.split(":").map(Number);
+  return h*60 + m; // tổng số phút
+}
+
+function formatMinutes(total){
+  if(total==null) return "";
+  const h = String(Math.floor(total/60)).padStart(2,"0");
+  const m = String(total%60).padStart(2,"0");
+  return `${h}:${m}`;
+}
+
+function loadData(){
+  const table = document.getElementById("table");
+
+  let url = API + "?t=" + Date.now();
+
+  if(selectedDate){
+    url += "&date=" + selectedDate;
+  }
+
+  fetch(url, {cache:"no-store"})
+    .then(r=>r.json())
+    .then(res=>{
+      const data = res.data;
+
+      if(!data || data.length === 0){
+        table.innerHTML = "<tr><td colspan='21'>No data</td></tr>";
+        return;
+      }
+
+      // giữ nguyên phần render bảng của bạn
+
+      // Header
+      let html = "<tr>";
+      html += "<th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th>";
+      html += "<th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th>";
+      html += "<th>GT</th><th>DELAY TIME</th><th>DELAY CODE</th><th>COOR</th><th>W&B</th></tr>";
+
+      data.slice(1).reverse().forEach(row=>{
+        html += `<tr id="row-${row[0]}" ondblclick='selectRow(${JSON.stringify(row)})'>`;
+        html += `<td>${formatDateForInput(row[1])}</td>`; //NGAY
+        html += `<td>${(row[2]||"").toUpperCase()}</td>`; //ACREG
+        html += `<td>${(row[3]||"").toUpperCase()}</td>`; //ARRFLIGHT
+        html += `<td>${(row[4]||"").toUpperCase()}</td>`; //FROM
+        html += `<td>${formatTimeForInput(row[5])}</td>`; //STA
+        html += `<td>${formatTimeForInput(row[6])}</td>`; //ETA
+        html += `<td>${formatTimeForInput(row[7])}</td>`; //LANDING
+        html += `<td>${formatTimeForInput(row[8])}</td>`; //ATA
+        html += `<td>${(row[9]||"").toUpperCase()}</td>`; //DEPFLIGHT
+        html += `<td>${(row[10]||"").toUpperCase()}</td>`; //TO
+        html += `<td>${formatTimeForInput(row[11])}</td>`; //STD
+        html += `<td>${formatTimeForInput(row[12])}</td>`; //ETD
+        html += `<td>${formatTimeForInput(row[13])}</td>`; //ATD
+        html += `<td>${formatTimeForInput(row[14])}</td>`; //FHT
+        html += `<td>${formatTimeForInput(row[15])}</td>`; //PUSHBACK
+        html += `<td>${formatTimeForInput(row[16])}</td>`; //TAKEOFF
+
+        // GT = ATD - ATA
+        let gt="";
+const atdStr = formatTimeForInput(row[13]); // ATD
+const ataStr = formatTimeForInput(row[8]);  // ATA
+if(atdStr && ataStr){
+  const diff = parseTime(atdStr)-parseTime(ataStr);
+  gt = formatMinutes(diff);
+}
+html += `<td>${gt}</td>`;
+
+        // Delay = ATD - ETD
+ let delay="";
+const etdStr = formatTimeForInput(row[12]); // ETD
+if(atdStr && etdStr){
+  const diff = parseTime(atdStr) - parseTime(etdStr);
+  if(diff < 0){
+     delay = "-" + formatMinutes(Math.abs(diff));
+  } else {
+    delay = formatMinutes(diff);
+  }
+}
+html += `<td>${delay}</td>`;
+
+        html += `<td>${(row[19]||"").toUpperCase()}</td>`;  // Delay code
+        html += `<td>${(row[20]||"").toUpperCase()}</td>`;  // COOR
+        html += `<td>${(row[21]||"").toUpperCase()}</td>`;  // W&B
+
+        html += "</tr>";
+      });
+
+      document.getElementById("table").innerHTML = html;
+
+
+      // Hiệu ứng màu
+      data.slice(1).reverse().forEach(row=>{
+        const tr = document.getElementById("row-"+row[0]);
+        if(!tr) return;
+        const cells = tr.querySelectorAll("td");
+
+// So sánh ETA với STA: nếu khác thì STA màu xám
+const etaStr = row[6] ? formatTimeForInput(row[6]) : "";
+const staStr = row[5] ? formatTimeForInput(row[5]) : "";
+if(etaStr && staStr){
+  const etaMin = parseTime(etaStr);
+  const staMin = parseTime(staStr);
+  if(etaMin !== staMin){
+    cells[5].classList.add("solid-gray"); 
+  }
+}
+
+
+        // So sánh ETD với STD: nếu khác thì STD màu xám
+        const etdStr0 = row[12] ? formatTimeForInput(row[12]) : "";
+        const stdStr = row[11] ? formatTimeForInput(row[11]) : "";
+        if(etdStr0 && stdStr){
+          const etdMin0 = parseTime(etdStr0);
+          const stdMin = parseTime(stdStr);
+          if(etdMin0 !== stdMin){
+            cells[11].classList.add("solid-gray");
+          }
+        }
+        // So sánh ATA với ETA
+        const ataStr = row[8] ? formatTimeForInput(row[8]) : "";
+        if(ataStr && etaStr){
+          const ataMin = parseTime(ataStr);
+          const etaMin = parseTime(etaStr);
+          const diff = ataMin - etaMin;
+
+          cells[7].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[7].classList.add("blink-red");   // ATA > ETA
+          } else {
+            cells[7].classList.add("solid-green"); // ATA ≤ ETA
+          }
+        }
+
+        // So sánh ATD với ETD
+        const atdStr = row[13] ? formatTimeForInput(row[13]) : "";
+        if(atdStr && etdStr0){
+          const atdMin = parseTime(atdStr);
+          const etdMin = parseTime(etdStr0);
+          const diff = atdMin - etdMin;
+
+          cells[12].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[12].classList.add("blink-red");   // ATD > ETD
+          } else {
+            cells[12].classList.add("solid-green"); // ATD ≤ ETD
+          }
+        }
+
+        // Kiểm tra Pushback vs ETD
+        const pushback = row[15] ? formatTimeForInput(row[15]) : "";
+        if(pushback && etdStr0){
+          const pbMin  = parseTime(pushback);
+          const etdMin = parseTime(etdStr0);
+          const diff   = pbMin - etdMin;
+
+          cells[14].classList.remove("blink-red","solid-green","solid-gold","blink-gold");
+
+          if(diff >= 15){
+            cells[14].classList.add("blink-red");
+          } else if(diff > 0 && diff < 15){
+            cells[14].classList.add("solid-gold");
+          } else {
+            cells[14].classList.add("solid-green");
+          }
+        }
+      });
+    });
+}
+function selectRow(row){
+  selectedRowId = row[0];
+  selectedRowData = row;
+
+  // Bỏ chọn các dòng khác
+  document.querySelectorAll("#table tr").forEach(tr=>{
+    tr.classList.remove("selected-row");
+  });
+
+  // Tô xám dòng hiện tại
+  const currentRow = document.getElementById("row-"+row[0]);
+  if(currentRow){
+    currentRow.classList.add("selected-row");
+  }
+
+  ngay.value = formatDateForInput(row[1]);
+  soDangKy.value = row[2] || "";
+  soHieu.value = row[3] || "";
+  from.value = row[4] || "";
+  sta.value = formatTimeForInput(row[5]);
+  eta.value = formatTimeForInput(row[6]);
+  landing.value = formatTimeForInput(row[7]);
+  ata.value = formatTimeForInput(row[8]);
+  soHieu1.value = row[9] || "";
+  to.value = row[10] || "";
+  std.value = formatTimeForInput(row[11]);
+  etd.value = formatTimeForInput(row[12]);
+  atd.value = formatTimeForInput(row[13]);
+  fht.value = formatTimeForInput(row[14]);
+  pushback.value = formatTimeForInput(row[15]);
+  takeoff.value = formatTimeForInput(row[16]);
+
+  // Các trường text
+  delaycode.value = row[19] || "";
+  coor.value = row[20] || "";
+  wnb.value = row[21] || "";
+}
+
+
+
+// INIT
+//////
+const ngay = document.getElementById("ngay");
+
+// mặc định hôm nay
+selectedDate = new Date().toISOString().split("T")[0];
+ngay.value = selectedDate;
+
+// khi đổi ngày
+ngay.addEventListener("change", function(){
+  selectedDate = this.value;
+  loadData();
+});
+//////////
+loadData();
+
+// Tự động gọi lại loadData mỗi 10 giây (1)
+setInterval(loadData, 60000);
+</script>
+
+
+<footer style="position:fixed; bottom:0; left:0; width:100%; text-align:left; 
+               background:#f9f9f9; padding:10px; font-size:14px; color:#555;">
+  • © 2026. All rights reserved. Any unauthorized copying, modification, or distribution of this content is strictly prohibited and subject to legal action.
+  • Developed and owned by Fast &amp; Smile.
+</footer>
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg" 
+     class="logo-fixed">
+</body></html>
