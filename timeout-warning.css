@@ -1,0 +1,39 @@
+.timeout-warning {
+  position: relative;
+  display: inline-flex; /* đổi sang flex cho chắc */
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-weight: bold;
+  color: #fff;
+  background: #ff0000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* chữ */
+.timeout-warning span {
+  position: relative;
+  z-index: 2;
+}
+
+/* lớp phủ */
+.timeout-warning::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* QUAN TRỌNG */
+  background: rgba(255, 0, 0, 0.8);
+  animation: flashWarning 0.8s infinite;
+  z-index: 1;
+  border-radius: 6px;
+}
+
+/* nhấp nháy */
+@keyframes flashWarning {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
