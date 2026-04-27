@@ -335,7 +335,7 @@ input.uppercase { text-transform: uppercase; }
   justify-content:space-between;
 }
 </style>
-<link rel="stylesheet" href="./admin15_files/center-title.css">
+<link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <button id="logoutBtn" style="
