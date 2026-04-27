@@ -365,7 +365,7 @@ button {
   margin-top: 30px !important;
 }
 </style>
-<link rel="stylesheet" href="./admin15_files/center-title.css">
+<link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 </head>
 <button id="logoutBtn" style="
   position:fixed;
