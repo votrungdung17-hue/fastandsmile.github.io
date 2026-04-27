@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<!-- saved from url=(0066)file:///G:/My%20Drive/database/fastandsmile.github.io/admin13.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Flight Manager</title>
+<style>
+.container {
+  width: 300px;
+  height: 200px;
+  overflow: auto; /* hoặc scroll */
+  border: 1px solid #ccc;
+}
+body {
+  font-family: "Segoe UI", "Roboto", "Inter", Arial, sans-serif;
+  font-size: 13px;
+  color: #212529;
+}
+.logo-fixed {
+  position: fixed;
+  bottom: 20px;   /* cách dưới */
+  right: 20px;    /* cách phải */
+  width: 120px;   /* chỉnh size */
+  opacity: 0.9;   /* hơi mờ cho đẹp */
+  z-index: 999;   /* luôn nổi trên cùng */
+  pointer-events: none; /* không click trúng */
+}
+
+
+.logo-inline {
+  width: 120px;        /* chỉnh size logo */
+  vertical-align: middle;
+  margin-left: 10px;  /* cách chữ MANAGER */
+  border-radius: 6px; /* bo góc nhẹ cho đẹp */
+}
+body {
+  font-family: Arial;
+}
+input { margin:3px; padding:3px; }
+table { border-collapse: collapse; margin-top:20px; width:100%; }
+td, th { border:1px solid #ccc; padding:5px; text-align:center; }
+th { background:#eee; }
+button { margin:2px; cursor:pointer; }
+tr.editing { background:#fff3cd; }
+input.uppercase { text-transform: uppercase; }
+
+/* Blink & Solid Styles */
+.blink-red { animation: blinkRed 3s infinite; }
+@keyframes blinkRed { 0% { background:red;color:#fff;} 50% { background:transparent;color:red;} 100% {background:red;color:#fff;} }
+.blink-green { animation: blinkGreen 1s infinite; }
+@keyframes blinkGreen { 0% { background:#28a745;color:#fff;} 50% { background:transparent;color:#28a745;} 100% { background:#28a745;color:#fff;} }
+.solid-green { background-color:#28a745;color:#fff; }
+.solid-gold { background-color:gold;color:#000; }
+.solid-gray {
+  background-color: #d3d3d3; /* lightgray */
+  color: #000;              /* chữ đen */
+}
+.blink-gold { animation: blinkGold 1.5s infinite; }
+@keyframes blinkGold { 0%{background:#FFD700;color:#000;}50%{background:transparent;color:#FFD700;}100%{background:#FFD700;color:#000;} }
+/* Ngăn không cho text trong ô bị chọn khi click */
+#table td {
+  user-select: none;   /* không cho chọn text */
+  cursor: default;     /* con trỏ mặc định */
+}
+.selected-row {
+  background-color: #d3d3d3; /* màu xám nhạt */
+}
+#mvaBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.tick-green {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.tick-red {
+  color: red;
+  font-weight: bold;
+  font-size: 16px;
+}
+.three-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+  align-items: stretch;
+}
+
+.main-box {
+  padding: 15px;
+  border-radius: 12px;
+  height: 100%;
+}
+
+/* màu */
+.blue-box { background: #e7f1ff; }
+.green-box { background: #d4edda; }
+.yellow-box { background: #fff3cd; }
+
+/* title */
+.main-box h3 {
+  text-align: center;
+  margin-top: 0;
+}
+
+/* grid */
+.rep-grid,
+.doc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* input */
+.main-box label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.main-box input {
+  width: 100%;
+  padding: 6px;
+  margin-top: 3px;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+.two-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+.doc-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.doc-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+}
+.doc-row-4 {
+  display: flex;
+  align-items: center; /* 👈 căn giữa theo chiều dọc */
+  gap: 6px; /* khoảng cách giữa checkbox và chữ */
+}
+.doc-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 10px 0;
+  padding: 6px;
+  color: #fff;
+  background: linear-gradient(90deg, #495057, #868e96);
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+.section-daidien {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #0072ff, #00c6ff);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.section-tailieu {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffF;
+  background: linear-gradient(90deg, #ff4d4f, #ff7875);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.section-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c2c2c;;
+  background: linear-gradient(90deg, #8e9eab, #eef2f3);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.top-right-img {
+  position: fixed;
+  top: 15px;
+  right: 1000px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+
+.top-right-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-mid-img {
+  position: fixed;
+  top: 15px;
+  right: 800px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-mid-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-left-img {
+  position: fixed;
+  top: 15px;
+  right: 600px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-left-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-input {
+  position: fixed;
+  top: 90px;
+  width: 80px;
+  text-align: center;
+
+  font-size: 28px;       /* 🔥 số to */
+  font-weight: 700;
+  border: none;          /* ❌ bỏ viền */
+  outline: none;         /* ❌ bỏ viền khi click */
+  background: transparent; /* ❌ bỏ nền */
+  pointer-events: none;  /* 👉 không cho nhập (chỉ hiển thị) */
+}
+.top-output {
+  position: fixed;
+  top: 90px;
+  width: 80px;
+  text-align: center;
+
+  font-size: 28px;       /* 🔥 số to */
+  font-weight: 700;
+  border: none;          /* ❌ bỏ viền */
+  outline: none;         /* ❌ bỏ viền khi click */
+  background: transparent; /* ❌ bỏ nền */
+
+}
+.top-leftt-img {
+  position: fixed;
+  top: 15px;
+  right: 400px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-leftt-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-lefttt-img {
+  position: fixed;
+  top: 15px;
+  right: 200px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-lefttt-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+/* căn theo từng icon */
+.input-adult { right: 1000px; }
+.input-children { right: 800px; }
+.input-baby { right: 600px; }
+.input-fuel { right: 400px; }
+.input-payload { right: 200px; }
+
+/* ❌ KHÔNG dùng cái này nữa */
+/* .three-main { display:none } */
+
+/* ❌ Ẩn toàn bộ nội dung bên trong */
+.three-main > * {
+  display: none !important;
+}
+
+
+/* ❌ Nhưng ẩn hết bên trong blue-box */
+.blue-box * {
+  display: none !important;
+}
+
+/* ✅ Hiện lại riêng DATE */
+#ngay {
+  display: block !important;
+  margin: 20px;
+}
+#ngay {
+  width: 100px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ❌ Ẩn label nếu muốn gọn */
+label {
+  display: none !important;
+}
+
+/* ❌ Ẩn toàn bộ input khác */
+input, textarea {
+  display: none !important;
+}
+
+/* ✅ Hiện lại các ô top */
+#adultCount,
+#childrenCount,
+#babyCount,
+#fuel,
+#payload {
+  display: block !important;
+}
+/* top counters vẫn giữ */
+#adultCount,
+#childrenCount,
+#babyCount,
+#fuel,
+#payload {
+  display: block !important;
+}
+/* ❌ Ẩn toàn bộ button */
+button {
+  display: none !important;
+}
+
+/* ✅ Giữ lại nút LOG OUT */
+#logoutBtn {
+  display: block !important;
+}
+#table {
+  margin-top: 30px !important;
+}
+</style>
+<link rel="stylesheet" href="./admin15_files/center-title.css">
+</head>
+<button id="logoutBtn" style="
+  position:fixed;
+  top:15px;
+  right:20px;
+  padding:8px 12px;
+  background:#dc3545;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+">
+  🔒 LOG OUT
+</button>
+<body>
+<img src="./admin15_files/adult.png" class="top-right-img">
+<img src="./admin15_files/children.png" class="top-mid-img">
+<img src="./admin15_files/baby.png" class="top-left-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/fuel.png" class="top-leftt-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/payload.png" class="top-lefttt-img">
+<input class="top-input input-adult" id="adultCount" placeholder="ADT">
+<input class="top-input input-children" id="childrenCount" placeholder="CHD">
+<input class="top-input input-baby" id="babyCount" placeholder="INF">
+<input class="top-output input-fuel" id="fuel" placeholder="TOF">
+<input class="top-output input-payload" id="payload" placeholder="APLD">
+
+<h2 class="center-title">
+  PHU QUOC FLIGHT MANAGER
+  <img src="./admin15_files/VNA.jpg" class="logo-inline">
+</h2>
+<input id="ngay" type="date" required="">
+<div class="three-main">
+
+  <!-- 🔵 THÔNG TIN CHUNG -->
+<div class="main-box blue-box">
+<div class="section-header">
+  ✈️ THÔNG TIN CHUNG
+</div>
+
+    <label for="soDangKy">A/C REG</label>
+    <input id="soDangKy" class="uppercase" required="" oninput="fillConfig()">
+
+   <label for="config">CONFIG</label>
+   <input id="config">
+
+  <!-- 👇 CHIA 3 CỘT -->
+  <div class="info-grid">
+
+    <!-- CỘT TRÁI -->
+    <div>
+   <label for="soHieu">ARR FLIGHT</label>
+    <input id="soHieu" class="uppercase" required="">
+
+    <label for="soHieu1">DEP FLIGHT</label>
+    <input id="soHieu1" class="uppercase" required="">
+
+    </div>
+
+    <!-- CỘT GIỮA -->
+    <div>
+
+    <label for="from">FROM</label>
+    <input id="from" class="uppercase" required="">
+
+    <label for="to">TO</label>
+    <input id="to" class="uppercase" required="">
+
+    </div>
+
+    <!-- CỘT PHẢI -->
+    <div>
+
+ <label for="sta">STA</label>
+    <input id="sta" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+
+   <label for="std">STD</label>
+    <input id="std" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- 🟢 ĐẠI DIỆN -->
+  <div class="main-box green-box">
+     <div class="section-daidien">
+  🔭 ĐẠI DIỆN
+</div>
+
+    <div class="info-grid">
+
+      <div>
+   <label for="eta">ETA</label>
+    <input id="eta" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+      <!-- DEPARTURE -->
+      <div>
+   <label for="etd">ETD</label>
+    <input id="etd" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+      <div>
+        <label for="pushback">Pushback</label>
+    <input id="pushback" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+    </div>
+<!-- HÀNG 2: CODE1 + TIME1 -->
+  <div class="doc-title">DELAY CODE</div>
+  <div class="doc-row-2">
+    <div>
+      <label>CODE1</label>
+      <input id="code1" class="uppercase">
+    </div>
+
+    <div>
+      <label>TIME1</label>
+      <input id="time1" class="uppercase">
+    </div>
+  </div>
+<!-- HÀNG 3: CODE2 + TIME2 -->
+  <div class="doc-row-2">
+    <div>
+      <label>CODE2</label>
+      <input id="code2" class="uppercase">
+    </div>
+
+    <div>
+      <label>TIME2</label>
+      <input id="time2" class="uppercase">
+    </div>
+  </div>
+         <label for="details">DETAILS</label>
+   <textarea id="details" class="uppercase"></textarea>
+
+<!-- HÀNG 4: MOPLUS + LOTUS -->
+  <div class="doc-row-4">
+    <div>
+          <label for="lotus">LOTUS</label>
+   <input type="checkbox" id="lotus">
+    </div>
+
+    <div>
+          <label for="moplus">MOPLUS</label>
+   <input type="checkbox" id="moplus">
+    </div>
+  </div>
+
+
+  </div>
+
+  <!-- 🟡 TÀI LIỆU -->
+<div class="main-box yellow-box">
+<div class="section-tailieu">
+  📚 TÀI LIỆU
+</div>
+
+  <!-- HÀNG 1: COOR + W&B -->
+  <div class="doc-row-2">
+    <div>
+      <label for="coor">COOR</label>
+    <input id="coor" class="uppercase">
+    </div>
+
+    <div>
+      <label for="wnb">W&amp;B</label>
+    <input id="wnb" class="uppercase">
+    </div>
+  </div>
+
+  <!-- HÀNG 2: ARRIVAL -->
+  <div class="doc-title">ARRIVAL</div>
+
+  <!-- HÀNG 3: LANDING + ATA -->
+  <div class="doc-row-2">
+    <div>
+      <label for="landing">LANDING</label>
+    <input id="landing" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+   <label for="ata">ATA</label>
+    <input id="ata" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+  </div>
+
+  <!-- HÀNG 4: DEPARTURE -->
+  <div class="doc-title">DEPARTURE</div>
+
+  <!-- HÀNG 5: FHT + ATD + TAKEOFF -->
+  <div class="doc-row-3">
+    <div>
+      <label for="fht">FHT</label>
+    <input id="fht" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+      <label for="atd">ATD</label>
+    <input id="atd" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+      <label for="takeoff">TAKEOFF</label>
+    <input id="takeoff" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+  </div>
+         <label for="ldm">LDM</label>
+   <textarea id="ldm" class="uppercase"></textarea>
+<button type="button" id="upload">UPLOAD</button>
+
+</div>
+</div>
+
+<form id="form">
+
+    <button type="submit">➕ Thêm</button>
+    <button type="button" id="deleteBtn">➖ Xoá</button>
+    <button type="button" id="btnUpdate">✏️ Update</button>
+
+</form>
+
+<table id="table"><tbody><tr><th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th><th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th><th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&amp;B</th><th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr></tbody></table>
+<button id="mvaBtn">MVA</button>
+<button id="mvdBtn">MVD</button>
+<button id="occBtn">OCC</button>
+<button id="fhtBtn">FHT</button>
+<div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
+<div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
+<div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
+<div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>  
+<div style="height: 500px;"></div> 
+<script>
+document.getElementById("logoutBtn").onclick = function(){
+  // Xoá trạng thái đăng nhập
+  localStorage.clear();
+
+  // Chuyển về trang login
+  window.location.href = "index.html";
+};
+
+//// config
+const configMap = {
+  // A
+  "334":"178/32A","335":"178/32A","336":"178/32A",
+  "602":"178/32A","606":"178/32A","610":"178/32A","398":"178/32A",
+
+  // B
+  "322":"184/32B","360":"184/32B","361":"184/32B","362":"184/32B",
+  "363":"184/32B","365":"184/32B","366":"184/32B","367":"184/32B","390":"184/32B",
+
+  // E
+  "350":"203/32E","351":"203/32E","352":"203/32E","353":"203/32E",
+  "354":"203/32E","356":"203/32E","357":"203/32E","359":"203/32E",
+
+  // C
+  "323":"184/32C","324":"184/32C","325":"184/32C","326":"184/32C",
+  "327":"184/32C","329":"184/32C","331":"184/32C","332":"184/32C",
+  "338":"184/32C","339":"184/32C","392":"184/32C","393":"184/32C",
+  "395":"184/32C","396":"184/32C","397":"184/32C","399":"184/32C",
+  "601":"184/32C","603":"184/32C","604":"184/32C","605":"184/32C",
+  "608":"184/32C","609":"184/32C","611":"184/32C","612":"184/32C",
+
+  // D
+  "344":"203/32D","345":"203/32D","347":"203/32D","348":"203/32D",
+  "349":"203/32D","358":"203/32D","613":"203/32D","614":"203/32D","615":"203/32D",
+
+  // N
+  "501":"203/32N","503":"203/32N","505":"203/32N","506":"203/32N",
+  "507":"203/32N","508":"203/32N","509":"203/32N","510":"203/32N",
+  "511":"203/32N","512":"203/32N","616":"203/32N","617":"203/32N",
+  "618":"203/32N","619":"203/32N","620":"203/32N","621":"203/32N",
+  "622":"203/32N","623":"203/32N","624":"203/32N","625":"203/32N",
+
+  // K
+  "513":"184/32K","514":"184/32K","515":"184/32K",
+
+  // ATR
+  "223":"72/AT7",
+
+  // W
+  "SAF":"178/32S",
+  "SAG":"178/32W",
+
+  // X
+  "MLX":"180/32X",
+  "MLO":"180/32X",
+
+  // A350
+  "890":"305/35B","891":"305/35B","892":"305/35B","893":"305/35B",
+  "894":"305/35B","895":"305/35B","896":"305/35B","897":"305/35B",
+  "898":"305/35B","899":"305/35B",
+
+  "886":"305/35A","887":"305/35A","888":"305/35A","889":"305/35A"
+  // thêm tuỳ bạn
+};
+//// 
+let selectedDate = "";
+let selectedRowId = null;
+let selectedRowData = null;
+const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; // Thay bằng link deploy mới
+
+function formatDateForInput(iso) {
+  if(!iso) return "";
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatTimeForInput(val){
+  if(!val) return "";
+
+  // ✅ Nếu đã là dạng HH:mm thì giữ nguyên (QUAN TRỌNG)
+  if (typeof val === "string" && /^\d{2}:\d{2}$/.test(val)) {
+    return val;
+  }
+
+  // ✅ Nếu là ISO (có T hoặc Z) thì mới parse Date
+  if (typeof val === "string" && val.includes("T")) {
+    const d = new Date(val);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  return "";
+}
+ function autoFormatTime(input) {
+    let value = input.value.replace(/[^0-9]/g, ""); // chỉ giữ số
+
+    if (value.length === 4) {
+      let hours = parseInt(value.slice(0, 2), 10);
+      let minutes = parseInt(value.slice(2, 4), 10);
+
+      // Giới hạn giờ và phút
+      if (hours > 23) hours = 23;
+      if (minutes > 59) minutes = 59;
+
+      // Đảm bảo luôn có 2 chữ số
+      let hh = hours.toString().padStart(2, "0");
+      let mm = minutes.toString().padStart(2, "0");
+
+      input.value = hh + ":" + mm;
+    } else {
+      input.value = value;
+    }
+  }
+
+  // Gắn sự kiện cho tất cả ô nhập giờ
+ document.addEventListener("DOMContentLoaded", function(){
+
+  document.querySelectorAll('#sta, #eta, #landing, #ata, #std, #etd, #atd, #fht, #pushback, #takeoff')
+    .forEach(el => {
+      el.addEventListener('input', () => autoFormatTime(el));
+    });
+
+});
+function applyBlinkEffect(cellElement, planned, actual){
+  cellElement.classList.remove("blink-red","blink-green","solid-green","blink-gold");
+  if(planned && actual){
+    if(actual > planned) cellElement.classList.add("blink-red");
+    else cellElement.classList.add("solid-green");
+  } else {
+    cellElement.classList.add("blink-gold");
+  }
+}
+
+function parseTime(str){
+  if(!str) return null;
+  const [h,m] = str.split(":").map(Number);
+  return h*60 + m; // tổng số phút
+}
+
+function formatMinutes(total){
+  if(total==null) return "";
+  const h = String(Math.floor(total/60)).padStart(2,"0");
+  const m = String(total%60).padStart(2,"0");
+  return `${h}:${m}`;
+}
+
+function loadData(){
+  const table = document.getElementById("table");
+
+  let url = API + "?t=" + Date.now();
+
+  if(selectedDate){
+    url += "&date=" + selectedDate;
+  }
+
+  fetch(url, {cache:"no-store"})
+    .then(r=>r.json())
+    .then(res=>{
+      const data = res.data;
+
+      if(!data || data.length === 0){
+        table.innerHTML = "<tr><td colspan='27'>No data</td></tr>";
+        return;
+      }
+
+      // giữ nguyên phần render bảng của bạn
+
+      // Header
+      let html = "<tr>";
+      html += "<th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th>";
+      html += "<th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th>";
+      html += "<th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&B</th>";
+      html += "<th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr>";
+
+      data.slice(1).reverse().forEach(row=>{
+        html += `<tr id="row-${row[0]}" ondblclick='selectRow(${JSON.stringify(row)})'>`;
+        html += `<td>${formatDateForInput(row[1])}</td>`; //NGAY
+        html += `<td>${(row[2]||"").toUpperCase()}</td>`; //ACREG
+        html += `<td>${(row[3]||"").toUpperCase()}</td>`; //ARRFLIGHT
+        html += `<td>${(row[4]||"").toUpperCase()}</td>`; //FROM
+        html += `<td>${formatTimeForInput(row[5])}</td>`; //STA
+        html += `<td>${formatTimeForInput(row[6])}</td>`; //ETA
+        html += `<td>${formatTimeForInput(row[7])}</td>`; //LANDING
+        html += `<td>${formatTimeForInput(row[8])}</td>`; //ATA
+        html += `<td>${(row[9]||"").toUpperCase()}</td>`; //DEPFLIGHT
+        html += `<td>${(row[10]||"").toUpperCase()}</td>`; //TO
+        html += `<td>${formatTimeForInput(row[11])}</td>`; //STD
+        html += `<td>${formatTimeForInput(row[12])}</td>`; //ETD
+        html += `<td>${formatTimeForInput(row[13])}</td>`; //ATD
+        html += `<td>${formatTimeForInput(row[14])}</td>`; //FHT
+        html += `<td>${formatTimeForInput(row[15])}</td>`; //PUSHBACK
+        html += `<td>${formatTimeForInput(row[16])}</td>`; //TAKEOFF
+
+        // GT = ATD - ATA
+        let gt="";
+const atdStr = formatTimeForInput(row[13]); // ATD
+const ataStr = formatTimeForInput(row[8]);  // ATA
+if(atdStr && ataStr){
+  const diff = parseTime(atdStr)-parseTime(ataStr);
+  gt = formatMinutes(diff);
+}
+html += `<td>${gt}</td>`;
+
+        // Delay = ATD - ETD
+ let delay="";
+const etdStr = formatTimeForInput(row[12]); // ETD
+if(atdStr && etdStr){
+  const diff = parseTime(atdStr) - parseTime(etdStr);
+  if(diff < 0){
+     delay = "-" + formatMinutes(Math.abs(diff));
+  } else {
+    delay = formatMinutes(diff);
+  }
+}
+html += `<td>${delay}</td>`;
+
+        html += `<td>${(row[19]||"").toUpperCase()}</td>`;  // Delay code1
+        html += `<td>${(row[20]||"").toUpperCase()}</td>`;  // Delay TIME1	
+        html += `<td>${(row[21]||"").toUpperCase()}</td>`;  // Delay CODE2
+        html += `<td>${(row[22]||"").toUpperCase()}</td>`;  // Delay time2
+        html += `<td>${(row[23]||"").toUpperCase()}</td>`;  // COOR
+        html += `<td>${(row[24]||"").toUpperCase()}</td>`;  // W&B
+        html += `<td>${row[25] || ""}</td>`; // CONFIG
+html += `<td class="${row[26] === true || row[26] === "TRUE" ? "tick-green" : "tick-red"}">
+  ${row[26] === true || row[26] === "TRUE" ? "✔" : "✖"}
+</td>`;
+
+html += `<td class="${row[27] === true || row[27] === "TRUE" ? "tick-green" : "tick-red"}">
+  ${row[27] === true || row[27] === "TRUE" ? "✔" : "✖"}
+</td>`;
+
+        html += "</tr>";
+      });
+
+      document.getElementById("table").innerHTML = html;
+
+
+      // Hiệu ứng màu
+      data.slice(1).reverse().forEach(row=>{
+        const tr = document.getElementById("row-"+row[0]);
+        if(!tr) return;
+        const cells = tr.querySelectorAll("td");
+
+// So sánh ETA với STA: nếu khác thì STA màu xám
+const etaStr = row[6] ? formatTimeForInput(row[6]) : "";
+const staStr = row[5] ? formatTimeForInput(row[5]) : "";
+if(etaStr && staStr){
+  const etaMin = parseTime(etaStr);
+  const staMin = parseTime(staStr);
+  if(etaMin !== staMin){
+    cells[5].classList.add("solid-gray"); 
+  }
+}
+
+
+        // So sánh ETD với STD: nếu khác thì STD màu xám
+        const etdStr0 = row[12] ? formatTimeForInput(row[12]) : "";
+        const stdStr = row[11] ? formatTimeForInput(row[11]) : "";
+        if(etdStr0 && stdStr){
+          const etdMin0 = parseTime(etdStr0);
+          const stdMin = parseTime(stdStr);
+          if(etdMin0 !== stdMin){
+            cells[11].classList.add("solid-gray");
+          }
+        }
+        // So sánh ATA với ETA
+        const ataStr2 = row[8] ? formatTimeForInput(row[8]) : "";
+        if(ataStr2 && etaStr){
+          const ataMin = parseTime(ataStr2);
+          const etaMin = parseTime(etaStr);
+          const diff = ataMin - etaMin;
+
+          cells[7].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[7].classList.add("blink-red");   // ATA > ETA
+          } else {
+            cells[7].classList.add("solid-green"); // ATA ≤ ETA
+          }
+        }
+
+        // So sánh ATD với ETD
+        const atdStr2 = row[13] ? formatTimeForInput(row[13]) : "";
+        if(atdStr2 && etdStr0){
+          const atdMin = parseTime(atdStr2);
+          const etdMin = parseTime(etdStr0);
+          const diff = atdMin - etdMin;
+
+          cells[12].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[12].classList.add("blink-red");   // ATD > ETD
+          } else {
+            cells[12].classList.add("solid-green"); // ATD ≤ ETD
+          }
+        }
+
+        // Kiểm tra Pushback vs ETD
+        const pushback = row[15] ? formatTimeForInput(row[15]) : "";
+        if(pushback && etdStr0){
+          const pbMin  = parseTime(pushback);
+          const etdMin = parseTime(etdStr0);
+          const diff   = pbMin - etdMin;
+
+          cells[14].classList.remove("blink-red","solid-green","solid-gold","blink-gold");
+
+          if(diff >= 15){
+            cells[14].classList.add("blink-red");
+          } else if(diff > 0 && diff < 15){
+            cells[14].classList.add("solid-gold");
+          } else {
+            cells[14].classList.add("solid-green");
+          }
+        }
+      });
+    });
+}
+function selectRow(row){
+  selectedRowId = row[0];
+  selectedRowData = row;
+
+  // Bỏ chọn các dòng khác
+  document.querySelectorAll("#table tr").forEach(tr=>{
+    tr.classList.remove("selected-row");
+  });
+document.getElementById("details").addEventListener("input", function(){
+  this.value = this.value.toUpperCase();
+});
+
+  // Tô xám dòng hiện tại
+  const currentRow = document.getElementById("row-"+row[0]);
+  if(currentRow){
+    currentRow.classList.add("selected-row");
+  }
+
+  ngay.value = formatDateForInput(row[1]);
+  soDangKy.value = row[2] || "";
+  soHieu.value = row[3] || "";
+  from.value = row[4] || "";
+  sta.value = formatTimeForInput(row[5]);
+  eta.value = formatTimeForInput(row[6]);
+  landing.value = formatTimeForInput(row[7]);
+  ata.value = formatTimeForInput(row[8]);
+  soHieu1.value = row[9] || "";
+  to.value = row[10] || "";
+  std.value = formatTimeForInput(row[11]);
+  etd.value = formatTimeForInput(row[12]);
+  atd.value = formatTimeForInput(row[13]);
+  fht.value = formatTimeForInput(row[14]);
+  pushback.value = formatTimeForInput(row[15]);
+  takeoff.value = formatTimeForInput(row[16]);
+
+  // Các trường text
+  code1.value = row[19] || "";
+ time1.value = row[20] || "";
+ code2.value = row[21] || "";
+ time2.value = row[22] || "";
+  coor.value = row[23] || "";
+  wnb.value = row[24] || "";
+  config.value = row[25] || "";
+lotus.checked = String(row[26]).toUpperCase() === "TRUE";
+moplus.checked = String(row[27]).toUpperCase() === "TRUE";
+details.value = row[28] || "";
+adultCount.value = row[29] || "";
+childrenCount.value = row[30] || "";
+babyCount.value = row[31] || "";
+fuel.value = row[32] || "";
+payload.value = row[33] || "";
+checkMVAEnable();
+}
+
+form.onsubmit = function(e){
+  e.preventDefault();
+  // 👉 Tính GT = ATD - ATA
+  let gt = "";
+  if(atd.value && ata.value){
+    const diff = parseTime(atd.value) - parseTime(ata.value);
+    gt = formatMinutes(diff);
+  }
+
+  // 👉 Tính DELAY = ATD - ETD
+  let delay = "";
+  if(atd.value && etd.value){
+    const diff = parseTime(atd.value) - parseTime(etd.value);
+    if(diff < 0){
+      delay = "-" + formatMinutes(Math.abs(diff));
+    } else {
+      delay = formatMinutes(diff);
+    }
+  }
+  const data = {
+    ngay: ngay.value,
+    soHieu: soHieu.value,
+    from: from.value,
+    soDangKy: soDangKy.value,
+    sta: sta.value,
+    eta: eta.value,
+    landing: landing.value,
+    ata: ata.value,
+    soHieu1: soHieu1.value,
+    to: to.value,
+    std: std.value,
+    etd: etd.value,
+    atd: atd.value,
+    fht: fht.value,
+    pushback: pushback.value,
+    takeoff: takeoff.value,
+    gt:gt,
+    delay:delay,
+    code1: code1.value,
+time1: time1.value,
+code2: code2.value,
+time2: time2.value,
+    coor: coor.value,
+    wnb: wnb.value,
+  config: config.value,
+  lotus: lotus.checked,
+  moplus: moplus.checked,
+details: details.value,
+adult: adultCount.value,
+children: childrenCount.value,
+baby: babyCount.value,
+fuel: fuel.value,
+payload: payload.value,
+    action:"create"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="created"){ 
+        alert("Thêm thành công!");
+        form.reset(); 
+        loadData(); 
+      } else {
+        alert("Thêm thất bại: " + (resp.error || ""));
+      }
+    })
+    .catch(err=>{
+      alert("Có lỗi xảy ra: " + err.message);
+    });
+};
+
+/// tạo nút update
+document.getElementById("btnUpdate").onclick = function(){
+  if(!selectedRowId){
+    alert("Chưa chọn dòng để cập nhật!");
+    return;
+  }
+
+  const data = {
+    id: selectedRowId,   // cần gửi id để biết dòng nào
+    ngay: ngay.value,
+    soHieu: soHieu.value,
+    from: from.value,
+    soDangKy: soDangKy.value,
+    sta: sta.value,
+    eta: eta.value,
+    landing: landing.value,
+    ata: ata.value,
+    soHieu1: soHieu1.value,
+    to: to.value,
+    std: std.value,
+    etd: etd.value,
+    atd: atd.value,
+    fht: fht.value,
+    pushback: pushback.value,
+    takeoff: takeoff.value,
+   code1: code1.value,
+time1: time1.value,
+code2: code2.value,
+time2: time2.value,
+    coor: coor.value,
+    wnb: wnb.value,
+   config: config.value,
+   lotus: lotus.checked,
+   moplus: moplus.checked,
+details: details.value,
+adult: adultCount.value,
+children: childrenCount.value,
+baby: babyCount.value,
+fuel: fuel.value,
+payload: payload.value,
+    action:"update"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="updated"){ 
+        loadData(); 
+        alert("Cập nhật thành công!");
+      } else {
+        alert("Cập nhật thất bại: "+(resp.error||""));
+      }
+    });
+};
+
+
+// SAVE
+function saveRow(id, btn){
+  const tr = btn.closest("tr");
+  const inputs = tr.querySelectorAll("input");
+  const data = {
+    id: id,
+    ngay: inputs[0].value,
+    soHieu: inputs[1].value,
+    soDangKy: inputs[2].value,
+    sta: inputs[3].value,
+    eta: inputs[4].value,
+    ata: inputs[5].value,
+    std: inputs[6].value,
+    etd: inputs[7].value,
+    atd: inputs[8].value,
+    fht: inputs[9].value,
+    pushback: inputs[10].value,
+    delay: inputs[11].value,
+    action:"update"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="updated") loadData();
+      else alert("Cập nhật thất bại: "+(resp.error||""));
+    });
+}
+
+// DELETE
+document.getElementById("deleteBtn").onclick = function(){
+  if(!selectedRowId){
+    alert("Chọn dòng trước (double click)");
+    return;
+  }
+
+  if(!confirm("Xóa dòng này?")) return;
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({id:selectedRowId, action:"delete"})
+  })
+  .then(r=>r.json())
+  .then(resp=>{
+    if(resp.status==="deleted"){
+      form.reset();
+      selectedRowId = null;
+      loadData();
+    } else {
+      alert("Xóa thất bại");
+    }
+  });
+};
+
+
+// INIT
+// --- THAY THẾ ĐOẠN CŨ BẰNG ĐOẠN NÀY ---
+const ngayInput = document.getElementById("ngay");
+
+// Lấy ngày hiện tại theo giờ địa phương (đảm bảo không bị lệch múi giờ)
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+const formattedToday = `${yyyy}-${mm}-${dd}`;
+
+// Gán ngày hôm nay vào biến và ô nhập liệu
+selectedDate = formattedToday;
+ngayInput.value = formattedToday;
+
+// Gọi loadData ngay lập tức để hiện bảng dữ liệu hôm nay
+loadData();
+
+// Lắng nghe sự kiện khi người dùng chọn ngày khác
+ngayInput.addEventListener("change", function(){
+  selectedDate = this.value;
+  loadData();
+});
+
+// Tự động gọi lại loadData mỗi 10 giây (3 phút)
+setInterval(loadData, 180000);
+/// giờ utc
+function convertLocalMinus7(timeStr, dateStr){
+  if(!timeStr || !dateStr) return {time:"", day:""};
+
+  // timeStr dạng HH:MM
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const [year, month, day] = dateStr.split("-").map(Number);
+
+  // Tạo đối tượng Date theo giờ local
+  const localDate = new Date(year, month-1, day, hh, mm);
+
+  // Trừ đi 7 tiếng
+  const newDate = new Date(localDate.getTime() - 7*60*60*1000);
+
+  // Lấy giờ và phút
+  const hours = newDate.getHours().toString().padStart(2,"0");
+  const minutes = newDate.getMinutes().toString().padStart(2,"0");
+
+  // Bỏ dấu “:”
+  const timeOut = hours + minutes;
+
+  // Lấy ngày mới (dd)
+  const newDay = newDate.getDate().toString().padStart(2,"0");
+
+  return {time: timeOut, day: newDay};
+//////// sự kiện OCC
+
+////////
+}
+function showMVA(row){
+  if(!row) return;
+
+  const arrFlight = (row[3]||"").toUpperCase();   // ARR FLIGHT
+  const dateStr   = formatDateForInput(row[1]);   // DATE (yyyy-mm-dd)
+  const acReg     = (row[2]||"").toUpperCase();   // A/C REG
+
+  const landingObj = convertLocalMinus7(formatTimeForInput(row[7]), dateStr);
+  const ataObj     = convertLocalMinus7(formatTimeForInput(row[8]), dateStr);
+
+  // Dùng ngày sau khi trừ 7 tiếng (có thể khác ngày gốc)
+  const day = landingObj.day || (dateStr ? dateStr.split("-")[2] : "");
+
+  const text = `MVT
+${arrFlight}/${day}.${acReg}.PQC
+AA${landingObj.time}/${ataObj.time}`;
+  document.getElementById("occOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("mvaOutput").textContent = text;
+}
+
+// Gắn sự kiện cho nút MVA
+document.getElementById("mvaBtn").addEventListener("click", ()=>{
+  showMVA(selectedRowData);
+});
+/// dieu chinh lai format gio
+function normalizeTime(t){
+  if(!t) return "";
+  if(t.includes(":")) return t;
+  return t.slice(0,2) + ":" + t.slice(2);
+}
+
+// Bảng mapping offset phút theo sân bay
+const offsetMap = {
+  "SGN": 65,   // +1h05
+  "HAN": 125,  // +2h05
+  "DAD": 45,   // +0h45
+  "PQC": 30    // +0h30
+};
+
+function showMVD(row){
+  if(!row) return;
+
+  const depFlight = (row[9]||"").toUpperCase();
+  const dateStr   = formatDateForInput(row[1]);
+  const acReg     = (row[2]||"").toUpperCase();
+  const to        = (row[10]||"").toUpperCase();
+  const pax= 
+  Number(row[29] || 0) + 
+  Number(row[30] || 0) + 
+  Number(row[31] || 0);
+const tof        = (row[32]||"").toUpperCase();
+const payload        = (row[33]||"").toUpperCase();
+
+
+  const adObj    = convertLocalMinus7(formatTimeForInput(row[13]), dateStr); // ATD
+  const fht      = convertLocalMinus7(formatTimeForInput(row[14]), dateStr); // FHT
+  const takeoff  = convertLocalMinus7(formatTimeForInput(row[16]), dateStr); // ETA
+
+  // 🔹 EA = ETA + offset
+let eaTime = takeoff.time;
+
+if(offsetMap[to] && takeoff.time){
+  const norm = normalizeTime(takeoff.time);
+  eaTime = addMinutesToTime(norm, offsetMap[to]);
+}
+
+  const day = adObj.day || (dateStr ? dateStr.split("-")[2] : "");
+ const code1 = (row[19]||"").toUpperCase();
+ const time1 = (row[20]||"").toUpperCase();
+ const code2 = (row[21]||"").toUpperCase();
+ const time2 = (row[22]||"").toUpperCase();
+const t1 = (time1 || "").padStart(4, "0");
+const t2 = (time2 || "").padStart(4, "0");
+let delayCode = code2 === ""
+  ? `${code1}${t1}`
+  : `${code1}/${code2}/${t1}/${t2}`;
+
+  let text = `MVT
+${depFlight}/${day}.${acReg}.PQC
+AD${adObj.time}/${takeoff.time}  EA${eaTime}  ${to}`;
+
+  // nếu có delay code thì chèn ngay sau dòng AD
+  if(delayCode){
+    text += `\nDL${delayCode}`;
+  }
+
+  text += `
+PX${pax}
+SI TOF${tof}    APLD${payload}
+FHT ${fht.time}`;
+
+  document.getElementById("mvdOutput").textContent = text;
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("occOutput").textContent = "";
+}
+
+// Hàm cộng phút vào chuỗi giờ "HH:MM"
+function addMinutesToTime(timeStr, minutes){
+  const [hh, mm] = timeStr.split(":").map(Number);
+  if(isNaN(hh) || isNaN(mm)) return "";
+
+  const d = new Date();
+  d.setHours(hh);
+  d.setMinutes(mm + minutes);
+
+  const newH = String(d.getHours()).padStart(2,"0");
+  const newM = String(d.getMinutes()).padStart(2,"0");
+  return newH + newM; // xuất dạng HHMM
+}
+
+
+// Gắn sự kiện cho nút MVD
+document.getElementById("mvdBtn").addEventListener("click", ()=>{
+  showMVD(selectedRowData);
+});
+//// sự kiện nút mva mvd
+function checkMVAEnable(){
+  const landingVal = document.getElementById("landing").value.trim();
+  const ataVal     = document.getElementById("ata").value.trim();
+  const coorVal    = document.getElementById("coor").value.trim();
+  const wnbVal     = document.getElementById("wnb").value.trim();
+
+  const mvaBtn = document.getElementById("mvaBtn");
+
+  if(landingVal && ataVal && coorVal && wnbVal){
+    mvaBtn.disabled = false;
+  } else {
+    mvaBtn.disabled = true;
+  }
+}
+const landingEl = document.getElementById("landing");
+const ataEl     = document.getElementById("ata");
+const coorEl    = document.getElementById("coor");
+const wnbEl     = document.getElementById("wnb");
+
+[landingEl, ataEl, coorEl, wnbEl].forEach(el => {
+  if(el){
+    el.addEventListener("input", checkMVAEnable);
+  }
+});
+///sự kiện nút fht
+function showFHT(row){
+  if(!row){
+    alert("Chưa chọn dòng!");
+    return;
+  }
+
+  const depFlight = (row[9] || "").toUpperCase();   // DEP FLIGHT
+  const dateStr   = formatDateForInput(row[1]);     // yyyy-mm-dd
+  const fhtTime   = formatTimeForInput(row[14]);    // FHT
+  const ataTime   = formatTimeForInput(row[8]);     // ATA
+  const etdTime   = formatTimeForInput(row[12]);    // ETD
+
+  // format ngày dd/mm/yyyy
+  let dateFormatted = "";
+  if(dateStr){
+    const [y,m,d] = dateStr.split("-");
+    dateFormatted = `${d}/${m}/${y}`;
+  }
+
+  // GT = FHT - ATA
+  let gt = "";
+  let gtMinutes = null;
+  if(fhtTime && ataTime){
+    gtMinutes = parseTime(fhtTime) - parseTime(ataTime);
+    gt = gtMinutes + " Phút";
+  }
+
+  // Delay = FHT - ETD
+  let delay = "";
+  let delayMinutes = null;
+  if(fhtTime && etdTime){
+    delayMinutes = parseTime(fhtTime) - parseTime(etdTime);
+    delay = (delayMinutes >= 0 ? delayMinutes : delayMinutes) + " Phút";
+  }
+
+  // ✅❌ LOGIC PASS / FAIL
+  let status = "⛔FAIL";
+
+  if(fhtTime && etdTime && ataTime){
+    const fhtMin = parseTime(fhtTime);
+    const etdMin = parseTime(etdTime);
+    const ataMin = parseTime(ataTime);
+
+    if(fhtMin < etdMin || (fhtMin - ataMin) <= 35){
+      status = "✅PASS";
+    }
+  }
+
+  const text = `${depFlight} ${dateFormatted}
+C.ON ${ataTime.replace(":","")} FHT ${fhtTime.replace(":","")}
+GT ${gt}
+FHT SO ETD ${delay}
+${status}`;
+
+  document.getElementById("fhtOutput").textContent = text;
+
+  // clear output khác
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("occOutput").textContent = "";
+}
+
+// event
+document.getElementById("fhtBtn").addEventListener("click", ()=>{
+  showFHT(selectedRowData);
+});
+/// tạo sự kiện nút OCC
+function showOCC(row){
+  if(!row){
+    alert("Bạn chưa chọn dòng (double click vào bảng)");
+    return;
+  }
+
+  const dateStr = formatDateForInput(row[1]);
+  const depFlight = (row[9] || "").toUpperCase();
+  const from = (row[4] || "").toUpperCase();
+  const to = (row[10] || "").toUpperCase();
+  const acReg = (row[2] || "").toUpperCase();
+
+  const std = formatTimeForInput(row[11]);
+  const pushback = formatTimeForInput(row[15]);
+
+  const code1 = (row[19] || "").toUpperCase();
+  const time1 = (row[20] || "").toUpperCase();
+  const code2 = (row[21] || "").toUpperCase();
+  const time2 = (row[22] || "").toUpperCase();
+  const config = (row[25] || "").toUpperCase();
+  const details = (row[28] || "").toUpperCase();
+
+  // ===== MAP DELAY CAUSE =====
+  const delayCauseMap = {
+    OA:"KHÔNG CÓ GATE/ BÃI ĐỖ", SG:"GROUNDTIME THẤP HƠN TIÊU CHUẨN",
+    PD:"NHẬN KHÁCH MUỘN", PL:"QUẦY THỦ TỤC QUÁ TẢI",
+    PE:"LỖI CHỦ QUAN DO LÀM THỦ TỤC", PO:"OVERBOOK, LỖI BOOKING",
+    PH:"LỖI BOARDING", PS:"THIẾU TIỆN NGHI PHỤC VỤ KHÁCH/ KHÁCH BỊ MẤT ĐỒ",
+    PC:"ĐẶT SUẤT ĂN SAI", PB:"PHÂN LOẠI HÀNH LÝ CHẬM",
+    PW:"KHÁCH HẠN CHẾ DI CHUYỂN",
+
+    CD:"SAI TÀI LIỆU HÀNG HÓA", CP:"HÀNG HÓA TẬP KẾT CHẬM",
+    CC:"CHẤP NHẬN HÀNG HÓA CHẬM", CI:"LỖI ĐÓNG GÓI HÀNG HÓA",
+    CO:"LỖI ĐẶT CHỖ / BÁN QUÁ CHỖ", CU:"CARGO KÉO RA TÀU MUỘN",
+
+    GD:"TÀI LIỆU CHUYẾN BAY SAI, CHẬM", GE:"THIẾU PHƯƠNG TIỆN CHẤT XẾP",
+    GS:"THIẾU PHƯƠNG TIỆN PHỤC VỤ KHÁCH", GC:"VỆ SINH TÀU BAY CHẬM",
+    GF:"NẠP/ RÚT DẦU",
+
+    TD:"LỖI KỸ THUẬT", TM:"BẢO DƯỠNG CHẬM",
+    TN:"BẢO DƯỠNG BẤT THƯỜNG", TC:"ĐỔI TÀU BAY DO KỸ THUẬT",
+    TL:"THIẾU TÀU BAY DỰ BỊ", TV:"THAY ĐỔI CONFIG",
+
+    WO:"THỜI TIẾT TẠI SÂN BAY KHỞI HÀNH",
+    WT:"THỜI TIẾT TẠI SÂN BAY ĐẾN",
+    WI:"CHỐNG PHÁ BĂNG",
+
+    AD:"ATC", AM:"ATC",
+
+    RA:"TÀU VỀ MUỘN", RO:"QUẢN LÝ ĐIỀU HÀNH KHAI THÁC",
+    MX:"BÁO CÁO TRONG DETAILS", AF:"QUÁ NĂNG LỰC CHK"
+  };
+
+  function getCause(code){
+    return delayCauseMap[(code || "").trim()] || "UNKNOWN";
+  }
+
+  function toMinutes(t){
+    if(!t) return 0;
+    return parseInt(t,10) || 0;
+  }
+
+  // ===== FORMAT DATE =====
+  let dateFormatted = "";
+  if(dateStr){
+    const [y,m,d] = dateStr.split("-");
+    dateFormatted = `${d}/${m}/${y}`;
+  }
+
+  // ===== FORMAT TIME =====
+  const stdText = std ? std.replace(":","") : "";
+  const pushbackText = pushback ? pushback.replace(":","") : "";
+
+  // ===== TÍNH DELAY =====
+  let delayMinutes = 0;
+  if(std && pushback){
+    delayMinutes = parseTime(pushback) - parseTime(std);
+    if(delayMinutes < 0) delayMinutes = 0;
+  }
+
+  let delayText = delayMinutes ? delayMinutes + " phút" : "";
+
+  // ===== DELAY CODE =====
+  let delayCode = "";
+  let causeText = "";
+
+  if(code1 && !code2){
+    delayCode = `${code1}${time1}`;
+    causeText = getCause(code1);
+  }
+  else if(code1 && code2){
+    delayCode = `${code1}${time1} + ${code2}${time2}`;
+    causeText = `${getCause(code1)} + ${getCause(code2)}`;
+  }
+
+  // ===== CHECK THIẾU DELAY → ADD AM =====
+  const totalCodeTime = toMinutes(time1) + toMinutes(time2);
+
+  if(delayMinutes > totalCodeTime && delayCode){
+    const extra = delayMinutes - totalCodeTime;
+    delayCode += ` + AM${extra}`;
+    causeText += ` + ATC`;
+  }
+
+  // ===== OUTPUT =====
+  const text = `Station : PQC
+Date: ${dateFormatted}
+Reporter : VNPQC 
+Flight : ${depFlight}
+Route : PQC${to}
+A/C Reg : ${acReg}
+A/C Type : ${config}
+STD : ${stdText}
+ATD : ${pushbackText}
+Delay : ${delayText}
+Delay code : ${delayCode}
+Delay Cause : ${causeText}
+Details :${details}`;
+
+  document.getElementById("occOutput").textContent = text;
+
+  // clear output khác
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+}
+document.getElementById("occBtn").addEventListener("click", ()=>{
+  showOCC(selectedRowData);
+});
+///
+function fillConfig(){
+  let acreg = document.getElementById("soDangKy").value.toUpperCase();
+  let configInput = document.getElementById("config");
+
+  // lấy 3 ký tự chữ/số cuối cùng
+  let match = acreg.match(/[A-Z0-9]{3}$/);
+  let key = match ? match[0] : "";
+
+  if(configMap[key]){
+    configInput.value = configMap[key];
+  } else {
+    configInput.value = "";
+  }
+}
+document.getElementById("upload").onclick = function () {
+  const ldmText = document.getElementById("ldm").value;
+
+  // Tìm pattern dạng -XXX.150/11/1
+  const match = ldmText.match(/-[A-Z]{3}\.(\d+)\/(\d+)\/(\d+)/);
+
+  if (match) {
+    const adult = match[1];
+    const children = match[2];
+    const baby = match[3];
+
+    document.getElementById("adultCount").value = adult;
+    document.getElementById("childrenCount").value = children;
+    document.getElementById("babyCount").value = baby;
+  } else {
+    alert("Không đọc được dữ liệu LDM!");
+  }
+document.getElementById("ldm").value = "";
+};
+
+</script>
+
+
+<footer style="position:fixed; bottom:0; left:0; width:100%; text-align:left; 
+               background:#f9f9f9; padding:10px; font-size:14px; color:#555;">
+  • © 2026. All rights reserved. Any unauthorized copying, modification, or distribution of this content is strictly prohibited and subject to legal action.
+  • Developed and owned by Fast &amp; Smile.
+</footer>
+<img src="./admin15_files/DEN GIO ROI.jpg" class="logo-fixed">
+</body></html>
