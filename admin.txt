@@ -365,7 +365,7 @@ input.uppercase { text-transform: uppercase; }
 
 <h2 class="center-title">
   PHU QUOC FLIGHT MANAGER
-  <img src="./admin15_files/VNA.jpg" class="logo-inline">
+  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg" class="logo-inline">
 </h2>
 
 <div class="three-main">
