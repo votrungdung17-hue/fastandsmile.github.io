@@ -1648,5 +1648,6 @@ document.getElementById("ldm").value = "";
   • © 2026. All rights reserved. Any unauthorized copying, modification, or distribution of this content is strictly prohibited and subject to legal action.
   • Developed and owned by Fast &amp; Smile.
 </footer>
-<img src="./admin15_files/DEN GIO ROI.jpg" class="logo-fixed">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg" 
+     class="logo-fixed">
 </body></html>
