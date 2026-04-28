@@ -1570,15 +1570,11 @@ function showOCC(row){
     delayCode = `${code1}${time1} + ${code2}${time2}`;
     causeText = `${getCause(code1)} + ${getCause(code2)}`;
   }
+ else if (!code1 && !code2 && delayMinutes>0 ) {
+  delayCode = `AM${delayMinutes}`;
+  causeText = 'ATC'; // hoặc text bạn muốn
+}
 
-  // ===== CHECK THIẾU DELAY → ADD AM =====
-  const totalCodeTime = toMinutes(time1) + toMinutes(time2);
-
-  if(delayMinutes > totalCodeTime && delayCode){
-    const extra = delayMinutes - totalCodeTime;
-    delayCode += ` + AM${extra}`;
-    causeText += ` + ATC`;
-  }
 
   // ===== OUTPUT =====
   const text = `Station : PQC
