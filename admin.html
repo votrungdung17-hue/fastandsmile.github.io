@@ -746,7 +746,7 @@ function loadData(){
       html += "<th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr>";
 
       data.slice(1).forEach(row=>{
-        html += `<tr id="row-${row[0]}" ondblclick='selectRow(${JSON.stringify(row)})'>`;
+        html += `<tr id="row-${row[0]}" onclick='selectRow(${JSON.stringify(row)})'>`;
         html += `<td>${formatDateForInput(row[1])}</td>`; //NGAY
         html += `<td>${(row[2]||"").toUpperCase()}</td>`; //ACREG
         html += `<td>${(row[3]||"").toUpperCase()}</td>`; //ARRFLIGHT
