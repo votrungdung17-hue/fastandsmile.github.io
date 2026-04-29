@@ -1515,6 +1515,16 @@ Details :${details}`;
 document.getElementById("occBtn").addEventListener("click", ()=>{
   showOCC(selectedRowData);
 });
+  /// get config map
+function getConfigFromAcreg(acreg){
+  const clean = (acreg || "").toString().trim().toUpperCase();
+
+  // lấy 3 ký tự cuối
+  const match = clean.match(/[A-Z0-9]{3}$/);
+  const key = match ? match[0] : "";
+
+  return configMap[key] || "";
+}
 ///
 function fillConfig(){
   let acreg = document.getElementById("soDangKy").value.toUpperCase();
@@ -1653,6 +1663,86 @@ document.addEventListener("DOMContentLoaded", () => {
     toEl.value = todayStr;
   }
 });
+  const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+
+importBtn.addEventListener("click", () => {
+  importFile.click();
+});
+
+importFile.addEventListener("change", handleImportFile);
+function handleImportFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(evt){
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, {type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+
+    console.log("DATA IMPORT:", rows);
+
+    importToSheet(rows);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+async function importToSheet(rows){
+
+  // bỏ header
+  const dataRows = rows.slice(1);
+
+  const payload = dataRows.map(r => ({
+  ngay: selectedDate,
+  soDangKy: r[0],
+  soHieu: r[3],
+  from: (r[4] || "").toString().slice(0, 3),
+  sta: r[5],
+  eta: r[5],
+  landing: "",
+  ata: "",
+  soHieu1: r[3],
+  to: (r[4] || "").toString().slice(-3),
+  std: r[6],
+  etd: r[6],
+  atd: r[12],
+  fht: r[13],
+  pushback: r[14],
+  takeoff: r[15],
+  code1: r[18],
+  time1: r[19],
+  code2: r[20],
+  time2: r[21],
+  coor: r[22],
+  wnb: r[23],
+  config: getConfigFromAcreg(r[0]) || config.value,
+  lotus: r[25] === true || r[25] === "TRUE",
+  moplus: r[26] === true || r[26] === "TRUE",
+  details: r[27],
+  adult: r[28],
+  children: r[29],
+  baby: r[30],
+  fuel: r[31],
+  payload: r[32]
+}));
+
+fetch(API,{
+  method:"POST",
+  body: JSON.stringify({
+    action: "import",
+    data: payload
+  })
+})
+.then(r=>r.json())
+.then(()=>{
+  alert("IMPORT XONG 🚀");
+  loadData();
+});
+}
 
 </script>
 
