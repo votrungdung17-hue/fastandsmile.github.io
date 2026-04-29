@@ -569,7 +569,11 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="exportBtn">📤 EXPORT</button>
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
-<button onclick="analyzeData()">📊 Phân tích</button>
+<textarea id="query" placeholder="Ví dụ:
+- chuyến bay hôm nay delay > 15 phút
+- GT > 35 phút
+"></textarea>
+<button onclick="analyzeData()">Analyze</button>
 <pre id="resultBox"></pre>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -1748,32 +1752,16 @@ fetch(API,{
 });
 }
 ////// gọi AI
-const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+async function analyzeData(){
+  const q = document.getElementById("query").value;
 
-function analyzeData(){
-  const box = document.getElementById("resultBox");
-  box.innerText = "⏳ Đang phân tích...";
+  try {
+    const res = await fetch("https://script.google.com/macros/s/YOUR_WEBAPP_ID/exec?action=analyze&q=" + encodeURIComponent(q));
+    const data = await res.json();
 
-  // xoá script cũ nếu có
-  const oldScript = document.getElementById("jsonpScript");
-  if(oldScript) oldScript.remove();
-
-  // tạo script mới
-  const script = document.createElement("script");
-  script.id = "jsonpScript";
-  script.src = API_URL + "?action=analyze&callback=handleAnalyze";
-
-  document.body.appendChild(script);
-}
-
-// callback nhận data
-function handleAnalyze(data){
-  const box = document.getElementById("resultBox");
-
-  if(data && data.result){
-    box.innerText = data.result;
-  }else{
-    box.innerText = "❌ Không có dữ liệu";
+    document.getElementById("resultBox").innerText = data.result;
+  } catch(err){
+    document.getElementById("resultBox").innerText = "❌ Lỗi: " + err;
   }
 }
 </script>
