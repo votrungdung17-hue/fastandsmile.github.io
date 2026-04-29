@@ -569,12 +569,6 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="exportBtn">📤 EXPORT</button>
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
-<textarea id="query" placeholder="Ví dụ:
-- chuyến bay hôm nay delay > 15 phút
-- GT > 35 phút
-"></textarea>
-<button onclick="analyzeData()">Analyze</button>
-<pre id="resultBox"></pre>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
@@ -1752,20 +1746,7 @@ fetch(API,{
 });
 }
 ////// gọi AI
-async function analyzeData(){
-  const q = document.getElementById("query").value;
 
-  try {
-const url = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
-
-const res = await fetch(url + "?action=analyze&q=" + encodeURIComponent(q));
-const data = await res.json();
-
-    document.getElementById("resultBox").innerText = data.result;
-  } catch(err){
-    document.getElementById("resultBox").innerText = "❌ Lỗi: " + err;
-  }
-}
 </script>
 
 
