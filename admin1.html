@@ -1750,41 +1750,32 @@ fetch(API,{
 ////// gọi AI
 const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
 
-async function analyzeData(){
+function analyzeData(){
   const box = document.getElementById("resultBox");
-  box.innerText = "⏳ Loading...";
+  box.innerText = "⏳ Đang phân tích...";
 
-  try{
-    const res = await fetch(API_URL + "?action=analyze");
+  // xoá script cũ nếu có
+  const oldScript = document.getElementById("jsonpScript");
+  if(oldScript) oldScript.remove();
 
-    // 👇 check status
-    console.log("status:", res.status);
+  // tạo script mới
+  const script = document.createElement("script");
+  script.id = "jsonpScript";
+  script.src = API_URL + "?action=analyze&callback=handleAnalyze";
 
-    const text = await res.text();
-    console.log("raw:", text);
+  document.body.appendChild(script);
+}
 
-    let data;
-    try{
-      data = JSON.parse(text);
-    }catch(e){
-      box.innerText = "❌ Không parse được JSON\n" + text;
-      return;
-    }
+// callback nhận data
+function handleAnalyze(data){
+  const box = document.getElementById("resultBox");
 
-    console.log("json:", data);
-
-    if(data.result){
-      box.innerText = data.result;
-    }else{
-      box.innerText = "❌ Không có field result\n" + JSON.stringify(data,null,2);
-    }
-
-  }catch(err){
-    console.error(err);
-    box.innerText = "❌ Fetch lỗi: " + err;
+  if(data && data.result){
+    box.innerText = data.result;
+  }else{
+    box.innerText = "❌ Không có dữ liệu";
   }
 }
-document.getElementById("resultBox").innerText = "TEST OK";
 </script>
 
 
