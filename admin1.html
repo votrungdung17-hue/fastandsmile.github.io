@@ -1756,7 +1756,7 @@ async function analyzeData(){
   const q = document.getElementById("query").value;
 
   try {
-    const res = await fetch("https://script.google.com/macros/s/YOUR_WEBAPP_ID/exec?action=analyze&q=" + encodeURIComponent(q));
+    const res = await fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec?action=analyze&q=" + encodeURIComponent(q));
     const data = await res.json();
 
     document.getElementById("resultBox").innerText = data.result;
