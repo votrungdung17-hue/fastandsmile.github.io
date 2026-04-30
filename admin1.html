@@ -1745,8 +1745,9 @@ function handleImportFile(e){
   reader.readAsArrayBuffer(file);
 }
 async function importToSheet(rows){
-const dataRows = rows.slice(1);
   // bỏ header
+  const dataRows = rows.slice(0);
+  
   const payload = dataRows.map(r => ({
   ngay: selectedDate,
   soDangKy: r[0],
