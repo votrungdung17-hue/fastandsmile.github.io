@@ -1752,7 +1752,7 @@ async function importToSheet(rows){
   const payload = dataRows.map(r => ({
   ngay: selectedDate,
   soDangKy: r[0],
-  soHieu: r[3],
+  soHieu: r[2],
   from: (r[4] || "").toString().slice(0, 3),
   sta: r[5],
   eta: r[5],
