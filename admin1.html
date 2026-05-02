@@ -569,6 +569,7 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="exportBtn">📤 EXPORT</button>
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
+<button type="button" id="arrcargo">🛬CARGO</button>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
@@ -1326,8 +1327,49 @@ const wnbEl     = document.getElementById("wnb");
     el.addEventListener("input", checkMVAEnable);
   }
 });
+// gắn sự kiện nút arrcargo
+document.getElementById("arrcargo").addEventListener("click", () => {
 
-// event
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = today.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const yyyy = today.getFullYear();
+
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  const query = `SELECT TO_CHAR(M.FLIGHT_DATE,'DD-MON-YYYY') AS FLIGHT_DATE,
+M.CARRIER || M.FLIGHT_NUMBER AS FL_NO,
+A.PREFIX||A.SERIAL AS AWB_NO,
+M.NATURE_GOODS NATURE,
+M.EXP_PIECES AS UNIT,
+M.EXP_WEIGHT AS WEIGHT,
+NVL(M.SHC,'NML') || ' ' || NVL(A.REMARKS,' ')  AS SHC,
+P.NAME AS SNAME,
+P1.NAME || ' - ' || P1.TEL1 AS CNAME,
+NVL(P1.ADDRESS1,' ') || ' ' || NVL(P1.ADDRESS2,'') AS CADD,
+DECODE(SUBSTR(M.ULD_NUMBER,1,1),'-','BULK',REPLACE(REPLACE(M.ULD_NUMBER,'=',''),'-','')) AS BUCKET,
+M.ORIGIN||'/'||M.DEST AS ROUTE,
+NVL(T.TEXT,' ') ACC_INFO
+FROM AWB A
+JOIN AWB_MOVE M ON A.SEQ = M.AWB_SEQ
+JOIN AWB_EXP E ON A.SEQ = E.AWB_SEQ AND E.EXP_IMP = 'E'
+LEFT OUTER JOIN PART P ON E.SHIPPER = P.CODE
+LEFT OUTER JOIN PART P1 ON E.CONSIGNEE = P1.CODE
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
+WHERE A.PREFIX|| A.SERIAL<>'MAL'
+AND ACTION_STATUS='DEP'
+AND A.ORIGIN IN ('BMV','CXR','DAD','DFD','DIN','DLI','HAN','HPH','HUI','NHA','PQC','PXV','SGN','SQH','TBB','UIH','VIH','VII','VKG','THD','VDH')
+AND A.DEST = 'PQC'
+AND M.DEST = 'PQC'
+AND M.FLIGHT_DATE BETWEEN '${todayStr}' AND '${todayStr}'
+ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
+
+  document.getElementById("occOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = query;
+
+});
 /// tạo sự kiện nút OCC
 function showOCC(row){
   if(!row){
