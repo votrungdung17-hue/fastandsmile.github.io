@@ -1417,6 +1417,7 @@ function showOCC(row){
     WO:"THỜI TIẾT TẠI SÂN BAY KHỞI HÀNH",
     WT:"THỜI TIẾT TẠI SÂN BAY ĐẾN",
     WI:"CHỐNG PHÁ BĂNG",
+    WG:"THỜI TIẾT ẢNH HƯỞNG PVMĐ",
 
     AD:"ATC", AM:"ATC",
 
@@ -1444,27 +1445,38 @@ function showOCC(row){
   const stdText = std ? std.replace(":","") : "";
   const pushbackText = pushback ? pushback.replace(":","") : "";
 
-  // ===== TÍNH DELAY =====
+ // ===== TÍNH DELAY =====
   let delayMinutes = 0;
+ const t1 = Number(time1) || 0;
+ const t2 = Number(time2) || 0;
+let delayMin = t1 + t2;
   if(std && pushback){
     delayMinutes = parseTime(pushback) - parseTime(std);
     if(delayMinutes < 0) delayMinutes = 0;
   }
 
   let delayText = delayMinutes ? delayMinutes + " phút" : "";
-
+  let delayFinal = delayMinutes - delayMin
   // ===== DELAY CODE =====
   let delayCode = "";
   let causeText = "";
 
-  if(code1 && !code2){
+  if(code1 && !code2 && delayFinal > 0){
+    delayCode = `${code1}${time1} + AM${delayFinal}`;
+    causeText = `${getCause(code1)} + ATC`;
+  
+}  else if(code1 && !code2 && delayFinal <= 0){
     delayCode = `${code1}${time1}`;
-    causeText = getCause(code1);
-  }
-  else if(code1 && code2){
+    causeText = `${getCause(code1)}`;
+}
+  else if(code1 && code2 && delayFinal > 0){
+    delayCode = `${code1}${time1} + ${code2}${time2} + AM${delayFinal}`;
+    causeText = `${getCause(code1)} + ${getCause(code2)} + ATC`;
+  }  
+else if(code1 && code2 && delayFinal <= 0){
     delayCode = `${code1}${time1} + ${code2}${time2}`;
     causeText = `${getCause(code1)} + ${getCause(code2)}`;
-  }
+}
  else if (!code1 && !code2 && delayMinutes>0 ) {
   delayCode = `AM${delayMinutes}`;
   causeText = 'ATC'; // hoặc text bạn muốn
