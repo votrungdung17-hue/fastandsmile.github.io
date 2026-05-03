@@ -1536,21 +1536,29 @@ function fillConfig(){
 document.getElementById("upload").onclick = function () {
   const ldmText = document.getElementById("ldm").value;
 
-  // Tìm pattern dạng -XXX.150/11/1
-  const match = ldmText.match(/-[A-Z]{3}\.(\d+)\/(\d+)\/(\d+)/);
+  // ===== LẤY PAX =====
+  const paxMatch = ldmText.match(/-[A-Z]{3}\.(\d+)\/(\d+)\/(\d+)/);
 
-  if (match) {
-    const adult = match[1];
-    const children = match[2];
-    const baby = match[3];
-
-    document.getElementById("adultCount").value = adult;
-    document.getElementById("childrenCount").value = children;
-    document.getElementById("babyCount").value = baby;
+  if (paxMatch) {
+    document.getElementById("adultCount").value = paxMatch[1];
+    document.getElementById("childrenCount").value = paxMatch[2];
+    document.getElementById("babyCount").value = paxMatch[3];
   } else {
-    alert("Không đọc được dữ liệu LDM!");
+    alert("Không đọc được PAX!");
   }
-document.getElementById("ldm").value = "";
+
+  // ===== LẤY ACREG =====
+  const acMatch = ldmText.match(/\.[A-Z0-9]{3,6}\./);
+
+  if (acMatch) {
+    const acReg = acMatch[0].replace(/\./g, ""); // bỏ dấu .
+    document.getElementById("soDangKy").value = acReg;
+fillConfig();
+  } else {
+    alert("Không đọc được ACreg!");
+  }
+
+  document.getElementById("ldm").value = "";
 };
 
 
