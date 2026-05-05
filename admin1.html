@@ -21,9 +21,12 @@ body {
   width: 120px;   /* chỉnh size */
   opacity: 0.9;   /* hơi mờ cho đẹp */
   z-index: 999;   /* luôn nổi trên cùng */
-  pointer-events: none; /* không click trúng */
+  cursor: pointer;
 }
-
+.logo-fixed:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
 
 .logo-inline {
   width: 120px;        /* chỉnh size logo */
@@ -334,6 +337,47 @@ input.uppercase { text-transform: uppercase; }
   display:flex;
   justify-content:space-between;
 }
+  #fastWrapper{
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 999;
+}
+
+/* popup nằm bên trái icon */
+#popup{
+  position: absolute;
+  bottom: 0;
+  right: 160px; /* <-- đẩy sang trái icon */
+  display: none;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.user{
+  width:80px;
+  height:120px;
+  object-fit:cover;
+  cursor:pointer;
+  margin:5px;
+  border-radius:6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user:hover{
+  transform: scale(1.2); /* phóng to */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* đổ bóng */
+}
+#repBox{
+  padding:10px;
+  border:1px solid #ccc;
+  width:250px;
+  border-radius:6px;
+  background:#f9f9f9;
+  font-weight:bold;
+}
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -427,6 +471,7 @@ input.uppercase { text-transform: uppercase; }
      <div class="section-daidien">
   🔭 ĐẠI DIỆN
 </div>
+    <div id="repBox">Rep: ---</div>
 
     <div class="info-grid">
 
@@ -575,7 +620,51 @@ input.uppercase { text-transform: uppercase; }
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
 <div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>  
 <div style="height: 500px;"></div> 
+  //sự kiện chọn đại diện
+<div id="fastWrapper">
+  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg"
+       id="mainIcon" class="logo-fixed">
+
+  <div id="popup">
+    <!-- 4 ảnh user -->
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DUNG.jpg" class="user" data-name="Võ Trung Dũng" data-phone="0931000600">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUANG.jpg" class="user" data-name="Nguyễn Quốc Quang" data-phone="0947882100">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUAN.jpg"  class="user" data-name="Nguyễn Văn Quân" data-phone="0917220723">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/SANG.jpg" class="user" data-name="Lý Minh Sang" data-phone="0376290292">
+  </div>
+</div>
+  
 <script>
+  // xử ly sự kiện chọn đại diện
+const mainIcon = document.getElementById("mainIcon");
+const popup = document.getElementById("popup");
+const users = document.querySelectorAll(".user");
+const result = document.getElementById("result");   // nếu bạn có input
+const repBox = document.getElementById("repBox");   // nếu bạn có box hiển thị
+
+// Bấm icon → hiện popup
+mainIcon.onclick = () => {
+  popup.style.display =
+    popup.style.display === "none" ? "block" : "none";
+};
+
+// Bấm vào từng người
+users.forEach(u => {
+  u.onclick = () => {
+    const name = u.dataset.name;
+    const phone = u.dataset.phone;
+
+    const text = `Rep. ${name} ${phone}`;
+
+    // Nếu dùng input
+    if(result) result.value = text;
+
+    // Nếu dùng box hiển thị
+    if(repBox) repBox.innerText = text;
+
+    popup.style.display = "none";
+  };
+});
 document.getElementById("logoutBtn").onclick = function(){
   // Xoá trạng thái đăng nhập
   localStorage.clear();
@@ -1867,10 +1956,6 @@ fetch(API,{
   • © 2026. All rights reserved. Any unauthorized copying, modification, or distribution of this content is strictly prohibited and subject to legal action.
   • Developed and owned by Fast &amp; Smile.
 </footer>
-  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg" 
-     class="logo-fixed">
-
-
 ////exportpopup
 <div id="exportPopup" class="popup">
   <div class="popup-box">
