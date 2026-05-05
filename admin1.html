@@ -635,6 +635,8 @@ input.uppercase { text-transform: uppercase; }
 </div>
   
 <script>
+  let selectedRep = "";
+
   // xử ly sự kiện chọn đại diện
 const mainIcon = document.getElementById("mainIcon");
 const popup = document.getElementById("popup");
@@ -654,13 +656,9 @@ users.forEach(u => {
     const name = u.dataset.name;
     const phone = u.dataset.phone;
 
-    const text = `Rep. ${name} ${phone}`;
+    selectedRep = `Rep. ${name} ${phone}`;
 
-    // Nếu dùng input
-    if(result) result.value = text;
-
-    // Nếu dùng box hiển thị
-    if(repBox) repBox.innerText = text;
+    if(repBox) repBox.innerText = selectedRep;
 
     popup.style.display = "none";
   };
@@ -1031,6 +1029,13 @@ childrenCount.value = row[30] || "";
 babyCount.value = row[31] || "";
 fuel.value = row[32] || "";
 payload.value = row[33] || "";
+  // 👉 hiển thị lại đại diện (nếu có trong data)
+if(row[34]){   // giả sử cột 34 là REP
+  selectedRep = row[34];
+  repBox.innerText = selectedRep;
+} else {
+  repBox.innerText = "Rep: ---";
+}
 checkMVAEnable();
 }
 
@@ -1087,6 +1092,7 @@ children: childrenCount.value,
 baby: babyCount.value,
 fuel: fuel.value,
 payload: payload.value,
+    rep: selectedRep,
     action:"create"
   };
 
@@ -1146,6 +1152,7 @@ children: childrenCount.value,
 baby: babyCount.value,
 fuel: fuel.value,
 payload: payload.value,
+    rep: selectedRep,
     action:"update"
   };
 
@@ -1722,6 +1729,7 @@ document.addEventListener("DOMContentLoaded", () => {
       INF: row[31],
       TOF: row[32],
       PAYLOAD: row[33],
+        REP: row[34],
       }));
 
       const ws = XLSX.utils.json_to_sheet(exportData);
