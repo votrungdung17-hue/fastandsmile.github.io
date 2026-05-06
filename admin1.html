@@ -615,6 +615,8 @@ input.uppercase { text-transform: uppercase; }
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
 <button type="button" id="arrcargo">🛬CARGO</button>
+  <button type="button" id="lomo">🔍LOMO CHECK</button>
+<div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
@@ -634,6 +636,54 @@ input.uppercase { text-transform: uppercase; }
 </div>
   
 <script>
+  document.getElementById("lomo").addEventListener("click", function(){
+
+  const resultDiv = document.getElementById("lomoResult");
+  resultDiv.innerHTML = "⏳ Đang kiểm tra toàn bộ dữ liệu...";
+
+  fetch(API + "?all=true&t=" + Date.now()) // 🔥 gọi ALL DATA
+    .then(res => res.json())
+    .then(res => {
+
+      const data = res.data;
+      let result = "";
+      let count = 0;
+
+      data.slice(1).forEach(row => {
+
+        const lotus = String(row[26]).toUpperCase();
+        const moplus = String(row[27]).toUpperCase();
+
+        // ❗ check FALSE
+        if(lotus !== "TRUE" || moplus !== "TRUE"){
+
+          const arr = row[3] || "";
+          const dep = row[9] || "";
+          const rep = row[34] || "";
+          const date = row[1] || "";
+
+          result += `✈️ ${arr} | ${dep} | ${rep} | ${date}\n`;
+          count++;
+        }
+
+      });
+
+      if(count === 0){
+        resultDiv.innerHTML = "<b style='color:green'>✔ Không có chuyến lỗi</b>";
+      } else {
+        resultDiv.innerHTML = `
+          <b style="color:red">⚠ ${count} chuyến lỗi toàn hệ thống</b><br>
+          <pre>${result}</pre>
+        `;
+      }
+
+    })
+    .catch(err => {
+      resultDiv.innerHTML = "❌ Lỗi gọi API";
+      console.error(err);
+    });
+
+});
   let selectedRep = "";
 
   // xử ly sự kiện chọn đại diện
