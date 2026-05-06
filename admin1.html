@@ -637,7 +637,10 @@ input.uppercase { text-transform: uppercase; }
   
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
-
+  document.getElementById("occOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("lomo").textContent = "";
   const resultDiv = document.getElementById("lomoResult");
   resultDiv.innerHTML = "⏳ Đang kiểm tra toàn bộ dữ liệu...";
 
