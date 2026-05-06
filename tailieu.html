@@ -583,7 +583,7 @@ button {
 <div class="section-tailieu">
   📚 TÀI LIỆU
 </div>
-
+<div id="repBox">Rep: ---</div>
   <!-- HÀNG 1: COOR + W&B -->
   <div class="doc-row-2">
     <div>
@@ -1024,6 +1024,13 @@ childrenCount.value = row[30] || "";
 babyCount.value = row[31] || "";
 fuel.value = row[32] || "";
 payload.value = row[33] || "";
+  // 👉 hiển thị lại đại diện (nếu có trong data)
+if(row[34]){   // giả sử cột 34 là REP
+  selectedRep = row[34];
+  repBox.innerText = selectedRep;
+} else {
+  repBox.innerText = "Rep: ---";
+}
 checkMVAEnable();
 }
 
@@ -1139,6 +1146,7 @@ children: childrenCount.value,
 baby: babyCount.value,
 fuel: fuel.value,
 payload: payload.value,
+    rep: selectedRep,
     action:"update"
   };
 
