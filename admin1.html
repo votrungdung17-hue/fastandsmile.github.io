@@ -637,6 +637,11 @@ input.uppercase { text-transform: uppercase; }
   
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
+      // 👉 CLEAR toàn bộ output khác
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("occOutput").textContent = "";
   const resultDiv = document.getElementById("lomoResult");
   resultDiv.innerHTML = "⏳ Đang kiểm tra toàn bộ dữ liệu...";
 
@@ -1347,6 +1352,7 @@ AA${landingObj.time}/${ataObj.time}`;
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("mvaOutput").textContent = text;
+  document.getElementById("lomoResult").innerHTML = "";
 }
 
 // Gắn sự kiện cho nút MVA
@@ -1424,6 +1430,7 @@ FHT ${fht.time}`;
   document.getElementById("mvaOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("occOutput").textContent = "";
+  document.getElementById("lomoResult").innerHTML = "";
 }
 
 // Hàm cộng phút vào chuỗi giờ "HH:MM"
@@ -1511,6 +1518,7 @@ ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
   document.getElementById("occOutput").textContent = "";
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("lomoResult").innerHTML = "";
   document.getElementById("fhtOutput").textContent = query;
 
 });
@@ -1648,6 +1656,7 @@ Details :${details}`;
   document.getElementById("mvaOutput").textContent = "";
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("lomoResult").innerHTML = "";
 }
 document.getElementById("occBtn").addEventListener("click", ()=>{
   showOCC(selectedRowData);
@@ -1902,6 +1911,7 @@ RATE: ${percent}%`;
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("mvaOutput").textContent = "";  
+      document.getElementById("lomoResult").innerHTML = "";
       document.getElementById("fhtOutput").textContent = result;
 
       fhtPopup.style.display = "none";
