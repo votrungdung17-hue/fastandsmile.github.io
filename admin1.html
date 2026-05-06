@@ -1346,7 +1346,6 @@ AA${landingObj.time}/${ataObj.time}`;
   document.getElementById("occOutput").textContent = "";
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
-  document.getElementById("lomo").textContent = "";
   document.getElementById("mvaOutput").textContent = text;
 }
 
@@ -1425,7 +1424,6 @@ FHT ${fht.time}`;
   document.getElementById("mvaOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("occOutput").textContent = "";
-  document.getElementById("lomo").textContent = "";
 }
 
 // Hàm cộng phút vào chuỗi giờ "HH:MM"
@@ -1513,7 +1511,6 @@ ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
   document.getElementById("occOutput").textContent = "";
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("mvaOutput").textContent = "";
-  document.getElementById("lomo").textContent = "";
   document.getElementById("fhtOutput").textContent = query;
 
 });
@@ -1651,7 +1648,6 @@ Details :${details}`;
   document.getElementById("mvaOutput").textContent = "";
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
-  document.getElementById("lomo").textContent = "";
 }
 document.getElementById("occBtn").addEventListener("click", ()=>{
   showOCC(selectedRowData);
@@ -1906,7 +1902,6 @@ RATE: ${percent}%`;
   document.getElementById("mvdOutput").textContent = "";
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("mvaOutput").textContent = "";  
-  document.getElementById("lomo").textContent = "";
       document.getElementById("fhtOutput").textContent = result;
 
       fhtPopup.style.display = "none";
