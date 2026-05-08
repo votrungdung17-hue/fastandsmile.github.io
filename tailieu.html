@@ -78,12 +78,26 @@ input.uppercase { text-transform: uppercase; }
   font-weight: bold;
   font-size: 16px;
 }
+.chart-box{
+  width: 100%;
+  max-width: 1200px;
+  height: 500px;
+  margin-top: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
 .three-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  margin-top: 15px;
-  align-items: stretch;
+  display: block;
+}
+.right-section{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+
+.chart-panel{
+  min-width:700px;
 }
 
 .main-box {
@@ -301,12 +315,18 @@ input.uppercase { text-transform: uppercase; }
 .input-fuel { right: 400px; }
 .input-payload { right: 200px; }
 
-/* ❌ KHÔNG dùng cái này nữa */
-/* .three-main { display:none } */
-
-/* ❌ Ẩn toàn bộ nội dung bên trong */
-.three-main > * {
+.blue-box,
+.green-box {
   display: none !important;
+}
+
+.right-section {
+  display: flex !important;
+  gap: 20px;
+  align-items: flex-start;
+}
+.chart-panel{
+  display:block !important;
 }
 
 
@@ -356,6 +376,10 @@ input, textarea {
 }
 /* ❌ Ẩn toàn bộ button */
 button {
+  display: none !important;
+}
+.section-daidien,
+.green-box .doc-title {
   display: none !important;
 }
 
@@ -578,12 +602,16 @@ button {
 
   </div>
 
+<div class="right-section">
+
   <!-- 🟡 TÀI LIỆU -->
-<div class="main-box yellow-box">
-<div class="section-tailieu">
-  📚 TÀI LIỆU
-</div>
-<div id="repBox">Rep: ---</div>
+  <div class="main-box yellow-box">
+
+    <div class="section-tailieu">
+      📚 TÀI LIỆU
+    </div>
+
+    <div id="repBox">Rep: ---</div>
   <!-- HÀNG 1: COOR + W&B -->
   <div class="doc-row-2">
     <div>
@@ -637,9 +665,14 @@ button {
    <textarea id="ldm" class="uppercase"></textarea>
   <button type="button" id="upload">UPLOAD</button>
 </div>
+<!-- 📊 CHART -->
+  <div class="main-box chart-panel">
 
-</div>
-</div>
+    <div class="chart-box">
+      <canvas id="wbChart"></canvas>
+    </div>
+</div> <!-- đóng right-section -->
+</div> <!-- đóng three-main -->
 
 <form id="form">
 
@@ -1643,6 +1676,59 @@ document.getElementById("upload").onclick = function () {
   }
 document.getElementById("ldm").value = "";
 };
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<script>
+
+//const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+fetch(API + "?type=wbchart&t=" + Date.now())
+.then(r => r.json())
+.then(res => {
+
+  const map = res.data;
+
+  // object -> array
+  let arr = Object.entries(map);
+
+  // sắp xếp giảm dần
+  arr.sort((a,b) => b[1] - a[1]);
+
+  const labels = arr.map(x => x[0]);
+  const values = arr.map(x => x[1]);
+
+  new Chart(document.getElementById("wbChart"), {
+
+    type: "bar",
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: "Số chuyến",
+        data: values,
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+     maintainAspectRatio: false,
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+
+  });
+
+});
 
 </script>
 
