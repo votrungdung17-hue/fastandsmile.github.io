@@ -620,7 +620,19 @@ input.uppercase { text-transform: uppercase; }
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
-<div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>  
+<div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>
+  <!-- 📊 CHART -->
+  <div class="main-box chart-panel">
+    <div class="section-header">
+      📊 W&B STATISTIC
+    </div>
+
+    <div class="chart-box">
+      <canvas id="wbChart"></canvas>
+    </div>
+  </div>
+
+</div>
 <div style="height: 500px;"></div> 
 <div id="fastWrapper">
   <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg"
@@ -2013,6 +2025,59 @@ fetch(API,{
 });
 }
 ////// gọi AI
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<script>
+
+
+//const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+fetch(API + "?type=wbchart&t=" + Date.now())
+.then(r => r.json())
+.then(res => {
+
+  const map = res.data;
+
+  // object -> array
+  let arr = Object.entries(map);
+
+  // sắp xếp giảm dần
+  arr.sort((a,b) => b[1] - a[1]);
+
+  const labels = arr.map(x => x[0]);
+  const values = arr.map(x => x[1]);
+
+  new Chart(document.getElementById("wbChart"), {
+
+    type: "bar",
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: "Số chuyến",
+        data: values,
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+     maintainAspectRatio: false,
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+
+  });
+
+});
 
 </script>
 
