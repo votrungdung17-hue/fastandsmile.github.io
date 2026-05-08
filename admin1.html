@@ -36,6 +36,19 @@ body {
   transform: scale(1.1);
   opacity: 1;
 }
+.chart-wrapper{
+  display:flex;
+  gap:20px;
+  width:100%;
+}
+
+.chart-panel{
+  flex:1;
+}
+
+.chart-box{
+  height:300px;
+}
 
 .logo-inline {
   width: 120px;        /* chỉnh size logo */
@@ -630,7 +643,10 @@ input.uppercase { text-transform: uppercase; }
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
 <div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>
-  <!-- 📊 CHART -->
+  <!-- 📊 WRAPPER -->
+<div class="chart-wrapper">
+
+  <!-- W&B -->
   <div class="main-box chart-panel">
     <div class="section-header">
       📊 W&B STATISTIC
@@ -638,6 +654,17 @@ input.uppercase { text-transform: uppercase; }
 
     <div class="chart-box">
       <canvas id="wbChart"></canvas>
+    </div>
+  </div>
+
+  <!-- COOR -->
+  <div class="main-box chart-panel">
+    <div class="section-header">
+      📊 COOR STATISTIC
+    </div>
+
+    <div class="chart-box">
+      <canvas id="coorChart"></canvas>
     </div>
   </div>
 
@@ -1590,7 +1617,7 @@ function showOCC(row){
     WO:"THỜI TIẾT TẠI SÂN BAY KHỞI HÀNH",
     WT:"THỜI TIẾT TẠI SÂN BAY ĐẾN",
     WI:"CHỐNG PHÁ BĂNG",
-    WG:"THỜI TIẾT ẢNH HƯỞNG PVMĐ",
+    WG:"THỜI TIẾT ẢNH HƯỞNG PVMĐ", FF:"NẠP THÊM DẦU",
 
     AD:"ATC", AM:"ATC",
 
@@ -2076,6 +2103,49 @@ fetch(API + "?type=wbchart&t=" + Date.now())
     options: {
       responsive: true,
      maintainAspectRatio: false,
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+
+  });
+
+});
+// ===== COOR =====
+fetch(API + "?type=coorchart&t=" + Date.now())
+.then(r => r.json())
+.then(res => {
+
+  const map = res.data;
+
+  let arr = Object.entries(map);
+
+  arr.sort((a,b) => b[1] - a[1]);
+
+  const labels = arr.map(x => x[0]);
+  const values = arr.map(x => x[1]);
+
+  new Chart(document.getElementById("coorChart"), {
+
+    type: "bar",
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: "Số chuyến",
+        data: values,
+        backgroundColor: "#ff1744",
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
 
       scales: {
         y: {
