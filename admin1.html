@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!-- saved from url=(0066)file:///G:/My%20Drive/database/fastandsmile.github.io/admin13.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Flight Manager</title>
 <style>
 .container {
@@ -400,6 +402,34 @@ input.uppercase { text-transform: uppercase; }
   background:#f9f9f9;
   font-weight:bold;
 }
+.tab-container{
+  display:flex;
+  gap:10px;
+  margin-top:25px;
+  margin-bottom:15px;
+}
+
+.tab-btn{
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  background:#ddd;
+}
+
+.tab-btn.active{
+  background:#007bff;
+  color:white;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -619,6 +649,21 @@ input.uppercase { text-transform: uppercase; }
 
 </div>
 </div>
+<!-- TAB -->
+<div class="tab-container">
+
+  <button class="tab-btn active"
+          onclick="showTab('operationTab', event)">
+    OPERATION
+  </button>
+
+  <button class="tab-btn"
+          onclick="showTab('cargoTab', event)">
+    CARGO
+  </button>
+
+</div>
+<div id="operationTab" class="tab-content active">
 
 <form id="form">
 
@@ -636,8 +681,7 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="exportBtn">📤 EXPORT</button>
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
-<button type="button" id="arrcargo">🛬CARGO</button>
-  <button type="button" id="lomo">🔍LOMO CHECK</button>
+<button type="button" id="lomo">🔍LOMO CHECK</button>
 <div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -667,6 +711,94 @@ input.uppercase { text-transform: uppercase; }
       <canvas id="coorChart"></canvas>
     </div>
   </div>
+</div>
+
+<!-- CARGO TAB -->
+<div id="cargoTab" class="tab-content">
+
+<div style="display:flex; gap:10px; margin-bottom:10px;">
+
+  <button type="button" onclick="showDepCargoPopup()">
+    🛫 DEP CARGO
+  </button>
+
+  <button type="button" onclick="showArrCargoPopup()">
+    🛬 ARR CARGO
+  </button>
+
+</div>
+<div id="depCargoPopup" class="popup">
+
+  <div class="popup-box" style="width:900px;">
+
+  <h3 id="cargoPopupTitle">🛫 DEP CARGO SQL</h3>
+
+    <textarea id="depCargoText"
+      style="
+        width:100%;
+        height:400px;
+        font-family:monospace;
+        font-size:12px;
+      "></textarea>
+
+    <div class="popup-actions">
+
+      <button onclick="copyDepCargo()">
+        📋 COPY
+      </button>
+
+      <button onclick="closeDepCargoPopup()">
+        ❌ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- Ô paste -->
+  <textarea id="cargoInput"
+    placeholder="Paste cargo data here..."
+    style="
+      width:100%;
+      height:150px;
+      margin-bottom:15px;
+      font-family:monospace;
+    "></textarea>
+
+  <button onclick="loadCargoData()">
+    LOAD CARGO
+  </button>
+
+  <table id="cargoTable">
+
+    <thead>
+      <tr>
+        <th>ISSUE DATE</th>
+        <th>AWB</th>
+        <th>ACC INFO</th>
+        <th>ORIGIN</th>
+        <th>DEST</th>
+        <th>NATURE GOODS</th>
+        <th>SHIPPER</th>
+        <th>FLIGHT</th>
+        <th>PIECES</th>
+        <th>WEIGHT</th>
+        <th>CHARGE WEIGHT</th>
+        <th>COMMODITY</th>
+        <th>RATE</th>
+        <th>TOTAL</th>
+        <th>STAFF</th>
+      </tr>
+    </thead>
+
+    <tbody id="cargoBody">
+    </tbody>
+
+  </table>
+
+</div>
 <div style="height: 500px;"></div> 
 <div id="fastWrapper">
   <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg"
@@ -1524,50 +1656,6 @@ const wnbEl     = document.getElementById("wnb");
     el.addEventListener("input", checkMVAEnable);
   }
 });
-// gắn sự kiện nút arrcargo
-document.getElementById("arrcargo").addEventListener("click", () => {
-
-  const today = new Date();
-  const dd = String(today.getDate()).padStart(2,'0');
-  const mm = today.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-  const yyyy = today.getFullYear();
-
-  const todayStr = `${yyyy}-${mm}-${dd}`;
-
-  const query = `SELECT TO_CHAR(M.FLIGHT_DATE,'DD-MON-YYYY') AS FLIGHT_DATE,
-M.CARRIER || M.FLIGHT_NUMBER AS FL_NO,
-A.PREFIX||A.SERIAL AS AWB_NO,
-M.NATURE_GOODS NATURE,
-M.EXP_PIECES AS UNIT,
-M.EXP_WEIGHT AS WEIGHT,
-NVL(M.SHC,'NML') || ' ' || NVL(A.REMARKS,' ')  AS SHC,
-P.NAME AS SNAME,
-P1.NAME || ' - ' || P1.TEL1 AS CNAME,
-NVL(P1.ADDRESS1,' ') || ' ' || NVL(P1.ADDRESS2,'') AS CADD,
-DECODE(SUBSTR(M.ULD_NUMBER,1,1),'-','BULK',REPLACE(REPLACE(M.ULD_NUMBER,'=',''),'-','')) AS BUCKET,
-M.ORIGIN||'/'||M.DEST AS ROUTE,
-NVL(T.TEXT,' ') ACC_INFO
-FROM AWB A
-JOIN AWB_MOVE M ON A.SEQ = M.AWB_SEQ
-JOIN AWB_EXP E ON A.SEQ = E.AWB_SEQ AND E.EXP_IMP = 'E'
-LEFT OUTER JOIN PART P ON E.SHIPPER = P.CODE
-LEFT OUTER JOIN PART P1 ON E.CONSIGNEE = P1.CODE
-LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
-WHERE A.PREFIX|| A.SERIAL<>'MAL'
-AND ACTION_STATUS='DEP'
-AND A.ORIGIN IN ('BMV','CXR','DAD','DFD','DIN','DLI','HAN','HPH','HUI','NHA','PQC','PXV','SGN','SQH','TBB','UIH','VIH','VII','VKG','THD','VDH')
-AND A.DEST = 'PQC'
-AND M.DEST = 'PQC'
-AND M.FLIGHT_DATE BETWEEN '${todayStr}' AND '${todayStr}'
-ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
-
-  document.getElementById("occOutput").textContent = "";
-  document.getElementById("mvdOutput").textContent = "";
-  document.getElementById("mvaOutput").textContent = "";
-  document.getElementById("lomoResult").innerHTML = "";
-  document.getElementById("fhtOutput").textContent = query;
-
-});
 /// tạo sự kiện nút OCC
 function showOCC(row){
   if(!row){
@@ -2155,7 +2243,196 @@ fetch(API + "?type=coorchart&t=" + Date.now())
   });
 
 });
+function showTab(tabId, event){
 
+  // Ẩn toàn bộ tab
+  document.querySelectorAll(".tab-content")
+    .forEach(tab=>{
+      tab.classList.remove("active");
+    });
+
+  // Remove active button
+  document.querySelectorAll(".tab-btn")
+    .forEach(btn=>{
+      btn.classList.remove("active");
+    });
+
+  // Hiện tab được chọn
+  document.getElementById(tabId)
+    .classList.add("active");
+
+  // Active button
+  if(event){
+    event.target.classList.add("active");
+  }
+}
+
+
+// ==========================
+// LOAD CARGO DATA
+// ==========================
+function loadCargoData(){
+
+  const input = document
+    .getElementById("cargoInput")
+    .value;
+
+  const tbody = document.getElementById("cargoBody");
+
+  tbody.innerHTML = "";
+
+  if(!input.trim()) return;
+
+  // Tách từng dòng
+  const lines = input
+    .split("\n")
+    .filter(line => line.trim() !== "");
+
+  lines.forEach((line, index)=>{
+
+    // Bỏ dòng header đầu tiên
+    if(index === 0) return;
+
+    // ==========================
+    // TÁCH THEO 1000000
+    // ==========================
+    let arr = line.split("1000000");
+
+    // trim nhưng KHÔNG xoá rỗng
+    arr = arr.map(x => x.trim());
+
+    // Nếu phần tử đầu rỗng -> bỏ
+    if(arr[0] === ""){
+      arr.shift();
+    }
+
+    // Nếu phần tử cuối rỗng -> bỏ
+    if(arr[arr.length - 1] === ""){
+      arr.pop();
+    }
+
+    // ==========================
+    // TẠO ROW
+    // ==========================
+    const tr = document.createElement("tr");
+
+    arr.forEach(col=>{
+
+      const td = document.createElement("td");
+
+      // giữ ô trống đúng vị trí
+      td.textContent = col || "";
+
+      tr.appendChild(td);
+
+    });
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+function showDepCargoPopup(){
+document.getElementById("cargoPopupTitle")
+  .innerText = "🛫 DEP CARGO SQL";
+
+  const today = new Date();
+
+  const yyyy = today.getFullYear();
+
+  const mm = String(today.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd = String(today.getDate())
+    .padStart(2, "0");
+
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  const sql = `selecT DISTINCT a.issue_date ,1000000,a.prefix || a.serial AS AWB,1000000,NVL(T.TEXT,' ') ACC_INFO,1000000, A.origin ,1000000,a.dest,1000000,a.nature_goods,1000000,e.shipper,1000000,  F1.FLIGHT_NUMBER as FLIGHT,1000000,a.pieces,1000000,a.weight,1000000,e.charge_weight,1000000,I1.COMMODITY  AS COMMODITY1,1000000,e.sell_total / e.charge_weight,1000000,
+e.sell_total + e.pp_carrier
++ e.vat_carrier AS TOTAL,1000000, CASE WHEN E.OPER = 'PQC009' THEN 'QUAN' WHEN E.OPER = 'PQC003' THEN 'DUNG' WHEN E.OPER = 'PQC010'
+THEN 'QUANG' ELSE ' ' END AS STAFF from awb a
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
+LEFT OUTER JOIN AWB_FLT F1 ON A.SEQ = F1.AWB_SEQ AND F1.LINE =1 AND F1.AWB_MOVE_SEQ = 0
+LEFT OUTER JOIN AWB_IATA I1 ON A.SEQ = I1.AWB_SEQ AND I1.LINE = 1
+, awb_exp e, AWB_MOVE M where ((prefix != '368') and
+a.ISSUE_DATE = '${dateStr}' and a.ORIGIN = 'PQC' and e.ACCOUNT_DATE ='${dateStr}' and e.ORIGIN
+= 'PQC' and awb_exp_seq = e.seq and awb_exp_seq != 0) and (ROWNUM <= 200) AND A.SEQ = M.AWB_SEQ ORDER BY AWB`;
+
+  document.getElementById("depCargoText")
+    .value = sql;
+
+  document.getElementById("depCargoPopup")
+    .style.display = "flex";
+}
+
+
+function closeDepCargoPopup(){
+
+  document.getElementById("depCargoPopup")
+    .style.display = "none";
+}
+
+
+function copyDepCargo(){
+
+  const text = document.getElementById("depCargoText");
+
+  text.select();
+
+  document.execCommand("copy");
+
+  alert("✅ Copied");
+}
+function showArrCargoPopup(){
+document.getElementById("cargoPopupTitle")
+  .innerText = "🛬 ARR CARGO SQL";
+
+  const today = new Date();
+
+  const yyyy = today.getFullYear();
+
+  const mm = String(today.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd = String(today.getDate())
+    .padStart(2, "0");
+
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  const sql = `SELECT TO_CHAR(M.FLIGHT_DATE,'DD-MON-YYYY') AS FLIGHT_DATE,
+M.CARRIER || M.FLIGHT_NUMBER AS FL_NO,
+A.PREFIX||A.SERIAL AS AWB_NO,
+M.NATURE_GOODS NATURE,
+M.EXP_PIECES AS UNIT,
+M.EXP_WEIGHT AS WEIGHT,
+NVL(M.SHC,'NML') || ' ' || NVL(A.REMARKS,' ')  AS SHC,
+P.NAME AS SNAME,
+P1.NAME || ' - ' || P1.TEL1 AS CNAME,
+NVL(P1.ADDRESS1,' ') || ' ' || NVL(P1.ADDRESS2,'') AS CADD,
+DECODE(SUBSTR(M.ULD_NUMBER,1,1),'-','BULK',REPLACE(REPLACE(M.ULD_NUMBER,'=',''),'-','')) AS BUCKET,
+M.ORIGIN||'/'||M.DEST AS ROUTE,
+NVL(T.TEXT,' ') ACC_INFO
+FROM AWB A
+JOIN AWB_MOVE M ON A.SEQ = M.AWB_SEQ
+JOIN AWB_EXP E ON A.SEQ = E.AWB_SEQ AND E.EXP_IMP = 'E'
+LEFT OUTER JOIN PART P ON E.SHIPPER = P.CODE
+LEFT OUTER JOIN PART P1 ON E.CONSIGNEE = P1.CODE
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
+WHERE A.PREFIX|| A.SERIAL<>'MAL'
+AND ACTION_STATUS='DEP'
+AND A.ORIGIN IN ('BMV','CXR','DAD','DFD','DIN','DLI','HAN','HPH','HUI','NHA','PQC','PXV','SGN','SQH','TBB','UIH','VIH','VII','VKG','THD','VDH')
+AND A.DEST = 'PQC'
+AND M.DEST = 'PQC'
+AND M.FLIGHT_DATE BETWEEN '${dateStr}' AND '${dateStr}'
+ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
+
+  document.getElementById("depCargoText")
+    .value = sql;
+
+  document.getElementById("depCargoPopup")
+    .style.display = "flex";
+}
 </script>
 
 
