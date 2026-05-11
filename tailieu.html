@@ -1140,6 +1140,7 @@ payload: payload.value,
 };
 
 /// tạo nút update
+  let selectedRep = ""; // 🔥 thêm dòng này
 document.getElementById("btnUpdate").onclick = function(){
   if(!selectedRowId){
     alert("Chưa chọn dòng để cập nhật!");
