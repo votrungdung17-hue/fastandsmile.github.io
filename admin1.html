@@ -94,6 +94,22 @@ input.uppercase { text-transform: uppercase; }
   background: #ccc;
   cursor: not-allowed;
 }
+.cargo-table-wrapper{
+  max-height: 500px;   /* khoảng 20 dòng */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+
+/* giữ header đứng yên */
+.cargo-table-wrapper thead th{
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+#cargoBody tr{
+  height: 40px;
+}
 .tick-green {
   color: #28a745;
   font-weight: bold;
@@ -775,8 +791,9 @@ input.uppercase { text-transform: uppercase; }
     ✏️ UPDATE
   </button>
 
-  <table id="cargoTable">
+ <div class="cargo-table-wrapper">
 
+  <table class="cargo-table">
     <thead>
       <tr>
         <th>ISSUE DATE</th>
@@ -797,10 +814,10 @@ input.uppercase { text-transform: uppercase; }
       </tr>
     </thead>
 
-    <tbody id="cargoBody">
-    </tbody>
-
+    <tbody id="cargoBody"></tbody>
   </table>
+
+</div>
 
 </div>
 <div style="height: 500px;"></div> 
