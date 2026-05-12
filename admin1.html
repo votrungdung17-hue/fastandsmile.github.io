@@ -792,7 +792,7 @@ input.uppercase { text-transform: uppercase; }
   </button>
  <!-- ✅ NÚT Export hanco -->
 <button type="button" onclick="showHancoPopup()">
-  📦 EXPORT HANCO
+  📦 EXPORT
 </button>
 
  <div class="cargo-table-wrapper">
@@ -2310,7 +2310,7 @@ function loadCargoData(){
 
   tbody.innerHTML = "";
 
-  if(!input.trim()) return;
+  if(!input.trim()) return;	
 
   // Tách từng dòng
   const lines = input
@@ -2624,58 +2624,130 @@ function loadHancoData() {
     }
 
     const tbody = document.getElementById("hancoBody");
+    // Elements cho Tổng cộng
+    const sumPcsEl = document.getElementById("sumPcs");
+    const sumWeightEl = document.getElementById("sumWeight");
+    const sumTotalEl = document.getElementById("sumTotal");
+    // Elements cho Lũy kế
+    const accPcsEl = document.getElementById("accPcs");
+    const accWeightEl = document.getElementById("accWeight");
+    const accTotalEl = document.getElementById("accTotal");
+
     tbody.innerHTML = "⏳ Loading...";
 
     const fromD = toDate(from);
     const toD = toDate(to);
+
+    // Xác định ngày đầu tháng (Lũy kế từ ngày 1 của tháng được chọn)
+    const startOfMonth = new Date(fromD.getFullYear(), fromD.getMonth(), 1);
 
     fetch(API + "?action=getCargo&t=" + Date.now())
         .then(res => res.json())
         .then(res => {
             const data = res.data;
             tbody.innerHTML = "";
+            
             let count = 0;
+            let totalPcs = 0, totalWeight = 0, totalMoney = 0;
+            let accPcs = 0, accWeight = 0, accMoney = 0;
 
             data.slice(1).forEach((row) => {
                 const issueDate = row[0];
-
-                // --- THÊM String() VÀO 2 DÒNG DƯỚI ĐÂY ---
-                const awb = String(row[1] || "").toUpperCase().trim(); 
-                const shipper = String(row[6] || "").toUpperCase().trim();
-                // ------------------------------------------
-
                 const issue = toDate(issueDate);
+                if (!issue) return;
 
-                const matchDate = (issue && issue >= fromD && issue <= toD);
-                const matchAWB = (!awbKey || awb.includes(awbKey));
-                const matchShipper = (!keyword || shipper.includes(keyword));
+                const pcs = parseFloat(row[8]) || 0;
+                const weight = parseFloat(row[9]) || 0;
+                const total = parseFloat(row[13]) || 0;
 
-                if (matchDate && matchAWB && matchShipper) {
+                // 1. Tính LŨY KẾ (Từ mùng 1 đến ngày "To")
+                // Điều kiện: Shipper và AWB phải khớp (nếu có filter), ngày >= mùng 1 và <= To
+                const matchAWB = (!awbKey || String(row[1] || "").toUpperCase().includes(awbKey));
+                const matchShipper = (!keyword || String(row[6] || "").toUpperCase().includes(keyword));
+                
+                if (issue >= startOfMonth && issue <= toD && matchAWB && matchShipper) {
+                    accPcs += pcs;
+                    accWeight += weight;
+                    accMoney += total;
+                }
+
+                // 2. Tính TỔNG CỘNG & Hiển thị Table (Theo khoảng From - To được chọn)
+                if (issue >= fromD && issue <= toD && matchAWB && matchShipper) {
+                    totalPcs += pcs;
+                    totalWeight += weight;
+                    totalMoney += total;
+
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td>${issueDate}</td>
+                        <td>${row[7] || ""}</td>
                         <td>${row[1]}</td>
                         <td>${row[3]}</td>
                         <td>${row[4]}</td>
                         <td>${row[6]}</td>
-                        <td>${row[8]}</td>
-                        <td>${row[9]}</td>
-                        <td>${row[13]}</td>
-                        <td>${row[14]}</td>
+                        <td>${pcs.toLocaleString()}</td>
+                        <td>${weight.toLocaleString()}</td>
+                        <td>${total.toLocaleString()}</td>
+                        <td>${row[14] || ""}</td>
                     `;
                     tbody.appendChild(tr);
                     count++;
                 }
             });
 
+            // Hiển thị Tổng cộng
+            sumPcsEl.innerText = totalPcs.toLocaleString();
+            sumWeightEl.innerText = totalWeight.toLocaleString();
+            sumTotalEl.innerText = totalMoney.toLocaleString();
+
+            // Hiển thị Lũy kế
+            accPcsEl.innerText = accPcs.toLocaleString();
+            accWeightEl.innerText = accWeight.toLocaleString();
+            accTotalEl.innerText = accMoney.toLocaleString();
+
             if (count === 0) {
-                tbody.innerHTML = "<tr><td colspan='9'>❌ Không tìm thấy dữ liệu</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='10'>❌ Không tìm thấy dữ liệu</td></tr>";
             }
         })
         .catch(err => {
-            tbody.innerHTML = "<tr><td colspan='9'>❌ Lỗi load dữ liệu</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='10'>❌ Lỗi load dữ liệu</td></tr>";
             console.error(err);
         });
+}
+function captureHancoTable() {
+    // Chọn phần tử bao quanh bảng (cả header, body và footer)
+    // Lưu ý: nên chụp thẻ div bao ngoài table để lấy được đầy đủ khung hình
+    const exportArea = document.querySelector("#hancoPopup .popup-box");
+
+    // Hiển thị thông báo đợi (tùy chọn)
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Capturing...";
+    btn.disabled = true;
+
+    html2canvas(exportArea, {
+        backgroundColor: "#ffffff", // Đảm bảo nền ảnh màu trắng
+        scale: 2, // Tăng độ phân giải ảnh cho rõ nét
+        useCORS: true, // Hỗ trợ nếu có ảnh từ nguồn khác
+        logging: false,
+    }).then(canvas => {
+        // Tạo link để tải ảnh về
+        const link = document.createElement("a");
+        const today = new Date().toISOString().slice(0, 10);
+        
+        link.download = `HANCO_CARGO_${today}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        // Khôi phục trạng thái nút
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }).catch(err => {
+        console.error("Lỗi chụp màn hình:", err);
+        alert("❌ Không thể chụp ảnh");
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
 }
 </script>
 
@@ -2754,31 +2826,53 @@ function loadHancoData() {
 
     <!-- table -->
     <div style="max-height:400px; overflow:auto;">
-      <table style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>DATE</th>
-            <th>AWB</th>
-            <th>ORIGIN</th>
-            <th>DEST</th>
-            <th>SHIPPER</th>
-            <th>PCS</th>
-            <th>WEIGHT</th>
-            <th>TOTAL</th>
-            <th>DT/KG</th>
-          </tr>
-        </thead>
-        <tbody id="hancoBody"></tbody>
-      </table>
-    </div>
+     <!-- Tìm đến table trong hancoPopup -->
+<table style="width:100%; border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>DATE</th>
+      <th>FLIGHT</th> <!-- Thêm cột này -->
+      <th>AWB</th>
+      <th>ORIGIN</th>
+      <th>DEST</th>
+      <th>SHIPPER</th>
+      <th>PCS</th>
+      <th>WEIGHT</th>
+      <th>TOTAL</th>
+      <th>DT/KG</th>
+    </tr>
+  </thead>
+  <tbody id="hancoBody"></tbody>
+  <tfoot id="hancoFoot" style="background: #eee; font-weight: bold; position: sticky; bottom: 0;">
+    <!-- Hàng Tổng cộng hiện tại -->
+    <tr style="background: #e1f5fe;">
+        <td colspan="6" style="text-align: right;">TỔNG CỘNG:</td>
+        <td id="sumPcs">0</td>
+        <td id="sumWeight">0</td>
+        <td id="sumTotal">0</td>
+        <td></td>
+    </tr>
+    <!-- Hàng Lũy kế tháng mới thêm -->
+    <tr style="background: #fff9c4; color: #d32f2f;">
+        <td colspan="6" style="text-align: right;">LŨY KẾ THÁNG:</td>
+        <td id="accPcs">0</td>
+        <td id="accWeight">0</td>
+        <td id="accTotal">0</td>
+        <td></td>
+    </tr>
+</tfoot>
+</table>
 
-    <div class="popup-actions">
-      <button onclick="exportHancoExcel()">📤 EXPORT</button>
-      <button onclick="closeHancoPopup()">❌ CLOSE</button>
     </div>
+<div class="popup-actions">
+  <button onclick="captureHancoTable()" style="background: #673ab7; color: white;">📸 SCREENSHOT</button>
+  <button onclick="exportHancoExcel()">📤 EXPORT</button>
+  <button onclick="closeHancoPopup()">❌ CLOSE</button>
+</div>
 
   </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 
 </html>
