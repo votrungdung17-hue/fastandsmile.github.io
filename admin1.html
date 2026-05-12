@@ -790,6 +790,10 @@ input.uppercase { text-transform: uppercase; }
   <button type="button" onclick="updateCargoData()">
     ✏️ UPDATE
   </button>
+ <!-- ✅ NÚT Export hanco -->
+<button type="button" onclick="showHancoPopup()">
+  📦 EXPORT HANCO
+</button>
 
  <div class="cargo-table-wrapper">
 
@@ -2357,6 +2361,10 @@ function loadCargoData(){
   });
 document.getElementById("cargoInput").value = "";
 }
+document.getElementById("awbSearch")
+  .addEventListener("input", function(){
+    loadHancoData(); // gọi lại filter
+});
 
 function showDepCargoPopup(){
 document.getElementById("cargoPopupTitle")
@@ -2516,7 +2524,7 @@ function loadCargoFromSheet(){
     .then(res => res.json())
     .then(res => {
 
-      const data = res.data;
+      const data = res.data || res;
 
       tbody.innerHTML = "";
 
@@ -2546,6 +2554,105 @@ function loadCargoFromSheet(){
       console.error(err);
     });
 
+}
+function showHancoPopup(){
+  document.getElementById("hancoPopup").style.display = "flex";
+}
+
+function closeHancoPopup(){
+  document.getElementById("hancoPopup").style.display = "none";
+}
+function toDate(val) {
+    if (!val) return null;
+
+    // Xử lý định dạng dd/mm/yyyy hoặc yyyy-mm-dd
+    if (typeof val === "string") {
+        let parts;
+        if (val.includes("/")) {
+            parts = val.split("/"); // dd/mm/yyyy
+            const date = new Date(parts[2], parts[1] - 1, parts[0]);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        } else if (val.includes("-")) {
+            parts = val.split("-"); // yyyy-mm-dd
+            // Kiểm tra xem là yyyy-mm-dd hay dd-mm-yyyy
+            const date = parts[0].length === 4 
+                ? new Date(parts[0], parts[1] - 1, parts[2]) 
+                : new Date(parts[2], parts[1] - 1, parts[0]);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+    }
+
+    const d = new Date(val);
+    if (isNaN(d)) return null;
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+function loadHancoData() {
+    const awbKey = (document.getElementById("awbSearch").value || "").toUpperCase().trim();
+    const keyword = (document.getElementById("hancoShipper").value || "").toUpperCase().trim();
+    const from = document.getElementById("hancoFrom").value;
+    const to = document.getElementById("hancoTo").value;
+
+    if (!from || !to) {
+        alert("❌ Chọn đủ FROM - TO");
+        return;
+    }
+
+    const tbody = document.getElementById("hancoBody");
+    tbody.innerHTML = "⏳ Loading...";
+
+    const fromD = toDate(from);
+    const toD = toDate(to);
+
+    fetch(API + "?action=getCargo&t=" + Date.now())
+        .then(res => res.json())
+        .then(res => {
+            const data = res.data;
+            tbody.innerHTML = "";
+            let count = 0;
+
+            data.slice(1).forEach((row) => {
+                const issueDate = row[0];
+
+                // --- THÊM String() VÀO 2 DÒNG DƯỚI ĐÂY ---
+                const awb = String(row[1] || "").toUpperCase().trim(); 
+                const shipper = String(row[6] || "").toUpperCase().trim();
+                // ------------------------------------------
+
+                const issue = toDate(issueDate);
+
+                const matchDate = (issue && issue >= fromD && issue <= toD);
+                const matchAWB = (!awbKey || awb.includes(awbKey));
+                const matchShipper = (!keyword || shipper.includes(keyword));
+
+                if (matchDate && matchAWB && matchShipper) {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${issueDate}</td>
+                        <td>${row[1]}</td>
+                        <td>${row[3]}</td>
+                        <td>${row[4]}</td>
+                        <td>${row[6]}</td>
+                        <td>${row[8]}</td>
+                        <td>${row[9]}</td>
+                        <td>${row[13]}</td>
+                        <td>${row[14]}</td>
+                    `;
+                    tbody.appendChild(tr);
+                    count++;
+                }
+            });
+
+            if (count === 0) {
+                tbody.innerHTML = "<tr><td colspan='9'>❌ Không tìm thấy dữ liệu</td></tr>";
+            }
+        })
+        .catch(err => {
+            tbody.innerHTML = "<tr><td colspan='9'>❌ Lỗi load dữ liệu</td></tr>";
+            console.error(err);
+        });
 }
 </script>
 
@@ -2591,6 +2698,62 @@ function loadCargoFromSheet(){
       <button type="button" id="confirmFHT">Tính</button>
       <button type="button" id="closeFHT">Huỷ</button>
     </div>
+  </div>
+</div>
+/// popup hanco
+<div id="hancoPopup" class="popup">
+  <div class="popup-box" style="width:1000px;">
+
+    <h3>📦 HANCO CARGO</h3>
+
+    <!-- filter -->
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+      <div>
+        <label>FROM</label>
+        <input type="date" id="hancoFrom">
+      </div>
+
+      <div>
+        <label>TO</label>
+        <input type="date" id="hancoTo">
+      </div>
+      <div>
+    <label>SHIPPER</label>
+    <input id="hancoShipper" placeholder="Nhập shipper (vd: HANCO)">
+      </div>
+      <div>
+<label>AWB</label>
+<input id="awbSearch" placeholder="Nhập 3 ký tự đầu (vd: 738)">
+      </div>
+
+      <button onclick="loadHancoData()">🔍 LOAD</button>
+    </div>
+
+    <!-- table -->
+    <div style="max-height:400px; overflow:auto;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>DATE</th>
+            <th>AWB</th>
+            <th>ORIGIN</th>
+            <th>DEST</th>
+            <th>SHIPPER</th>
+            <th>PCS</th>
+            <th>WEIGHT</th>
+            <th>TOTAL</th>
+            <th>STAFF</th>
+          </tr>
+        </thead>
+        <tbody id="hancoBody"></tbody>
+      </table>
+    </div>
+
+    <div class="popup-actions">
+      <button onclick="exportHancoExcel()">📤 EXPORT</button>
+      <button onclick="closeHancoPopup()">❌ CLOSE</button>
+    </div>
+
   </div>
 </div>
 </body>
