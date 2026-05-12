@@ -814,7 +814,7 @@ input.uppercase { text-transform: uppercase; }
         <th>COMMODITY</th>
         <th>RATE</th>
         <th>TOTAL</th>
-        <th>STAFF</th>
+        <th>DT/KG</th>
       </tr>
     </thead>
 
@@ -2382,16 +2382,39 @@ document.getElementById("cargoPopupTitle")
 
   const dateStr = `${yyyy}-${mm}-${dd}`;
 
-  const sql = `selecT DISTINCT a.issue_date ,1000000,a.prefix || a.serial AS AWB,1000000,NVL(T.TEXT,' ') ACC_INFO,1000000, A.origin ,1000000,a.dest,1000000,a.nature_goods,1000000,e.shipper,1000000,  F1.FLIGHT_NUMBER as FLIGHT,1000000,a.pieces,1000000,a.weight,1000000,e.charge_weight,1000000,I1.COMMODITY  AS COMMODITY1,1000000,e.sell_total / e.charge_weight,1000000,
-e.sell_total + e.pp_carrier
-+ e.vat_carrier AS TOTAL,1000000, CASE WHEN E.OPER = 'PQC009' THEN 'QUAN' WHEN E.OPER = 'PQC003' THEN 'DUNG' WHEN E.OPER = 'PQC010'
-THEN 'QUANG' ELSE ' ' END AS STAFF from awb a
-LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
-LEFT OUTER JOIN AWB_FLT F1 ON A.SEQ = F1.AWB_SEQ AND F1.LINE =1 AND F1.AWB_MOVE_SEQ = 0
-LEFT OUTER JOIN AWB_IATA I1 ON A.SEQ = I1.AWB_SEQ AND I1.LINE = 1
-, awb_exp e, AWB_MOVE M where ((prefix != '368') and
-a.ISSUE_DATE = '${dateStr}' and a.ORIGIN = 'PQC' and e.ACCOUNT_DATE ='${dateStr}' and e.ORIGIN
-= 'PQC' and awb_exp_seq = e.seq and awb_exp_seq != 0) and (ROWNUM <= 200) AND A.SEQ = M.AWB_SEQ ORDER BY AWB`;
+  const sql = `SELECT DISTINCT 
+    a.issue_date, 1000000,
+    a.prefix || a.serial AS AWB, 1000000,
+    NVL(T.TEXT, ' ') AS ACC_INFO, 1000000, 
+    a.origin, 1000000,
+    a.dest, 1000000,
+    a.nature_goods, 1000000,
+    e.shipper, 1000000, 
+    F1.FLIGHT_NUMBER AS FLIGHT, 1000000,
+    a.pieces, 1000000,
+    a.weight, 1000000,
+    e.charge_weight, 1000000,
+    I1.COMMODITY AS COMMODITY1, 1000000,
+    e.sell_total / NULLIF(e.charge_weight, 0) AS RATE, 1000000,
+    (e.sell_total + e.pp_carrier + e.vat_carrier) AS TOTAL, 1000000,
+    /* Cắt bỏ số lẻ, chỉ lấy phần nguyên 9213 */
+    TRUNC((e.sell_total + e.pp_carrier + e.vat_carrier) / NULLIF(a.weight, 0)) AS "DT/KG"
+FROM awb a
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE = 1
+LEFT OUTER JOIN AWB_FLT F1 ON A.SEQ = F1.AWB_SEQ AND F1.LINE = 1 AND F1.AWB_MOVE_SEQ = 0
+LEFT OUTER JOIN AWB_IATA I1 ON A.SEQ = I1.AWB_SEQ AND I1.LINE = 1, 
+awb_exp e, 
+AWB_MOVE M 
+WHERE ((prefix != '368') 
+    AND a.ISSUE_DATE = '${dateStr}' 
+    AND a.ORIGIN = 'PQC' 
+    AND e.ACCOUNT_DATE = '${dateStr}' 
+    AND e.ORIGIN = 'PQC' 
+    AND awb_exp_seq = e.seq 
+    AND awb_exp_seq != 0) 
+    AND (ROWNUM <= 200) 
+    AND A.SEQ = M.AWB_SEQ 
+ORDER BY AWB`;
 
   document.getElementById("depCargoText")
     .value = sql;
@@ -2742,7 +2765,7 @@ function loadHancoData() {
             <th>PCS</th>
             <th>WEIGHT</th>
             <th>TOTAL</th>
-            <th>STAFF</th>
+            <th>DT/KG</th>
           </tr>
         </thead>
         <tbody id="hancoBody"></tbody>
