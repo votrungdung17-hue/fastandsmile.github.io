@@ -698,6 +698,9 @@ input.uppercase { text-transform: uppercase; }
 <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
 <button type="button" id="importBtn">📥 IMPORT</button>
 <button type="button" id="lomo">🔍LOMO CHECK</button>
+<button type="button" onclick="showLinkPopup()">
+  🌐 LINK
+</button>
 <div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -741,8 +744,8 @@ input.uppercase { text-transform: uppercase; }
   <button type="button" onclick="showArrCargoPopup()">
     🛬 ARR CARGO
   </button>
-
 </div>
+
 <div id="depCargoPopup" class="popup">
 
   <div class="popup-box" style="width:900px;">
@@ -2744,6 +2747,13 @@ function captureHancoTable() {
         btn.disabled = false;
     });
 }
+function showLinkPopup(){
+  document.getElementById("linkPopup").style.display = "flex";
+}
+
+function closeLinkPopup(){
+  document.getElementById("linkPopup").style.display = "none";
+}
 </script>
 
 
@@ -2876,6 +2886,66 @@ function captureHancoTable() {
 </div>
 
   </div>
+</div>
+<!-- LINK POPUP -->
+<div id="linkPopup" class="popup">
+
+  <div class="popup-box" style="width:700px;">
+
+    <h3>🌐 QUICK LINKS</h3>
+
+    <div id="linkContainer"
+         style="
+           max-height:500px;
+           overflow:auto;
+           line-height:2;
+         ">
+
+      <!-- 👇 GẮN LINK TẠI ĐÂY -->
+      <a href="https://vhat.vietnamairlines.com/account/"
+         target="_blank">
+         VĂN HÓA AN TOÀN
+      </a>
+
+      <br>
+      <a href="http://10.97.9.132/thvp/DesktopModules/Login.aspx?ReturnUrl=%2fthvp%2fDefault.aspx"
+         target="_blank">
+         LÀM CÔNG VĂN XUẤT VÉ
+      </a>
+
+      <br>
+
+      <a href="http://10.222.10.14:8080/Login.aspx"
+         target="_blank">
+         XUẤT HÓA ĐƠN HÀNG HÓA
+      </a>
+
+      <br>
+
+      <a href="https://apo.vietnamairlines.com/login-ldap"
+         target="_blank">
+         LOTUS
+      </a>
+
+      <br>
+
+      <a href="https://moplus.vietnamairlines.com/home"
+         target="_blank">
+         MOPLUS
+      </a>
+
+    </div>
+
+    <div class="popup-actions">
+
+      <button onclick="closeLinkPopup()">
+        ❌ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
