@@ -1717,7 +1717,7 @@ function showOCC(row){
   const to = (row[10] || "").toUpperCase();
   const acReg = (row[2] || "").toUpperCase();
 
-  const std = formatTimeForInput(row[12]);
+  const etd = formatTimeForInput(row[12]);
   const pushback = formatTimeForInput(row[15]);
 
   const code1 = (row[19] || "").toUpperCase();
@@ -1777,7 +1777,7 @@ function showOCC(row){
   }
 
   // ===== FORMAT TIME =====
-  const stdText = std ? std.replace(":","") : "";
+  const etdText = etd ? etd.replace(":","") : "";
   const pushbackText = pushback ? pushback.replace(":","") : "";
 
  // ===== TÍNH DELAY =====
@@ -1785,8 +1785,8 @@ function showOCC(row){
  const t1 = Number(time1) || 0;
  const t2 = Number(time2) || 0;
 let delayMin = t1 + t2;
-  if(std && pushback){
-    delayMinutes = parseTime(pushback) - parseTime(std);
+  if(etd && pushback){
+    delayMinutes = parseTime(pushback) - parseTime(etd);
     if(delayMinutes < 0) delayMinutes = 0;
   }
 
@@ -1826,7 +1826,7 @@ Flight : ${depFlight}
 Route : PQC${to}
 A/C Reg : ${acReg}
 A/C Type : ${config}
-STD : ${stdText}
+STD : ${etdText}
 ATD : ${pushbackText}
 Delay : ${delayText}
 Delay code : ${delayCode}
