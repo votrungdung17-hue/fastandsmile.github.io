@@ -5,6 +5,41 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Flight Manager</title>
 <style>
+/* Roster Styles */
+#rosterTable th, #rosterTable td {
+  border: 1px solid #aaa;
+  padding: 6px 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 28px;
+}
+#rosterTable th { background: #f2f2f2; }
+#rosterTable td:first-child { text-align: left; padding-left: 8px; min-width: 150px; background: #fff; }
+
+/* Màu nền của ngày cuối tuần (Thứ 7 / CN) */
+.roster-weekend { background-color: #ffeb3b !important; } 
+
+/* Màu chữ/nền theo loại ca trực */
+.shift-n { background-color: #d1ecf1 !important; color: #0c5460 !important; } /* Ca N - Xanh dương nhạt */
+.shift-p { background-color: #ffeeba !important; color: #856404 !important; } /* Ca P - Cam/Vàng nhạt */
+.shift-t { background-color: #f8d7da !important; color: #721c24 !important; } /* Ca T - Hồng nhạt */
+.shift-r { background-color: #ffffff; color: #000000; }                      /* Ca R1, R2 - Chữ đen nền trắng */
+
+/* Input chỉnh sửa trực tiếp trong bảng roster */
+.roster-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+  padding: 0;
+  margin: 0;
+}
+.roster-input:focus { outline: none; background: #fff; }
+
 .container {
   width: 300px;
   height: 200px;
@@ -678,8 +713,16 @@ input.uppercase { text-transform: uppercase; }
     CARGO
   </button>
 
+<button class="tab-btn"
+          onclick="showTab('rosterTab', event)">
+    ROSTER
+  </button>
+
 </div>
+
 <div id="operationTab" class="tab-content active">
+
+
 
 <form id="form">
 
@@ -847,6 +890,39 @@ input.uppercase { text-transform: uppercase; }
 </div>
 
 </div>
+<div id="rosterTab" class="tab-content">
+  <div style="background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ccc; margin-top: 15px;">
+    
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <span class="section-daidien" style="background: linear-gradient(90deg, #6f42c1, #a92fd8);">📅 LỊCH TRỰC ROSTER</span>
+      
+      <label style="font-weight: bold; font-size: 14px;">Chọn Tháng:</label>
+      <select id="rosterMonthSelect" onchange="renderRoster()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; cursor: pointer;">
+        <option value="1">Tháng 1</option>
+        <option value="2">Tháng 2</option>
+        <option value="3">Tháng 3</option>
+        <option value="4">Tháng 4</option>
+        <option value="5">Tháng 5</option>
+        <option value="6" selected>Tháng 6</option> 
+        <option value="7">Tháng 7</option>
+        <option value="8">Tháng 8</option>
+        <option value="9">Tháng 9</option>
+        <option value="10">Tháng 10</option>
+        <option value="11">Tháng 11</option>
+        <option value="12">Tháng 12</option>
+      </select>
+    </div>
+
+    <div style="overflow-x: auto; max-width: 100%;">
+      <table id="rosterTable" style="margin-top: 0; min-width: 1200px;">
+        </table>
+    </div>
+<button id="saveRosterBtn" onclick="window.saveAllRoster()" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">
+  LƯU LỊCH TRỰC
+</button>
+
+  </div>
+  </div>
 <div style="height: 500px;"></div> 
 <div id="fastWrapper">
   <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg"
@@ -2292,35 +2368,218 @@ fetch(API + "?type=coorchart&t=" + Date.now())
   });
 
 });
-function showTab(tabId, event){
 
-  // Ẩn toàn bộ tab
-  document.querySelectorAll(".tab-content")
-    .forEach(tab=>{
-      tab.classList.remove("active");
-    });
-
-  // Remove active button
-  document.querySelectorAll(".tab-btn")
-    .forEach(btn=>{
-      btn.classList.remove("active");
-    });
-
-  // Hiện tab được chọn
-  document.getElementById(tabId)
-    .classList.add("active");
-
-  // Active button
-  if(event){
-    event.target.classList.add("active");
+// =========================================================================
+// 1. HÀM CHUYỂN TAB AN TOÀN TUYỆT ĐỐI (Tự động load Roster & Cargo khi đổi tab)
+// =========================================================================
+window.showTab = function(tabId, event) {
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(content => {
+    content.classList.remove('active');
+    content.style.display = 'none'; 
+  });
+  
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add('active');
+    targetTab.style.display = 'block'; 
   }
-  // ✅ 👉 THÊM ĐOẠN NÀY Ở CUỐI
-  if(tabId === "cargoTab"){
-    loadCargoFromSheet();
+  
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
   }
-}
 
+  // Tự động vẽ và tải lịch trực nếu mở tab Roster
+  if (tabId === 'rosterTab') {
+    setTimeout(function() {
+      if (typeof window.renderRoster === 'function') {
+        window.renderRoster();
+      }
+    }, 50);
+  }
 
+  // Tự động tải dữ liệu nếu mở tab Cargo (Giải quyết lỗi không tự load)
+  if (tabId === 'cargoTab') { 
+    setTimeout(function() {
+      if (typeof window.loadCargoFromSheet === 'function') {
+        window.loadCargoFromSheet();
+      }
+    }, 50);
+  }
+};
+
+// ==========================================
+// 2. DANH SÁCH NHÂN SỰ
+// ==========================================
+const staffList = [
+  "VÕ TRUNG DŨNG",
+  "NGUYỄN VĂN QUÂN",
+  "NGUYỄN QUỐC QUANG",
+  "LÝ MINH SANG"
+];
+
+// ==========================================
+// 3. HÀM VẼ LỊCH TRỰC VÀ TẢI DỮ LIỆU TỪ SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// ==========================================
+window.renderRoster = function() {
+  const selectBox = document.getElementById("rosterMonthSelect");
+  const table = document.getElementById("rosterTable");
+  if (!selectBox || !table) return;
+  
+  const month = parseInt(selectBox.value) || 6;
+  const year = 2026; 
+  
+  const totalDays = new Date(year, month, 0).getDate();
+  
+  let headerRow1 = '<tr><th rowspan="2" style="vertical-align: middle; min-width: 150px;">NAME</th>';
+  let headerRow2 = '<tr>';
+  
+  const isWeekendArr = [];
+  
+  for (let d = 1; d <= totalDays; d++) {
+    const dateObj = new Date(year, month - 1, d);
+    const dayOfWeek = dateObj.getDay(); 
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    isWeekendArr.push(isWeekend);
+    
+    const weekendClass = isWeekend ? 'class="roster-weekend"' : '';
+    const dayName = dayOfWeek === 0 ? "CN" : "T" + (dayOfWeek + 1);
+    
+    headerRow1 += `<th ${weekendClass}>${d}</th>`;
+    headerRow2 += `<th ${weekendClass} style="font-size:10px; font-weight:normal;">${dayName}</th>`;
+  }
+  
+  headerRow1 += '</tr>';
+  headerRow2 += '</tr>';
+  
+  let bodyRows = "";
+  staffList.forEach(staff => {
+    const nameStyle = staff === "LÝ MINH SANG" ? 'style="color: red;"' : '';
+    bodyRows += `<tr id="row-${btoa(encodeURIComponent(staff))}"> <td ${nameStyle}>${staff}</td>`;
+    
+    for (let d = 1; d <= totalDays; d++) {
+      const isWeekend = isWeekendArr[d - 1];
+      const weekendClass = isWeekend ? "roster-weekend" : "";
+      const colIndex = d + 1; 
+      
+      bodyRows += `<td class="${weekendClass}">
+        <input class="roster-input" data-col="${colIndex}" data-staff="${staff}" value="" oninput="window.updateShiftColor(this)">
+      </td>`;
+    }
+    bodyRows += '</tr>';
+  });
+  
+  table.innerHTML = `<thead>${headerRow1}${headerRow2}</thead><tbody>${bodyRows}</tbody>`;
+
+  // --- THAY THẾ ĐOẠN LOAD ROSTER THÀNH FETCH API (GET) ---
+  const sheetName = month.toString(); 
+  
+  fetch(`${API}?action=loadRoster&sheet=${sheetName}`)
+    .then(response => response.json())
+    .then(dataArray => {
+      if (!dataArray || dataArray.length === 0) return;
+      
+      dataArray.forEach(row => {
+        const staffName = row.name;
+        const colIndex = row.date; 
+        const shiftValue = row.value;
+        
+        const input = table.querySelector(`input[data-staff="${staffName}"][data-col="${colIndex}"]`);
+        if (input) {
+          input.value = shiftValue;
+          
+          const td = input.parentElement;
+          if (td) {
+            td.classList.remove("shift-n", "shift-p", "shift-t");
+            if (shiftValue.startsWith("N")) td.classList.add("shift-n");
+            else if (shiftValue.startsWith("P")) td.classList.add("shift-p");
+            else if (shiftValue.startsWith("T")) td.classList.add("shift-t");
+          }
+        }
+      });
+    })
+    .catch(error => console.error("Lỗi khi tải lịch trực từ API:", error));
+};
+
+// =========================================================================
+// 4. HÀM ĐỔI MÀU Ô TRỰC QUAN
+// =========================================================================
+window.updateShiftColor = function(input) {
+  const val = input.value.toUpperCase();
+  input.value = val;
+  const td = input.parentElement;
+  if (!td) return;
+  
+  td.classList.remove("shift-n", "shift-p", "shift-t");
+  if (val.startsWith("N")) {
+    td.classList.add("shift-n");
+  } else if (val.startsWith("P")) {
+    td.classList.add("shift-p");
+  } else if (val.startsWith("T")) {
+    td.classList.add("shift-t");
+  }
+};
+
+// =========================================================================
+// 5. HÀM LƯU TOÀN BỘ LỊCH TRỰC VÀO SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// =========================================================================
+window.saveAllRoster = function() {
+  const table = document.getElementById("rosterTable");
+  const selectBox = document.getElementById("rosterMonthSelect");
+  if (!table || !selectBox) return;
+
+  const sheetName = selectBox.value.toString(); 
+  const inputs = table.querySelectorAll(".roster-input");
+  const rosterData = [];
+
+  inputs.forEach(input => {
+    const val = input.value.trim().toUpperCase();
+    rosterData.push({
+      staffName: input.getAttribute("data-staff"),
+      colIndex: parseInt(input.getAttribute("data-col"), 10),
+      value: val
+    });
+  });
+
+  const saveBtn = document.getElementById("saveRosterBtn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Đang lưu dữ liệu...";
+  }
+
+  // --- THAY THẾ ĐOẠN SAVE ROSTER THÀNH FETCH API (POST) ---
+  const payload = {
+    action: "saveBulk",
+    sheet: sheetName,
+    data: rosterData
+  };
+
+  fetch(API, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(res => {
+    alert("Hệ thống: " + (res.message || "Đã lưu thành công!"));
+  })
+  .catch(error => {
+    alert("Lỗi kết nối máy chủ hoặc lỗi lưu dữ liệu: " + error.message);
+    console.error(error);
+  })
+  .finally(() => {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerText = "LƯU LỊCH TRỰC";
+    }
+  });
+};
 // ==========================
 // LOAD CARGO DATA
 // ==========================
@@ -2806,6 +3065,9 @@ function guiCauHoiAI() {
       responseDiv.innerHTML = "❌ Lỗi kết nối đến AI: " + error.message;
     });
 }
+
+
+
 </script>
 
 
@@ -2852,7 +3114,6 @@ function guiCauHoiAI() {
     </div>
   </div>
 </div>
-/// popup hanco
 <div id="hancoPopup" class="popup">
   <div class="popup-box" style="width:1000px;">
 
@@ -3030,3 +3291,4 @@ function guiCauHoiAI() {
 </body>
 
 </html>
+
