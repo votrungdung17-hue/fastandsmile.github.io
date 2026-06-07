@@ -3161,6 +3161,19 @@ function guiCauHoiAI() {
 }
 
 async function dongBoThongKeTuAPI() {
+  // 1. Kiểm tra mật khẩu trước khi cho phép chạy code phía dưới
+  const matKhauNhap = prompt("Vui lòng nhập mật khẩu để đồng bộ dữ liệu:");
+  
+  if (matKhauNhap === null) {
+    return; // Người dùng bấm "Hủy" (Cancel) -> Thoát hàm
+  }
+  
+  if (matKhauNhap !== "846721") {
+    alert("❌ Mật khẩu không chính xác! Hành động bị từ chối.");
+    return; // Sai mật khẩu -> Thoát hàm
+  }
+
+  // 2. Nội dung xử lý cũ của bạn sau khi đã qua vòng gửi xe
   const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec?action=loadYearlyStat";
   const syncBtn = document.getElementById("syncApiBtn");
   
@@ -3171,7 +3184,6 @@ async function dongBoThongKeTuAPI() {
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error("Mất kết nối API");
     
-    // Nhận dữ liệu tổng hợp từ Google Apps Script
     const thongKeNam = await response.json();
 
     const rows = document.querySelectorAll("#rosterStatBody tr");
@@ -3179,22 +3191,18 @@ async function dongBoThongKeTuAPI() {
       const name = row.getAttribute("data-name");
       
       if (thongKeNam[name]) {
-        // 1. Ép kiểu số cho dữ liệu Đã Sử Dụng từ API
         const pUsed = parseInt(thongKeNam[name].P) || 0;
         const bUsed = parseInt(thongKeNam[name].B) || 0;
         const lUsed = parseInt(thongKeNam[name].L) || 0;
 
-        // 2. Ép kiểu số cho Định Mức Gốc khai báo ngoài HTML
         const maxP = Number(row.getAttribute("data-p")) || 0;
         const maxB = Number(row.getAttribute("data-b")) || 0;
         const maxL = Number(row.getAttribute("data-l")) || 0;
 
-        // 3. Đổ số liệu "Đã Sử Dụng" vào các ô tương ứng
         row.querySelector(".p-used").innerText = pUsed;
         row.querySelector(".b-used").innerText = bUsed;
         row.querySelector(".l-used").innerText = lUsed;
 
-        // 4. Phép tính trừ thẳng: Định mức - Đã dùng (Ra số âm nếu dùng lố hoặc lỗi đọc định mức)
         row.querySelector(".p-remain").innerText = maxP - pUsed;
         row.querySelector(".b-remain").innerText = maxB - bUsed;
         row.querySelector(".l-remain").innerText = maxL - lUsed;
