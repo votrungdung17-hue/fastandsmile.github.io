@@ -771,6 +771,9 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" onclick="showLinkPopup()">
   🌐 LINK
 </button>
+<button type="button" id="ganttBtn" onclick="showGanttPopup()">
+  📊 GANTT
+</button>
 <div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -3220,6 +3223,90 @@ async function dongBoThongKeTuAPI() {
   }
 }
 
+// Hàm hiển thị Popup Gantt
+function showGanttPopup() {
+  document.getElementById("ganttPopup").style.display = "flex";
+  
+  // Tự động lấy giờ ATA hoặc STA từ form chính điền vào làm mặc định nếu có
+  const ataValue = document.getElementById("ata") ? document.getElementById("ata").value : "";
+  if (ataValue) {
+    document.getElementById("ganttChockOnInput").value = ataValue;
+  }
+  tinhToanGanttTimeline();
+}
+
+// Hàm đóng Popup Gantt
+function closeGanttPopup() {
+  document.getElementById("ganttPopup").style.display = "none";
+}
+
+// Hàm xử lý cộng giờ phút và hiển thị chuỗi mũi tên
+function tinhToanGanttTimeline() {
+  const chockOnTime = document.getElementById("ganttChockOnInput").value.trim();
+  const wrapper = document.getElementById("ganttTimelineWrapper");
+  
+  // Kiểm tra định dạng thời gian HH:MM
+  if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(chockOnTime)) {
+    alert("Vui lòng nhập đúng định dạng giờ dạng HH:MM (Ví dụ: 09:00)");
+    return;
+  }
+
+  // Tách giờ và phút gốc
+  const [hours, minutes] = chockOnTime.split(":").map(Number);
+
+  // Định nghĩa danh sách cấu trúc mốc thời gian và số phút cộng thêm (offset)
+  const quyTrinhTurnaround = [
+    { name: "🛬 Chock-on (Đóng chèn)", offset: 0 },
+    { name: "🚶 Disembarkation Started (Bắt đầu khách xuống)", offset: 3 },
+    { name: "💼 Loading Started (Bắt đầu dỡ hầm hàng)", offset: 3 },
+    { name: "⛽ Fuel Started (Bắt đầu nạp nhiên liệu)", offset: 9 },
+    { name: "🛑 Disembarkation Completed (Khách xuống hết)", offset: 9 },
+    { name: "🧹 Cleaning Started (Bắt đầu dọn dẹp cabin)", offset: 9 },
+    { name: "🚌 Preboarding (Bắt đầu cho khách lên xe)", offset: 10 },
+    { name: "🚠 Preboarding (Bắt đầu cho khách ra ống)", offset: 15 },
+    { name: "✨ Cleaning Completed (Dọn dẹp xong cabin)", offset: 17 },
+    { name: "✅ Fuel Completed (Nạp xong nhiên liệu)", offset: 20 },
+    { name: "🧑‍✈️ Embarkation Started (Bắt đầu đón khách lên)", offset: 20 },
+    { name: "🔒 Embarkation Completed (Đóng cửa tàu/Khách lên hết)", offset: 33 },
+    { name: "📦 Loading Completed (Chất xếp xong hầm hàng)", offset: 33 },
+    { name: "⏰ Aero Bridge/Steps Started Release (Bắt đầu rút ống/thang)", offset: 33 },
+    { name: "✈️ Aero Bridge/Steps Released (Rút xong - Sẵn sàng đẩy lùi)", offset: 35 },
+  ];
+
+  wrapper.innerHTML = ""; // Xóa dữ liệu cũ để vẽ lại
+
+  // Vòng lặp tính toán thời gian thực tế cho từng mốc
+  quyTrinhTurnaround.forEach(step => {
+    // Thuật toán cộng phút xử lý trường hợp tràn qua giờ mới (quá 60 phút)
+    let tongPhut = minutes + step.offset;
+    let gioThucTe = hours + Math.floor(tongPhut / 60);
+    let phutThucTe = tongPhut % 60;
+    
+    // Xử lý nếu giờ vượt quá 24h đêm
+    gioThucTe = gioThucTe % 24;
+
+    // Định dạng chuỗi hiển thị số có 2 chữ số (Ví dụ: 09:05)
+    const gioIn = String(gioThucTe).padStart(2, '0');
+    const phutIn = String(phutThucTe).padStart(2, '0');
+    const thoiGianKetQua = `${gioIn}:${phutIn}`;
+
+    // Đổi màu sắc đặc biệt cho điểm mốc Chock-on đầu và FHT cuối để làm nổi bật tiến trình
+    let mauVien = "#6f42c1"; // Tím mặc định
+    let nenMoc = "#e9ecef";
+    if (step.offset === 0) { mauVien = "#28a745"; nenMoc = "#d4edda"; } // Xanh lá cho Chock-on
+    if (step.offset === 35) { mauVien = "#dc3545"; nenMoc = "#f8d7da"; } // Đỏ nổi bật cho mốc FHT kết thúc
+
+    // Tạo phần tử giao diện mũi tên hàng dọc
+    const stepHtml = `
+      <div class="gantt-step" style="border-left-color: ${mauVien}; background-color: ${nenMoc};">
+        <div class="gantt-time">${thoiGianKetQua}</div>
+        <div class="gantt-name">${step.name}</div>
+        <div class="gantt-offset">+${step.offset} min</div>
+      </div>
+    `;
+    wrapper.insertAdjacentHTML("beforeend", stepHtml);
+  });
+}
 </script>
 
 
@@ -3446,6 +3533,59 @@ async function dongBoThongKeTuAPI() {
 
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<div id="ganttPopup" class="popup" style="display:none;">
+  <div class="popup-box" style="width: 95%; max-width: 1200px; height: 80vh; overflow-y: auto;">
+    <h3 style="color: #6f42c1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+      <span>📊 BIỂU ĐỒ TIẾN TRÌNH QUAY ĐẦU TÀU BAY (TURNAROUND GANTT)</span>
+      <button onclick="closeGanttPopup()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px;">❌ ĐÓNG</button>
+    </h3>
+    
+    <div style="background: #eef2f3; border-left: 5px solid #0072ff; padding: 10px 15px; margin-bottom: 15px; border-radius: 0 6px 6px 0; font-size: 12px; line-height: 1.6; color: #495057;">
+      📌 <b>Theo công văn số:</b> 621/TCTHK-DVHK <br>
+      <b>Vv:</b> Triển khai thực hiện phục vụ mặt đất theo Ground time 35’ chuyến bay NĐ-NĐ khai thác tàu A320/A321.
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+      <label style="font-weight: bold; font-size: 14px;">Nhập giờ Chock-on gốc:</label>
+      <input type="text" id="ganttChockOnInput" placeholder="HH:MM" style="width: 100px; padding: 6px; font-size: 16px; text-align: center; font-weight: bold;" value="09:00">
+      <button onclick="tinhToanGanttTimeline()" style="padding: 7px 15px; background: #6f42c1; color: white; border: none; border-radius: 5px; font-weight: bold;">📊 VẼ TIẾN TRÌNH</button>
+    </div>
+
+    <div id="ganttTimelineWrapper" style="display: flex; flex-direction: column; gap: 12px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+       </div>
+  </div>
+</div>
+<style>
+.gantt-step {
+  display: flex;
+  align-items: center;
+  background: #e9ecef;
+  border-left: 5px solid #6f42c1;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.gantt-time {
+  font-size: 15px;
+  color: #d946ef;
+  font-weight: 800;
+  margin-right: 15px;
+  min-width: 60px;
+}
+.gantt-name {
+  font-weight: bold;
+  color: #333;
+  flex-grow: 1;
+}
+.gantt-offset {
+  font-size: 11px;
+  color: #6c757d;
+  background: #dee2e6;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+</style>
 </body>
 
 </html>
