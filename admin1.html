@@ -933,8 +933,8 @@ input.uppercase { text-transform: uppercase; }
         <option value="3">Tháng 3</option>
         <option value="4">Tháng 4</option>
         <option value="5">Tháng 5</option>
-        <option value="6" selected>Tháng 6</option> 
-        <option value="7">Tháng 7</option>
+        <option value="6">Tháng 6</option> 
+        <option value="7" selected>Tháng 7</option>
         <option value="8">Tháng 8</option>
         <option value="9">Tháng 9</option>
         <option value="10">Tháng 10</option>
@@ -1005,8 +1005,8 @@ input.uppercase { text-transform: uppercase; }
             <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">19</td>
             <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
           </tr>
-          <tr data-name="Lý Minh Sang" data-p="12" data-b="0" data-l="11">
-            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Lý Minh Sang</td>
+          <tr data-name="Từ Đức Nguyên" data-p="12" data-b="0" data-l="11">
+            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Từ Đức Nguyên</td>
             <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
             <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
             <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
@@ -1031,6 +1031,7 @@ input.uppercase { text-transform: uppercase; }
     <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUANG.jpg" class="user" data-name="Nguyễn Quốc Quang" data-phone="0947882100">
     <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUAN.jpg"  class="user" data-name="Nguyễn Văn Quân" data-phone="0917220723">
     <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/SANG.jpg" class="user" data-name="Lý Minh Sang" data-phone="0376290292">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/NGUYEN.jpg" class="user" data-name="Từ Đức Nguyên" data-phone="0949999406">
   </div>
 </div>
   
@@ -2515,7 +2516,7 @@ const staffList = [
   "VÕ TRUNG DŨNG",
   "NGUYỄN VĂN QUÂN",
   "NGUYỄN QUỐC QUANG",
-  "LÝ MINH SANG"
+  "TỪ ĐỨC NGUYÊN"
 ];
 
 // ==========================================
@@ -2554,7 +2555,7 @@ window.renderRoster = function() {
   
   let bodyRows = "";
   staffList.forEach(staff => {
-    const nameStyle = staff === "LÝ MINH SANG" ? 'style="color: red;"' : '';
+    const nameStyle = staff === "TỪ ĐỨC NGUYÊN" ? 'style="color: red;"' : '';
     bodyRows += `<tr id="row-${btoa(encodeURIComponent(staff))}"> <td ${nameStyle}>${staff}</td>`;
     
     for (let d = 1; d <= totalDays; d++) {
