@@ -774,6 +774,65 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="ganttBtn" onclick="showGanttPopup()">
   📊 GANTT
 </button>
+<button type="button" onclick="showImmiPopup()">
+    👮‍♂️ IMMI
+</button>
+<div id="immiPopup" class="popup">
+
+    <div class="popup-box" style="width:350px">
+
+        <h3>👮 EXPORT IMMI</h3>
+
+
+<label>Ngày bay</label>
+<input type="date" id="immiDate">
+
+<div style="
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    margin-top:15px;
+    margin-bottom:15px;
+">
+    <label style="
+        display:flex;
+        align-items:center;
+        gap:6px;
+        cursor:pointer;
+    ">
+        <input type="checkbox" id="immiVN">
+        VN
+    </label>
+
+    <label style="
+        display:flex;
+        align-items:center;
+        gap:6px;
+        cursor:pointer;
+    ">
+        <input type="checkbox" id="immiBL">
+        BL
+    </label>
+</div>
+
+<div class="popup-actions">
+
+            <button onclick="exportIMMI()">
+                📤 EXPORT
+            </button>
+
+            <button onclick="closeImmiPopup()">
+                ❌ CLOSE
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
 <div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -3308,6 +3367,175 @@ function tinhToanGanttTimeline() {
     wrapper.insertAdjacentHTML("beforeend", stepHtml);
   });
 }
+// =======================
+// IMMI POPUP
+// =======================
+
+function showImmiPopup() {
+
+    // Nếu có ô ngày chính thì lấy mặc định
+    const mainDate = document.getElementById("ngay");
+    if (mainDate) {
+        document.getElementById("immiDate").value = mainDate.value;
+    }
+
+    document.getElementById("immiPopup").style.display = "flex";
+}
+
+function closeImmiPopup() {
+    document.getElementById("immiPopup").style.display = "none";
+}
+
+function showLoadingExport() {
+    document.getElementById("loadingExport").style.display = "flex";
+}
+
+function hideLoadingExport() {
+    document.getElementById("loadingExport").style.display = "none";
+}
+
+
+// =======================
+// EXPORT IMMI
+// =======================
+
+async function exportIMMI() {
+
+    showLoadingExport();
+
+    try {
+
+        const selectedDate = document.getElementById("immiDate").value;
+const vnChecked = document.getElementById("immiVN").checked;
+const blChecked = document.getElementById("immiBL").checked;
+
+if (!vnChecked && !blChecked) {
+    alert("Vui lòng chọn hãng muốn trích xuất dữ liệu.");
+    return;
+}
+
+        if (!selectedDate) {
+            alert("Vui lòng chọn ngày bay.");
+            return;
+        }
+
+        const res = await fetch(
+            API +
+            "?action=immi" +
+            "&date=" + encodeURIComponent(selectedDate) +
+            "&t=" + Date.now()
+        );
+
+        const json = await res.json();
+        const data = json.data || [];
+
+        if (data.length <= 1) {
+            alert("Không có chuyến bay trong ngày " + selectedDate);
+            return;
+        }
+
+        const output = [];
+
+        // Header
+        output.push([
+            "Số hiệu (*)",
+            "Ngày bay yyyy-MM-dd (*)",
+            "Mã hãng (*)",
+            "Cảng đi (*)",
+            "Cảng đến (*)",
+            "Khởi hành yyyy-MM-dd HH:mm",
+            "Loại chuyến (DOMESTIC/INTERNATIONAL)",
+            "Số ĐK tàu bay",
+            "PAX"
+        ]);
+
+        for (let i = 1; i < data.length; i++) {
+
+            const row = data[i];
+
+const flightNo = String(row[9] || "").trim();
+const airlineCode = flightNo.substring(0, 2).toUpperCase();
+
+// Lọc theo checkbox
+if (
+    (airlineCode === "VN" && !vnChecked) ||
+    (airlineCode === "BL" && !blChecked)
+) {
+    continue;
+}
+
+// Nếu là hãng khác VN/BL thì bỏ qua
+if (airlineCode !== "VN" && airlineCode !== "BL") {
+    continue;
+}
+
+            const ngay = formatDateForInput(row[1]);
+
+            const pax =
+                (+row[29] || 0) +
+                (+row[30] || 0) +
+                (+row[31] || 0);
+
+            const gio = formatTimeForInput(row[13]);
+
+            // Chuyển VNA321 -> VN-A321
+            let reg = String(row[2] || "").trim();
+
+            if (/^VN[A-Z]/.test(reg)) {
+                reg = reg.replace(/^VN([A-Z])/, "VN-$1");
+            }
+
+output.push([
+    row[9] || "",
+    ngay,
+    airlineCode,
+    "PQC",
+    row[10] || "",
+    ngay + " " + gio,
+    "DOMESTIC",
+    reg,
+    pax
+]);
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(output);
+
+        // Ép cột H (Số ĐK) thành Text
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+
+        for (let r = 1; r <= range.e.r; r++) {
+
+            const cell = XLSX.utils.encode_cell({
+                r: r,
+                c: 7 // cột H
+            });
+
+            if (ws[cell]) {
+                ws[cell].t = "s";
+            }
+        }
+
+        XLSX.utils.book_append_sheet(wb, ws, "Import");
+
+        XLSX.writeFile(
+            wb,
+            "IMMI_" + selectedDate.replaceAll("-", "") + ".xlsx"
+        );
+
+        closeImmiPopup();
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Có lỗi khi xuất dữ liệu: " + err.message);
+
+    } finally {
+
+        hideLoadingExport();
+
+    }
+}
 </script>
 
 
@@ -3593,7 +3821,49 @@ function tinhToanGanttTimeline() {
   padding: 2px 6px;
   border-radius: 10px;
 }
+.loading-overlay{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.35);
+    z-index:99999;
+
+    justify-content:center;
+    align-items:center;
+}
+
+.loading-box{
+    background:#fff;
+    padding:20px 30px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+.spinner{
+    width:50px;
+    height:50px;
+    border:5px solid #ddd;
+    border-top:5px solid #0066cc;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:0 auto 10px;
+}
+
+@keyframes spin{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
 </style>
+<div id="loadingExport" class="loading-overlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <div>Đang xuất dữ liệu IMMI...</div>
+    </div>
+</div>
 </body>
 
 </html>
