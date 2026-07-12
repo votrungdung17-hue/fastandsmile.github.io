@@ -526,6 +526,28 @@ input.uppercase { text-transform: uppercase; }
   🔒 LOG OUT
 </button>
 <body>
+
+<!-- POPUP MODAL (Bao gồm lớp nền mờ và hộp thoại chính) -->
+<div id="immiCargoContainer" style="display: none; position: fixed; top: 80px; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+  
+  <!-- Hộp thoại nội dung (White Box) -->
+  <div style="background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; position: relative;">
+    
+    <!-- Tiêu đề & Thanh điều khiển -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; margin-bottom: 15px;">
+      <h3 style="margin: 0; color: #333; font-size: 18px;">BẢNG THEO DÕI ĐỐI SOÁT IMMI CARGO</h3>
+      
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; font-size: 14px;">Chọn Tháng:</label>
+        <input type="month" id="immiMonthPicker" onchange="renderImmiCargoCalendar()" style="display:inline-block; width:auto; padding: 6px; border-radius:4px; border:1px solid #ccc;">
+        <button type="button" class="btn btn-secondary" onclick="closeImmiCargoModal()" style="padding: 6px 12px; background: #6c757d; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Đóng</button>
+      </div>
+    </div>
+    
+    <!-- Lưới hiển thị nội dung lịch -->
+    <div id="immiDaysGrid" class="immi-grid" style="flex: 1;"></div>
+  </div>
+</div>
 <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/adult.png" class="top-right-img">
 <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/children.png" class="top-mid-img">
 <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/baby.png" class="top-left-img">
@@ -831,8 +853,8 @@ input.uppercase { text-transform: uppercase; }
 
     </div>
 
-
 </div>
+ 
 <div id="lomoResult" style="margin-top:10px;"></div>
 <div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
 <div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
@@ -895,7 +917,24 @@ input.uppercase { text-transform: uppercase; }
 
   <button type="button" onclick="showArrCargoPopup()">
     🛬 ARR CARGO
+  </button>  
+<button type="button" onclick="openImmiCargoModal()">
+    📦 IMMI CARGO
   </button>
+
+</div>
+</div>
+  <div id="immiCargoContainer" style="display: none; border: 1px solid #ddd; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; margin-bottom: 15px;">
+      <h3 style="margin: 0; color: #333;">BẢNG THEO DÕI ĐỐI SOÁT IMMI CARGO</h3>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; font-size: 14px;">Chọn Tháng:</label>
+        <input type="month" id="immiMonthPicker" onchange="renderImmiCargoCalendar()" style="display:inline-block; width:auto; padding: 4px; border-radius:4px; border:1px solid #ccc;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('immiCargoContainer').style.display='none'">Đóng</button>
+      </div>
+    </div>
+    <div id="immiDaysGrid" class="immi-grid"></div>
+  </div>
 </div>
 
 <div id="depCargoPopup" class="popup">
@@ -3536,6 +3575,161 @@ output.push([
 
     }
 }
+
+</script>
+<script>
+// URL ứng dụng Google Apps Script Web App của bạn
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; 
+let immiSavedData = {}; 
+
+// --- LOGIC XỬ LÝ CHỨC NĂNG CHÍNH IMMI CARGO ---
+
+// 1. Hàm mở Popup Modal
+function openImmiCargoModal() {
+  const container = document.getElementById('immiCargoContainer');
+  container.style.display = 'flex'; // Chuyển thành 'flex' để căn giữa theo CSS mới của modal
+  
+  const picker = document.getElementById('immiMonthPicker');
+  if (!picker.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    picker.value = `${yyyy}-${mm}`;
+  }
+  
+  // Đã bỏ scrollIntoView vì modal dạng fixed luôn hiển thị trung tâm màn hình
+  fetchAndRenderImmiCargo();
+}
+
+// 2. Hàm đóng Popup Modal
+function closeImmiCargoModal() {
+  const container = document.getElementById('immiCargoContainer');
+  container.style.display = 'none';
+}
+
+async function fetchAndRenderImmiCargo() {
+  const grid = document.getElementById('immiDaysGrid');
+  grid.innerHTML = "<p style='color:#666; font-style:italic;'>Đang tải dữ liệu trạng thái IMMI CARGO...</p>";
+  
+  try {
+    const response = await fetch(`${GAS_WEB_APP_URL}?action=loadImmiCargo`);
+    const serverData = await response.json();
+    
+    immiSavedData = {};
+    if (Array.isArray(serverData)) {
+      serverData.forEach(item => {
+        let dKey = "";
+        if (item.date) {
+          // KHẮC PHỤC LỖI LỆCH NGÀY: Chuyển đổi định dạng Timezone đảm bảo lấy đúng ngày cục bộ tại VN (GMT+7)
+          const parsedDate = new Date(item.date);
+          if (!isNaN(parsedDate)) {
+            const yyyy = parsedDate.getFullYear();
+            const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(parsedDate.getDate()).padStart(2, '0');
+            dKey = `${yyyy}-${mm}-${dd}`;
+          } else if (typeof item.date === "string") {
+            dKey = item.date.split("T")[0];
+          }
+        }
+        
+        if (dKey) {
+          immiSavedData[dKey] = {
+            status: item.status || "Chưa đối soát",
+            checker: item.checker || ""
+          };
+        }
+      });
+    }
+    renderImmiCargoCalendar();
+  } catch (error) {
+    console.error("Lỗi khi tải dữ liệu IMMI CARGO:", error);
+    grid.innerHTML = "<p style='color:red; font-weight:bold;'>Không thể tải dữ liệu từ Google Sheets. Vui lòng kiểm tra lại cấu hình Web App!</p>";
+  }
+}
+
+function renderImmiCargoCalendar() {
+  const monthVal = document.getElementById('immiMonthPicker').value; 
+  if (!monthVal) return;
+  
+  const [year, month] = monthVal.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate(); 
+  
+  const grid = document.getElementById('immiDaysGrid');
+  grid.innerHTML = ""; 
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = String(day).padStart(2, '0');
+    const monthStr = String(month).padStart(2, '0');
+    const fullDateStr = `${year}-${monthStr}-${dayStr}`; 
+    
+    const status = immiSavedData[fullDateStr]?.status || "Chưa đối soát";
+    const checker = immiSavedData[fullDateStr]?.checker || "";
+    
+    let colorClass = "immi-chua-doi-soat";
+    if (status === "Đã đối soát") colorClass = "immi-da-doi-soat";
+    if (status === "Chờ xử lý") colorClass = "immi-cho-xu-ly";
+    
+    const dayCard = document.createElement('div');
+    dayCard.id = `card-${fullDateStr}`;
+    dayCard.className = `immi-day-card ${colorClass}`;
+    
+    dayCard.innerHTML = `
+      <div class="immi-day-title">Ngày ${dayStr}/${monthStr}</div>
+      <label class="immi-label">Tình trạng</label>
+      <select class="immi-select" onchange="updateImmiStatus('${fullDateStr}', this.value)">
+        <option value="Chưa đối soát" ${status === "Chưa đối soát" ? "selected" : ""}>Chưa đối soát</option>
+        <option value="Đã đối soát" ${status === "Đã đối soát" ? "selected" : ""}>Đã đối soát</option>
+        <option value="Chờ xử lý" ${status === "Chờ xử lý" ? "selected" : ""}>Chờ xử lý</option>
+      </select>
+      <label class="immi-label">Người đối soát</label>
+      <input type="text" class="immi-input" value="${checker}" placeholder="Nhập tên..." onchange="updateImmiChecker('${fullDateStr}', this.value)">
+    `;
+    grid.appendChild(dayCard);
+  }
+}
+
+function updateImmiStatus(dateStr, newStatus) {
+  const card = document.getElementById(`card-${dateStr}`);
+  card.classList.remove('immi-chua-doi-soat', 'immi-da-doi-soat', 'immi-cho-xu-ly');
+  
+  if (newStatus === "Đã đối soát") card.classList.add('immi-da-doi-soat');
+  else if (newStatus === "Chờ xử lý") card.classList.add('immi-cho-xu-ly');
+  else card.classList.add('immi-chua-doi-soat');
+  
+  if (!immiSavedData[dateStr]) immiSavedData[dateStr] = { status: "", checker: "" };
+  immiSavedData[dateStr].status = newStatus;
+  
+  saveImmiDayToServer(dateStr);
+}
+
+function updateImmiChecker(dateStr, newChecker) {
+  if (!immiSavedData[dateStr]) immiSavedData[dateStr] = { status: "Chưa đối soát", checker: "" };
+  immiSavedData[dateStr].checker = newChecker;
+  
+  saveImmiDayToServer(dateStr);
+}
+
+async function saveImmiDayToServer(dateStr) {
+  const dataPayload = {
+    action: "saveImmiCargo",
+    date: dateStr, // Truyền trực tiếp chuỗi dạng thuần yyyy-mm-dd để tránh bị tự động ép sang định dạng múi giờ UTC độc lập
+    status: immiSavedData[dateStr].status,
+    checker: immiSavedData[dateStr].checker
+  };
+  
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(dataPayload)
+    });
+    const result = await response.text();
+    if (result === "OK") {
+      console.log(`Đã tự động lưu thành công dữ liệu ngày ${dateStr}`);
+    }
+  } catch (error) {
+    console.error(`Lỗi đồng bộ dữ liệu ngày ${dateStr} lên Server:`, error);
+  }
+}
 </script>
 
 
@@ -3857,6 +4051,50 @@ output.push([
     0%{transform:rotate(0deg);}
     100%{transform:rotate(360deg);}
 }
+/* --- HỆ THỐNG STYLES IMMI CARGO MỚI --- */
+.nav-tabs { list-style: none; display: flex; padding: 0; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+.nav-tabs li { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -2px; font-weight: bold; }
+.nav-tabs li.active { background: #fff; border-color: #ddd #ddd #fff; border-radius: 4px 4px 0 0; color: #007bff; }
+.tab-content { display: none; }
+.tab-content.active-tab { display: block; }
+
+.immi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+.immi-day-card { border: 1px solid #ccc; border-radius: 6px; padding: 10px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.immi-day-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.immi-label { font-size: 0.85em; color: #555; margin-top: 6px; display: block; font-weight: 650; }
+.immi-select, .immi-input { width: 100%; padding: 4px; margin-top: 2px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9em; background: #fff; }
+
+.immi-chua-doi-soat { background-color: #f9f9f9; color: #333; }
+.immi-da-doi-soat { background-color: #28a745 !important; color: white !important; }
+.immi-da-doi-soat .immi-label { color: #eee !important; }
+.immi-cho-xu-ly { background-color: #dc3545 !important; color: white !important; }
+.immi-cho-xu-ly .immi-label { color: #eee !important; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
+/* --- HỆ THỐNG STYLES IMMI CARGO MỚI --- */
+.nav-tabs { list-style: none; display: flex; padding: 0; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+.nav-tabs li { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -2px; font-weight: bold; }
+.nav-tabs li.active { background: #fff; border-color: #ddd #ddd #fff; border-radius: 4px 4px 0 0; color: #007bff; }
+.tab-content { display: none; }
+.tab-content.active-tab { display: block; }
+
+.immi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+.immi-day-card { border: 1px solid #ccc; border-radius: 6px; padding: 10px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.immi-day-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.immi-label { font-size: 0.85em; color: #555; margin-top: 6px; display: block; font-weight: 650; }
+.immi-select, .immi-input { width: 100%; padding: 4px; margin-top: 2px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9em; background: #fff; }
+
+.immi-chua-doi-soat { background-color: #f9f9f9; color: #333; }
+.immi-da-doi-soat { background-color: #28a745 !important; color: white !important; }
+.immi-da-doi-soat .immi-label { color: #eee !important; }
+.immi-cho-xu-ly { background-color: #dc3545 !important; color: white !important; }
+.immi-cho-xu-ly .immi-label { color: #eee !important; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
 </style>
 <div id="loadingExport" class="loading-overlay">
     <div class="loading-box">
