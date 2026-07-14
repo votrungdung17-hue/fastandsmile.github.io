@@ -1149,7 +1149,9 @@ input.uppercase { text-transform: uppercase; }
           const arr  = flight.arr  || "";
           const dep  = flight.dep  || "";
           const rep  = flight.rep  || "";
- 	const date = (flight.date || "").slice(0, 10);
+ 	// Thay thế dòng date cũ bằng 2 dòng này:
+const UTCDate = new Date(flight.date);
+const date = flight.date ? new Date(UTCDate.getTime() + (7 * 60 * 60 * 1000)).toISOString().slice(0, 10) : "";
 
           resultText += `✈️ ${arr} | ${dep} | ${rep} | ${date}\n`;
         });
