@@ -1128,51 +1128,43 @@ input.uppercase { text-transform: uppercase; }
   document.getElementById("fhtOutput").textContent = "";
   document.getElementById("occOutput").textContent = "";
   const resultDiv = document.getElementById("lomoResult");
-  resultDiv.innerHTML = "⏳ Đang kiểm tra toàn bộ dữ liệu...";
+  resultDiv.innerHTML = "⏳ Đang kiểm tra dữ liệu siêu nhanh...";
 
-  fetch(API + "?all=true&t=" + Date.now()) // 🔥 gọi ALL DATA
+  // 🔥 2. Gọi đúng nhánh ?type=lomo đã tối ưu trên Apps Script của bạn
+  fetch(API + "?type=lomo&t=" + Date.now()) 
     .then(res => res.json())
     .then(res => {
+      // Đọc mảng data và tổng số lượng lỗi từ cấu trúc { data: [...], total: X }
+      const errorFlights = res.data || [];
+      const totalErrors = res.total !== undefined ? res.total : errorFlights.length;
 
-      const data = res.data;
-      let result = "";
-      let count = 0;
+      let resultText = "";
 
-      data.slice(1).forEach(row => {
-
-        const lotus = String(row[26]).toUpperCase();
-        const moplus = String(row[27]).toUpperCase();
-
-        // ❗ check FALSE
-        if(lotus !== "TRUE" || moplus !== "TRUE"){
-
-          const arr = row[3] || "";
-          const dep = row[9] || "";
-          const rep = row[34] || "";
-          const date = row[1] || "";
-
-          result += `✈️ ${arr} | ${dep} | ${rep} | ${date}\n`;
-          count++;
-        }
-
-      });
-
-      if(count === 0){
+      if (totalErrors === 0) {
         resultDiv.innerHTML = "<b style='color:green'>✔ Không có chuyến lỗi</b>";
       } else {
+        // Duyệt qua dữ liệu gọn nhẹ đã lọc từ Server
+        errorFlights.forEach(flight => {
+          // Lấy đúng các key (arr, dep, rep, date) bạn đã cấu hình trong Apps Script
+          const arr  = flight.arr  || "";
+          const dep  = flight.dep  || "";
+          const rep  = flight.rep  || "";
+ 	const date = (flight.date || "").slice(0, 10);
+
+          resultText += `✈️ ${arr} | ${dep} | ${rep} | ${date}\n`;
+        });
+
         resultDiv.innerHTML = `
-          <b style="color:red">⚠ ${count} chuyến lỗi toàn hệ thống</b><br>
-          <pre>${result}</pre>
+          <b style="color:red">⚠ ${totalErrors} chuyến lỗi toàn hệ thống</b><br>
+          <pre style="background: #fff5f5; padding: 10px; border: 1px solid #feb2b2; border-radius: 4px; margin-top: 5px; font-family: monospace; white-space: pre-wrap; word-break: break-all;">${resultText}</pre>
         `;
       }
-
     })
     .catch(err => {
       resultDiv.innerHTML = "❌ Lỗi gọi API";
       console.error(err);
     });
-
-});
+}); // <--- Kết thúc sự kiện click nút LOMO hợp pháp
   let selectedRep = "";
 
   // xử ly sự kiện chọn đại diện
