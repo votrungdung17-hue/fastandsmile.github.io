@@ -508,6 +508,102 @@ input.uppercase { text-transform: uppercase; }
 .tab-content.active{
   display:block;
 }
+/* Nền tối phía sau Popup */
+.export-modal {
+  display: none; 
+  position: fixed; 
+  z-index: 9999; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  background-color: rgba(0, 0, 0, 0.5); 
+  backdrop-filter: blur(3px);
+}
+
+/* Khung nội dung chính của Popup */
+.export-modal-content {
+  background-color: #fff;
+  margin: 15% auto; 
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: animatetop 0.3s;
+}
+
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
+/* Header */
+.export-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+.export-modal-header h3 { margin: 0; font-size: 16px; color: #333; }
+.close-btn { font-size: 24px; cursor: pointer; color: #aaa; }
+.close-btn:hover { color: #000; }
+
+/* Body */
+.export-modal-body {
+  padding: 20px 0;
+}
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.date-input-group label {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #555;
+}
+.date-input-group input[type="date"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Footer & Buttons */
+.export-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+.export-modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-cancel { background-color: #e0e0e0; color: #333; }
+.btn-cancel:hover { background-color: #d5d5d5; }
+.btn-confirm { background-color: #28a745; color: white; }
+.btn-confirm:hover { background-color: #218838; }
+/* Hiệu ứng vòng xoay Spinner */
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db; /* Màu xanh chủ đạo */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -526,6 +622,11 @@ input.uppercase { text-transform: uppercase; }
   🔒 LOG OUT
 </button>
 <body>
+<!-- Bộ phận hiển thị Loading (Ẩn mặc định bằng CSS) -->
+<div id="loadingOverlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px;">
+  <div class="loader"></div>
+  <p style="margin-top: 15px; font-weight: bold; color: #333;">⏳ Hệ thống đang xử lý và tải file, vui lòng đợi trong giây lát...</p>
+</div>
 
 <!-- POPUP MODAL (Bao gồm lớp nền mờ và hộp thoại chính) -->
 <div id="immiCargoContainer" style="display: none; position: fixed; top: 80px; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
@@ -766,6 +867,77 @@ input.uppercase { text-transform: uppercase; }
           onclick="showTab('rosterTab', event)">
     ROSTER
   </button>
+<button class="tab-btn"
+        onclick="showTab('configTab', event); loadConfigMap();">
+  CONFIG
+</button>
+</div>
+<div id="configTab" class="tab-content">
+
+  <h3>⚙️ CONFIG MAP</h3>
+
+<body>
+
+<label>ACREG</label><br>
+<input type="text" id="acreg"><br><br>
+
+<label>CONFIG</label><br>
+<textarea id="configInput" rows="8" cols="60"></textarea><br><br>
+
+<!-- Nút bấm gọi hàm update() -->
+<button onclick="upload()">Update</button>
+
+<p id="msg"></p>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; 
+
+// Hàm xử lý khi người dùng bấm nút Update
+function upload() {
+  let acreg = document.getElementById("acreg").value.trim().toUpperCase();
+  let config = document.getElementById("configInput").value.trim();
+
+  // Kiểm tra nếu chưa nhập đủ thông tin thì cảnh báo và dừng lại
+  if (acreg === "" || config === "") {
+    document.getElementById("msg").innerHTML = "⚠️ Vui lòng nhập đầy đủ ACREG và CONFIG!";
+    return; 
+  }
+
+  // Thông báo trạng thái đang gửi dữ liệu
+  document.getElementById("msg").innerHTML = "⏳ Đang lưu dữ liệu...";
+
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    mode: "no-cors", 
+    body: JSON.stringify({
+      action: "upload",
+      acreg: acreg,
+      config: config
+    })
+  })
+  .then(() => {
+    document.getElementById("msg").innerHTML = "✅ Đã cập nhật thành công!";
+    if(typeof loadConfigMap === "function") loadConfigMap();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("msg").innerHTML = "❌ Lỗi khi đồng bộ dữ liệu.";
+  });
+}
+</script>
+
+</body>
+
+  <table id="configTable">
+    <thead>
+      <tr>
+        <th>A/C REG</th>
+        <th>CONFIG</th>
+       </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
 </div>
 
@@ -796,6 +968,54 @@ input.uppercase { text-transform: uppercase; }
 <button type="button" id="ganttBtn" onclick="showGanttPopup()">
   📊 GANTT
 </button>
+<button id="importACV">📊 IMPORT ACV</button>
+<input type="file" id="acvFile" style="display: none;" accept=".xlsx, .xls">
+<div id="loading" style="
+  display:none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+">
+  <div style="
+    background:white;
+    padding:20px 30px;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+  ">
+    ⏳ Processing...
+  </div>
+</div>
+<button type="button" id="exportAcvBtn" onclick="openExportPopup()">
+  📤 EXPORT ACV
+</button>
+<!-- POPUP MODAL CHỌN NGÀY -->
+<div id="exportModal" class="export-modal">
+  <div class="export-modal-content">
+    <div class="export-modal-header">
+      <h3>📅 Chọn khoảng ngày xuất dữ liệu ACV</h3>
+      <span class="close-btn" onclick="closeExportPopup()">&times;</span>
+    </div>
+    <div class="export-modal-body">
+      <div class="date-input-group">
+        <label for="fromDate">Từ ngày:</label>
+        <input type="date" id="fromDate">
+      </div>
+      <div class="date-input-group">
+        <label for="toDate">Đến ngày:</label>
+        <input type="date" id="toDate">
+      </div>
+    </div>
+    <div class="export-modal-footer">
+      <button type="button" class="btn-cancel" onclick="closeExportPopup()">Hủy bỏ</button>
+      <button type="button" id="confirmExportBtn" class="btn-confirm" onclick="processExportToACV()">🚀 Xác nhận xuất Excel</button>
+    </div>
+  </div>
+</div>
 <button type="button" onclick="showImmiPopup()">
     👮‍♂️ IMMI
 </button>
@@ -1118,8 +1338,53 @@ input.uppercase { text-transform: uppercase; }
     <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/SANG.jpg" class="user" data-name="Lý Minh Sang" data-phone="0376290292">
     <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/NGUYEN.jpg" class="user" data-name="Từ Đức Nguyên" data-phone="0949999406">
   </div>
-</div>
-  
+ </div>
+
+
+ <script>
+
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+async function loadConfigMap() {
+
+  try {
+
+    const response = await fetch(
+      GAS_URL + "?action=loadConfigMap"
+    );
+
+    const data = await response.json();
+
+    const tbody =
+      document.querySelector("#configTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.slice(1).forEach(row => {
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td contenteditable="true">${row[0] || ""}</td>
+        <td contenteditable="true">${row[1] || ""}</td>
+            </td>
+      `;
+
+      tbody.appendChild(tr);
+
+    });
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Không tải được CONFIG_MAP");
+
+  }
+
+}
+
+</script>
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
       // 👉 CLEAR toàn bộ output khác
@@ -3575,6 +3840,197 @@ output.push([
     }
 }
 
+</script>
+<script>
+////// import acv
+
+// 1. Khi bấm nút Import, ta kích hoạt cái input file ẩn
+document.getElementById("importACV").onclick = function () {
+  document.getElementById("acvFile").click();
+};
+
+// 2. Khi người dùng đã chọn file xong (cửa sổ chọn file đóng lại)
+document.getElementById("acvFile").onchange = function (event) {
+  const file = event.target.files[0];
+
+  if (!file) return; // Nếu mở ra mà bấm Cancel thì thôi
+
+  const loading = document.getElementById("loading");
+  const btn = document.getElementById("importACV");
+
+  // Hiện loading và khóa nút bấm
+  loading.style.display = "flex";
+  btn.disabled = true;
+
+  const reader = new FileReader();
+
+  reader.onerror = function (err) {
+    console.error("❌ FileReader lỗi:", err);
+    finish(false);
+  };
+
+  reader.onload = function (e) {
+    let jsonData;
+
+    // 👉 BƯỚC 1: đọc Excel
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      console.log("✅ Đọc Excel OK");
+    } catch (err) {
+      console.error("❌ Lỗi đọc Excel:", err);
+      finish(false);
+      return;
+    }
+
+    // 👉 BƯỚC 2: gửi API
+    fetch("https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec", {
+      method: "POST",
+      mode: "no-cors",
+      cache: "no-cache",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "importACV",
+        data: jsonData
+      })
+    })
+    .then(() => {
+      finish(true);
+    })
+    .catch(err => {
+      console.error("Fetch error:", err);
+      finish(false);
+    })
+    .finally(() => {
+      // Quan trọng: Reset input file để lần sau chọn lại chính file đó vẫn ăn event 'onchange'
+      event.target.value = "";
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
+
+  function finish(success) {
+    loading.style.display = "none";
+    btn.disabled = false;
+    if (success) {
+      alert("✅ Import ACV thành công!");
+    } else {
+      alert("❌ Lỗi import!");
+    }
+  }
+};
+</script>
+<script>
+// Hàm mở popup chọn ngày
+function openExportPopup() {
+  const modal = document.getElementById("exportModal");
+  
+  // Sửa lỗi cú pháp nhỏ ở dòng dưới (modal.display là sai, phải là modal.style.display)
+  modal.style.display = "block"; 
+  
+  // Tự động điền ngày hôm nay vào các ô nhập nếu chưa có dữ liệu ban đầu
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (!document.getElementById("fromDate").value) {
+    document.getElementById("fromDate").value = todayStr;
+  }
+  if (!document.getElementById("toDate").value) {
+    document.getElementById("toDate").value = todayStr;
+  }
+}
+
+// Hàm đóng popup
+function closeExportPopup() {
+  // Chỉ cho phép đóng nếu KHÔNG trong trạng thái đang tải dữ liệu
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  if (loadingOverlay && loadingOverlay.style.display === "flex") {
+    return; // Đang tải thì không cho đóng
+  }
+  document.getElementById("exportModal").style.display = "none";
+}
+
+// Đóng popup nếu người dùng click ra vùng trống ngoài popup
+window.onclick = function(event) {
+  const modal = document.getElementById("exportModal");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  
+  // Chỉ đóng khi click ra ngoài VÀ hệ thống không trong trạng thái đang tải
+  if (event.target == modal && (!loadingOverlay || loadingOverlay.style.display !== "flex")) {
+    modal.style.display = "none";
+  }
+}
+
+async function processExportToACV() {
+  const fromDateVal = document.getElementById("fromDate").value;
+  const toDateVal = document.getElementById("toDate").value;
+
+  if (!fromDateVal || !toDateVal) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  const confirmBtn = document.getElementById("confirmExportBtn");
+  const cancelBtn = document.querySelector("#exportModal .close-btn") || {}; // Nút X hoặc nút Hủy của bạn
+  const originalText = confirmBtn.innerHTML;
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  
+  // 1. BẬT TRẠNG THÁI CHỜ
+  confirmBtn.innerHTML = "⏳ Đang tải...";
+  confirmBtn.disabled = true;
+  if (cancelBtn) cancelBtn.disabled = true; // Khóa luôn nút Hủy nếu có
+  
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "flex"; // Hiển thị lớp phủ xoay tròn
+  }
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  const newHeaders = [
+    "Ngày", "Tháng", "Năm", "Hãng", "Sector", "Số hiệu chuyến bay", "Loại tàu bay", "STD (Local time)", "Cap", "Pax"
+  ];
+
+  try {
+    // Gọi API truyền kèm tham số ngày lọc lên Apps Script
+    const response = await fetch(`${API_URL}?action=read&sheet=ACV&fromDate=${fromDateVal}&toDate=${toDateVal}`);
+    if (!response.ok) throw new Error("Không thể kết nối đến máy chủ!");
+    
+    const exportRows = await response.json();
+    
+    if (exportRows.error) {
+      alert(`Lỗi hệ thống: ${exportRows.error} ❌`);
+      return;
+    }
+
+    if (!exportRows || exportRows.length === 0) {
+      alert(`Không tìm thấy chuyến đi nào từ ngày ${fromDateVal} đến ngày ${toDateVal}! 🔍`);
+      return;
+    }
+
+    // Xuất dữ liệu thẳng ra file Excel bằng thư viện SheetJS
+    const worksheet = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Chuyến đi");
+
+    XLSX.writeFile(workbook, `ChuyenDi_${fromDateVal}_den_${toDateVal}.xlsx`);
+    
+    // Tắt loading và đóng popup khi thành công
+    if (loadingOverlay) loadingOverlay.style.display = "none";
+    document.getElementById("exportModal").style.display = "none";
+
+  } catch (error) {
+    console.error("Lỗi:", error);
+    alert("Có lỗi xảy ra khi xuất file! ❌");
+  } finally {
+    // 2. TẮT TRẠNG THÁI CHỜ (Luôn chạy dù thành công hay thất bại)
+    confirmBtn.innerHTML = originalText;
+    confirmBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+    
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "none";
+    }
+  }
+}
 </script>
 <script>
 // URL ứng dụng Google Apps Script Web App của bạn
