@@ -2120,7 +2120,10 @@ function generateMVA(type){
     const acReg     = (row[2]||"").toUpperCase();
 
     const landingObj = convertLocalMinus7(formatTimeForInput(row[7]), dateStr);
-    const ataObj     = convertLocalMinus7(formatTimeForInput(row[8]), dateStr);
+    const ataObj = {
+    time: normalizeTime(formatTimeForInput(row[8])).replace(":", ""),
+    day: dateStr ? dateStr.split("-")[2] : ""
+};
 
     const day = landingObj.day || (dateStr ? dateStr.split("-")[2] : "");
 
@@ -2134,8 +2137,7 @@ function generateMVA(type){
 
     const text = `MVT
 ${arrFlight}/${day}.${acReg}.PQC
-AA${landingObj.time}/${ataObj.time}
-
+CHOCK-ON : ${ataObj.time}
 PRE-BOARDING : ${preBoard}`;
 
     document.getElementById("occOutput").textContent = "";
@@ -2143,6 +2145,26 @@ PRE-BOARDING : ${preBoard}`;
     document.getElementById("fhtOutput").textContent = "";
     document.getElementById("mvaOutput").textContent = text;
     document.getElementById("lomoResult").innerHTML = "";
+
+    // Copy nội dung + đổi trạng thái nút
+    navigator.clipboard.writeText(text).then(() => {
+
+        const mvaBtn = document.getElementById("mvaBtn");
+
+        const originalText = mvaBtn.innerText;
+        const originalBg = mvaBtn.style.background;
+
+        mvaBtn.innerText = "✓ COPIED!";
+        mvaBtn.style.background = "#28a745";
+
+        setTimeout(() => {
+            mvaBtn.innerText = originalText;
+            mvaBtn.style.background = originalBg;
+        }, 1500);
+
+    }).catch(err => {
+        console.error("Copy thất bại:", err);
+    });
 }
 
 // Gắn sự kiện cho nút MVA
@@ -2250,7 +2272,7 @@ function checkMVAEnable(){
 
   const mvaBtn = document.getElementById("mvaBtn");
 
-  if(landingVal && ataVal){
+  if(ataVal){
     mvaBtn.disabled = false;
   } else {
     mvaBtn.disabled = true;
