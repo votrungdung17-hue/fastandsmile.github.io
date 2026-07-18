@@ -152,10 +152,6 @@ input.uppercase { text-transform: uppercase; }
 .selected-row {
   background-color: #d3d3d3; /* màu xám nhạt */
 }
-#mvaBtn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
 .cargo-table-wrapper{
   max-height: 500px;   /* khoảng 20 dòng */
   overflow-y: auto;
@@ -603,6 +599,22 @@ input.uppercase { text-transform: uppercase; }
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+.popup-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.popup-box{
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    text-align:center;
 }
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
@@ -2077,33 +2089,64 @@ function convertLocalMinus7(timeStr, dateStr){
 
 ////////
 }
-function showMVA(row){
-  if(!row) return;
+function openMVAPopup(){
+    if(!selectedRowData) return;
+    document.getElementById("mvaPopup").style.display="flex";
+}
 
-  const arrFlight = (row[3]||"").toUpperCase();   // ARR FLIGHT
-  const dateStr   = formatDateForInput(row[1]);   // DATE (yyyy-mm-dd)
-  const acReg     = (row[2]||"").toUpperCase();   // A/C REG
+function closeMVAPopup(){
+    document.getElementById("mvaPopup").style.display="none";
+}
+function addMinutes(timeStr, mins){
+    if(!timeStr) return "";
 
-  const landingObj = convertLocalMinus7(formatTimeForInput(row[7]), dateStr);
-  const ataObj     = convertLocalMinus7(formatTimeForInput(row[8]), dateStr);
+    const [h,m] = normalizeTime(timeStr).split(":").map(Number);
 
-  // Dùng ngày sau khi trừ 7 tiếng (có thể khác ngày gốc)
-  const day = landingObj.day || (dateStr ? dateStr.split("-")[2] : "");
+    const d = new Date();
+    d.setHours(h,m+mins,0,0);
 
-  const text = `MVT
+    return String(d.getHours()).padStart(2,"0") +
+           String(d.getMinutes()).padStart(2,"0");
+}
+function generateMVA(type){
+
+    closeMVAPopup();
+
+    const row = selectedRowData;
+    if(!row) return;
+
+    const arrFlight = (row[3]||"").toUpperCase();
+    const dateStr   = formatDateForInput(row[1]);
+    const acReg     = (row[2]||"").toUpperCase();
+
+    const landingObj = convertLocalMinus7(formatTimeForInput(row[7]), dateStr);
+    const ataObj     = convertLocalMinus7(formatTimeForInput(row[8]), dateStr);
+
+    const day = landingObj.day || (dateStr ? dateStr.split("-")[2] : "");
+
+    // ATA LOCAL (không trừ 7)
+    const ataLocal = normalizeTime(formatTimeForInput(row[8]));
+
+    const preBoard =
+        type === "gate"
+            ? addMinutes(ataLocal,15)
+            : addMinutes(ataLocal,10);
+
+    const text = `MVT
 ${arrFlight}/${day}.${acReg}.PQC
-AA${landingObj.time}/${ataObj.time}`;
-  document.getElementById("occOutput").textContent = "";
-  document.getElementById("mvdOutput").textContent = "";
-  document.getElementById("fhtOutput").textContent = "";
-  document.getElementById("mvaOutput").textContent = text;
-  document.getElementById("lomoResult").innerHTML = "";
+AA${landingObj.time}/${ataObj.time}
+
+PRE-BOARDING : ${preBoard}`;
+
+    document.getElementById("occOutput").textContent = "";
+    document.getElementById("mvdOutput").textContent = "";
+    document.getElementById("fhtOutput").textContent = "";
+    document.getElementById("mvaOutput").textContent = text;
+    document.getElementById("lomoResult").innerHTML = "";
 }
 
 // Gắn sự kiện cho nút MVA
-document.getElementById("mvaBtn").addEventListener("click", ()=>{
-  showMVA(selectedRowData);
-});
+document.getElementById("mvaBtn").addEventListener("click", openMVAPopup);
 /// dieu chinh lai format gio
 function normalizeTime(t){
   if(!t) return "";
@@ -2207,7 +2250,7 @@ function checkMVAEnable(){
 
   const mvaBtn = document.getElementById("mvaBtn");
 
-  if(landingVal && ataVal && coorVal && wnbVal){
+  if(landingVal && ataVal){
     mvaBtn.disabled = false;
   } else {
     mvaBtn.disabled = true;
@@ -4565,6 +4608,25 @@ async function saveImmiDayToServer(dateStr) {
         <div class="spinner"></div>
         <div>Đang xuất dữ liệu IMMI...</div>
     </div>
+</div>
+<div id="mvaPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h3>Chọn vị trí đỗ</h3>
+
+    <button class="btn btn-success" onclick="generateMVA('gate')">
+      🛬 Vào ống
+    </button>
+
+    <button class="btn btn-danger" onclick="generateMVA('remote')">
+      🚍 Ra bãi
+    </button>
+
+    <br><br>
+
+    <button class="btn btn-secondary" onclick="closeMVAPopup()">
+      Hủy
+    </button>
+  </div>
 </div>
 </body>
 
