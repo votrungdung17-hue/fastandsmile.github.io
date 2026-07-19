@@ -616,6 +616,27 @@ input.uppercase { text-transform: uppercase; }
     border-radius:10px;
     text-align:center;
 }
+.spinner{
+    display:inline-block;
+    width:16px;
+    height:16px;
+    margin-right:8px;
+    border:2px solid rgba(255,255,255,.35);
+    border-top:2px solid #fff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    vertical-align:middle;
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+button:disabled{
+    cursor:not-allowed;
+    opacity:.75;
+}
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1014,12 +1035,12 @@ function upload() {
     </div>
     <div class="export-modal-body">
       <div class="date-input-group">
-        <label for="fromDate">Từ ngày:</label>
-        <input type="date" id="fromDate">
+        <label for="startDate">Từ ngày:</label>
+        <input type="date" id="startDate">
       </div>
       <div class="date-input-group">
-        <label for="toDate">Đến ngày:</label>
-        <input type="date" id="toDate">
+        <label for="endDate">Đến ngày:</label>
+        <input type="date" id="endDate">
       </div>
     </div>
     <div class="export-modal-footer">
@@ -2508,30 +2529,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnClose = document.getElementById("closePopup");
   const btnConfirm = document.getElementById("confirmExport");
 
+  const defaultBtnHTML = "🚀 Xác nhận xuất Excel";
+
   btnExport.onclick = () => {
     popup.style.display = "flex";
   };
 
   btnClose.onclick = () => {
+    if (btnConfirm.disabled) return; // Không cho đóng khi đang export
     popup.style.display = "none";
   };
 
   btnConfirm.onclick = async () => {
+
     const from = document.getElementById("fromDate").value;
     const to   = document.getElementById("toDate").value;
 
-    if(!from || !to){
+    if (!from || !to) {
       alert("Chọn đủ From - To");
       return;
     }
 
+    // Hiển thị trạng thái đang xử lý
+    btnConfirm.disabled = true;
+    btnConfirm.innerHTML = `<span class="spinner"></span> Đang xuất dữ liệu...`;
+
     let url = API + `?from=${from}&to=${to}&t=${Date.now()}`;
 
-    try{
+    try {
+
       const res = await fetch(url);
       const json = await res.json();
 
-      if(!json.data || json.data.length <= 1){
+      if (!json.data || json.data.length <= 1) {
         alert("Không có dữ liệu");
         return;
       }
@@ -2563,34 +2593,43 @@ document.addEventListener("DOMContentLoaded", () => {
         TIME2: row[22],
         COOR: row[23],
         WB: row[24],
-       CONFIG: row[25],
+        CONFIG: row[25],
         LOTUS: row[26],
-       MOPLUS: row[27],
-       DETAILS: row[28],
-       ADUL: row[29],
-      CHD: row[30],
-      INF: row[31],
-      TOF: row[32],
-      PAYLOAD: row[33],
-        REP: row[34],
+        MOPLUS: row[27],
+        DETAILS: row[28],
+        ADUL: row[29],
+        CHD: row[30],
+        INF: row[31],
+        TOF: row[32],
+        PAYLOAD: row[33],
+        REP: row[34]
       }));
 
       const ws = XLSX.utils.json_to_sheet(exportData);
       const wb = XLSX.utils.book_new();
+
       XLSX.utils.book_append_sheet(wb, ws, "DATA");
 
       XLSX.writeFile(wb, `FLIGHT_${from}_TO_${to}.xlsx`);
 
       popup.style.display = "none";
 
-    } catch(err){
-      alert("Lỗi export: " + err.message);
+    } catch (err) {
+
       console.error(err);
+      alert("Lỗi export: " + err.message);
+
+    } finally {
+
+      // Khôi phục trạng thái nút
+      btnConfirm.disabled = false;
+      btnConfirm.innerHTML = defaultBtnHTML;
+
     }
+
   };
 
 });
-//// EXPORT
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -4002,11 +4041,11 @@ function openExportPopup() {
   
   // Tự động điền ngày hôm nay vào các ô nhập nếu chưa có dữ liệu ban đầu
   const todayStr = new Date().toISOString().slice(0, 10);
-  if (!document.getElementById("fromDate").value) {
-    document.getElementById("fromDate").value = todayStr;
+  if (!document.getElementById("startDate").value) {
+    document.getElementById("startDate").value = todayStr;
   }
-  if (!document.getElementById("toDate").value) {
-    document.getElementById("toDate").value = todayStr;
+  if (!document.getElementById("endDate").value) {
+    document.getElementById("endDate").value = todayStr;
   }
 }
 
@@ -4032,8 +4071,8 @@ window.onclick = function(event) {
 }
 
 async function processExportToACV() {
-  const fromDateVal = document.getElementById("fromDate").value;
-  const toDateVal = document.getElementById("toDate").value;
+  const fromDateVal = document.getElementById("startDate").value;
+  const toDateVal = document.getElementById("endDate").value;
 
   if (!fromDateVal || !toDateVal) {
     alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
