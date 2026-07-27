@@ -4373,26 +4373,38 @@ async function processExportToACV() {
   }
 
   const confirmBtn = document.getElementById("confirmExportBtn");
-  const cancelBtn = document.querySelector("#exportModal .close-btn") || {}; // Nút X hoặc nút Hủy của bạn
+  const cancelBtn = document.querySelector("#exportModal .close-btn") || {};
   const originalText = confirmBtn.innerHTML;
   const loadingOverlay = document.getElementById("loadingOverlay");
   
   // 1. BẬT TRẠNG THÁI CHỜ
   confirmBtn.innerHTML = "⏳ Đang tải...";
   confirmBtn.disabled = true;
-  if (cancelBtn) cancelBtn.disabled = true; // Khóa luôn nút Hủy nếu có
+  if (cancelBtn) cancelBtn.disabled = true;
   
   if (loadingOverlay) {
-    loadingOverlay.style.display = "flex"; // Hiển thị lớp phủ xoay tròn
+    loadingOverlay.style.display = "flex";
   }
 
   const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  // 🎯 CẬP NHẬT: Thêm tiêu đề cột "Pax đến" và "Link Flight No" vào newHeaders
   const newHeaders = [
-    "Ngày", "Tháng", "Năm", "Hãng", "Sector", "Số hiệu chuyến bay", "Loại tàu bay", "STD (Local time)", "Cap", "Pax"
+    "Ngày", 
+    "Tháng", 
+    "Năm", 
+    "Hãng", 
+    "Sector", 
+    "Số hiệu chuyến bay", 
+    "Loại tàu bay", 
+    "STD (Local time)", 
+    "Cap", 
+    "Pax đi",
+    "Pax đến",
+    "LINKFLIGHTNO" // Cột mới lấy từ cột CL
   ];
 
   try {
-    // Gọi API truyền kèm tham số ngày lọc lên Apps Script
     const response = await fetch(`${API_URL}?action=read&sheet=ACV&fromDate=${fromDateVal}&toDate=${toDateVal}`);
     if (!response.ok) throw new Error("Không thể kết nối đến máy chủ!");
     
@@ -4408,14 +4420,13 @@ async function processExportToACV() {
       return;
     }
 
-    // Xuất dữ liệu thẳng ra file Excel bằng thư viện SheetJS
+    // Xuất dữ liệu ra file Excel với đúng thứ tự cột trong newHeaders
     const worksheet = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Chuyến đi");
 
     XLSX.writeFile(workbook, `ChuyenDi_${fromDateVal}_den_${toDateVal}.xlsx`);
     
-    // Tắt loading và đóng popup khi thành công
     if (loadingOverlay) loadingOverlay.style.display = "none";
     document.getElementById("exportModal").style.display = "none";
 
@@ -4423,7 +4434,7 @@ async function processExportToACV() {
     console.error("Lỗi:", error);
     alert("Có lỗi xảy ra khi xuất file! ❌");
   } finally {
-    // 2. TẮT TRẠNG THÁI CHỜ (Luôn chạy dù thành công hay thất bại)
+    // 2. TẮT TRẠNG THÁI CHỜ
     confirmBtn.innerHTML = originalText;
     confirmBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
