@@ -1146,6 +1146,59 @@ function upload() {
     </div>
   </div>
 </div>
+<!-- THÊM NÚT PBB NÀY NGAY BÊN CẠNH -->
+<button type="button" onclick="showPbbPopup()" style="background:#007bff; color:white;">
+    📊 PBB
+</button>
+
+<!-- THÊM POPUP THỐNG KÊ PBB -->
+<div id="pbbPopup" class="popup">
+  <div class="popup-box" style="width: 380px;">
+    <h3>📊 TỈ LỆ CẬP ỐNG LỒNG</h3>
+    
+    <div style="text-align: left; margin-bottom: 15px;">
+      <label style="font-weight: bold; display: block; margin-top: 5px;">Từ ngày:</label>
+      <input type="date" id="pbbFromDate" style="width: 100%; box-sizing: border-box;">
+      
+      <label style="font-weight: bold; display: block; margin-top: 10px;">Đến ngày:</label>
+      <input type="date" id="pbbToDate" style="width: 100%; box-sizing: border-box;">
+    </div>
+
+    <div class="popup-actions" style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button type="button" onclick="thongKePBB()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        🚀 Báo cáo
+      </button>
+      <button type="button" onclick="closePbbPopup()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+        ❌ Đóng
+      </button>
+    </div>
+  </div>
+</div
+
+<!-- POPUP LOADING (BÁNH XE QUAY VÒNG) -->
+<div id="pbbLoadingPopup" class="popup" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+  <div class="popup-box" style="width: 280px; text-align: center; padding: 25px 20px;">
+    <div class="spinner" style="margin: 0 auto 15px auto;"></div>
+    <h4 style="margin: 0; color: #333; font-size: 15px; font-weight: 600;">Đang xử lý dữ liệu...</h4>
+    <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">Vui lòng chờ trong giây lát</p>
+  </div>
+</div>
+
+<style>
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
 <button type="button" onclick="showImmiPopup()">
     👮‍♂️ IMMI
 </button>
@@ -4442,6 +4495,102 @@ async function processExportToACV() {
     if (loadingOverlay) {
       loadingOverlay.style.display = "none";
     }
+  }
+}
+</script>
+<script>
+// Quản lý hiển thị Popup PBB
+function showPbbPopup() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("pbbFromDate").value = today;
+  document.getElementById("pbbToDate").value = today;
+  document.getElementById("pbbPopup").style.display = "flex";
+}
+
+function closePbbPopup() {
+  document.getElementById("pbbPopup").style.display = "none";
+}
+
+function showLoading(show) {
+  const loading = document.getElementById("pbbLoadingPopup");
+  if (loading) {
+    loading.style.display = show ? "flex" : "none";
+  }
+}
+
+// Hàm tính toán và xuất kết quả PBB
+async function thongKePBB() {
+  const fromDate = document.getElementById("pbbFromDate").value;
+  const toDate = document.getElementById("pbbToDate").value;
+
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ Từ ngày và Đến ngày!");
+    return;
+  }
+
+  // Đóng popup chọn ngày & mở popup bánh xe quay vòng
+  closePbbPopup();
+  showLoading(true);
+
+  // Đổi định dạng hiển thị ngày DD/MM/YY
+  const formatDateStr = (dStr) => {
+    const [y, m, d] = dStr.split("-");
+    return `${d}/${m}/${y.slice(2)}`;
+  };
+
+  try {
+    const url = `${API}?action=getPbbStats&from=${fromDate}&to=${toDate}&t=${Date.now()}`;
+    const res = await fetch(url);
+    const result = await res.json();
+
+    if (result.status !== "success") {
+      alert("Lỗi tải dữ liệu: " + (result.message || ""));
+      return;
+    }
+
+    const data = result.data;
+    
+    // Tạo chuỗi báo cáo chuẩn theo mẫu
+    let text = `TỈ LỆ CẬP ỐNG LỒNG\n`;
+    text += `FROM ${formatDateStr(fromDate)} TO ${formatDateStr(toDate)}\n`;
+    text += `AIRLINES  CB  ỐNG  TỈ LỆ    \n`;
+
+    let totalCB = 0;
+    let totalOng = 0;
+
+    data.forEach(item => {
+      const code = item.code.padEnd(10, ' ');
+      const cb = item.cb.toString().padEnd(4, ' ');
+      const ong = item.ong.toString().padEnd(5, ' ');
+      const rate = item.rate + "%";
+      
+      text += `${code}${cb}${ong}${rate}\n`;
+      totalCB += item.cb;
+      totalOng += item.ong;
+    });
+
+    // In tổng nếu có dữ liệu
+    if (totalCB > 0) {
+      const totalRate = ((totalOng / totalCB) * 100).toFixed(2) + "%";
+      text += `-----------------------------\n`;
+      text += `${"TỔNG".padEnd(10, ' ')}${totalCB.toString().padEnd(4, ' ')}${totalOng.toString().padEnd(5, ' ')}${totalRate}`;
+    }
+
+    // Hiển thị kết quả ra các vùng Output và tự động copy
+    document.getElementById("mvaOutput").textContent = "";
+    document.getElementById("mvdOutput").textContent = "";
+    document.getElementById("fhtOutput").textContent = text;
+    document.getElementById("occOutput").textContent = "";
+    if (document.getElementById("lomoResult")) document.getElementById("lomoResult").innerHTML = "";
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+  } catch (err) {
+    alert("Có lỗi xảy ra: " + err.message);
+    console.error(err);
+  } finally {
+    showLoading(false);
   }
 }
 </script>
