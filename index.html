@@ -1,57 +1,5940 @@
 <!DOCTYPE html>
-<html lang="vi">
+<!-- saved from url=(0066)file:///G:/My%20Drive/database/fastandsmile.github.io/admin13.html -->
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vietnam Airlines Login</title>
-  <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Flight Manager</title>
+<style>
+/* Thống kê Roster năm */
+.roster-stat-table {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 800px;
+  border-collapse: collapse;
+}
+.roster-stat-table th, .roster-stat-table td {
+  border: 1px solid #aaa;
+  padding: 8px;
+  font-size: 13px;
+  text-align: center;
+}
+.roster-stat-table th {
+  background: linear-gradient(90deg, #6f42c1, #a92fd8);
+  color: white;
+  font-weight: bold;
+}
+.roster-stat-table td:first-child {
+  text-align: left;
+  font-weight: bold;
+  background: #f8f9fa;
+  min-width: 150px;
+}
+.stat-used { background-color: #f8d7da; color: #721c24; font-weight: bold; }
+.stat-remain { background-color: #d4edda; color: #155724; font-weight: bold; }
+
+/* Roster Styles */
+#rosterTable th, #rosterTable td {
+  border: 1px solid #aaa;
+  padding: 6px 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 28px;
+}
+#rosterTable th { background: #f2f2f2; }
+#rosterTable td:first-child { text-align: left; padding-left: 8px; min-width: 150px; background: #fff; }
+
+/* Màu nền của ngày cuối tuần (Thứ 7 / CN) */
+.roster-weekend { background-color: #ffeb3b !important; } 
+
+/* Màu chữ/nền theo loại ca trực */
+.shift-n { background-color: #d1ecf1 !important; color: #0c5460 !important; } /* Ca N - Xanh dương nhạt */
+.shift-p { background-color: #ffeeba !important; color: #856404 !important; } /* Ca P - Cam/Vàng nhạt */
+.shift-t { background-color: #f8d7da !important; color: #721c24 !important; } /* Ca T - Hồng nhạt */
+.shift-r { background-color: #ffffff; color: #000000; }                      /* Ca R1, R2 - Chữ đen nền trắng */
+
+/* Input chỉnh sửa trực tiếp trong bảng roster */
+.roster-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+  padding: 0;
+  margin: 0;
+}
+.roster-input:focus { outline: none; background: #fff; }
+
+.container {
+  width: 300px;
+  height: 200px;
+  overflow: auto; /* hoặc scroll */
+  border: 1px solid #ccc;
+}
+body {
+  font-family: "Segoe UI", "Roboto", "Inter", Arial, sans-serif;
+  font-size: 13px;
+  color: #212529;
+}
+  .chart-box{
+  width: 100%;
+  max-width:1600px;
+  height: 500px;
+  margin-top: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+.logo-fixed {
+  position: fixed;
+  bottom: 20px;   /* cách dưới */
+  right: 20px;    /* cách phải */
+  width: 120px;   /* chỉnh size */
+  opacity: 0.9;   /* hơi mờ cho đẹp */
+  z-index: 999;   /* luôn nổi trên cùng */
+  cursor: pointer;
+}
+.logo-fixed:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.chart-wrapper{
+  display:flex;
+  gap:20px;
+  width:100%;
+}
+
+.chart-panel{
+  flex:1;
+}
+
+.chart-box{
+  height:300px;
+}
+
+.logo-inline {
+  width: 120px;        /* chỉnh size logo */
+  vertical-align: middle;
+  margin-left: 10px;  /* cách chữ MANAGER */
+  border-radius: 6px; /* bo góc nhẹ cho đẹp */
+}
+body {
+  font-family: Arial;
+}
+input { margin:3px; padding:3px; }
+table { border-collapse: collapse; margin-top:20px; width:100%; }
+td, th { border:1px solid #ccc; padding:5px; text-align:center; }
+th { background:#eee; }
+button { margin:2px; cursor:pointer; }
+tr.editing { background:#fff3cd; }
+input.uppercase { text-transform: uppercase; }
+
+/* Blink & Solid Styles */
+.blink-red { animation: blinkRed 3s infinite; }
+@keyframes blinkRed { 0% { background:red;color:#fff;} 50% { background:transparent;color:red;} 100% {background:red;color:#fff;} }
+.blink-green { animation: blinkGreen 1s infinite; }
+@keyframes blinkGreen { 0% { background:#28a745;color:#fff;} 50% { background:transparent;color:#28a745;} 100% { background:#28a745;color:#fff;} }
+.solid-green { background-color:#28a745;color:#fff; }
+.solid-gold { background-color:gold;color:#000; }
+.solid-gray {
+  background-color: #d3d3d3; /* lightgray */
+  color: #000;              /* chữ đen */
+}
+.blink-gold { animation: blinkGold 1.5s infinite; }
+@keyframes blinkGold { 0%{background:#FFD700;color:#000;}50%{background:transparent;color:#FFD700;}100%{background:#FFD700;color:#000;} }
+/* Ngăn không cho text trong ô bị chọn khi click */
+#table td {
+  user-select: none;   /* không cho chọn text */
+  cursor: default;     /* con trỏ mặc định */
+}
+.selected-row {
+  background-color: #d3d3d3; /* màu xám nhạt */
+}
+.cargo-table-wrapper{
+  max-height: 500px;   /* khoảng 20 dòng */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+
+/* giữ header đứng yên */
+.cargo-table-wrapper thead th{
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+#cargoBody tr{
+  height: 40px;
+}
+.tick-green {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.tick-red {
+  color: red;
+  font-weight: bold;
+  font-size: 16px;
+}
+.three-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+  align-items: stretch;
+}
+
+.main-box {
+  padding: 15px;
+  border-radius: 12px;
+  height: 100%;
+}
+
+/* màu */
+.blue-box { background: #e7f1ff; }
+.green-box { background: #d4edda; }
+.yellow-box { background: #fff3cd; }
+
+/* title */
+.main-box h3 {
+  text-align: center;
+  margin-top: 0;
+}
+
+/* grid */
+.rep-grid,
+.doc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* input */
+.main-box label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.main-box input {
+  width: 100%;
+  padding: 6px;
+  margin-top: 3px;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+.two-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+.doc-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.doc-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+}
+.doc-row-4 {
+  display: flex;
+  align-items: center; /* 👈 căn giữa theo chiều dọc */
+  gap: 6px; /* khoảng cách giữa checkbox và chữ */
+}
+.doc-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 10px 0;
+  padding: 6px;
+  color: #fff;
+  background: linear-gradient(90deg, #495057, #868e96);
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+.section-daidien {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #0072ff, #00c6ff);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.section-tailieu {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffF;
+  background: linear-gradient(90deg, #ff4d4f, #ff7875);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.section-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c2c2c;;
+  background: linear-gradient(90deg, #8e9eab, #eef2f3);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.top-right-img {
+  position: fixed;
+  top: 15px;
+  right: 1000px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+
+.top-right-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-mid-img {
+  position: fixed;
+  top: 15px;
+  right: 800px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-mid-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-left-img {
+  position: fixed;
+  top: 15px;
+  right: 600px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-left-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-input {
+  position: fixed;
+  top: 90px;
+  width: 80px;
+  text-align: center;
+
+  font-size: 28px;       /* 🔥 số to */
+  font-weight: 700;
+  border: none;          /* ❌ bỏ viền */
+  outline: none;         /* ❌ bỏ viền khi click */
+  background: transparent; /* ❌ bỏ nền */
+  pointer-events: none;  /* 👉 không cho nhập (chỉ hiển thị) */
+}
+.top-output {
+  position: fixed;
+  top: 90px;
+  width: 80px;
+  text-align: center;
+
+  font-size: 28px;       /* 🔥 số to */
+  font-weight: 700;
+  border: none;          /* ❌ bỏ viền */
+  outline: none;         /* ❌ bỏ viền khi click */
+  background: transparent; /* ❌ bỏ nền */
+
+}
+.top-leftt-img {
+  position: fixed;
+  top: 15px;
+  right: 400px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-leftt-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+.top-lefttt-img {
+  position: fixed;
+  top: 15px;
+  right: 200px;
+  width: 80px;
+  opacity: 0.85;
+  z-index: 9999;
+  transition: 0.3s;
+}
+.top-lefttt-img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+/* căn theo từng icon */
+.input-adult { right: 1000px; }
+.input-children { right: 800px; }
+.input-baby { right: 600px; }
+.input-fuel { right: 400px; }
+.input-payload { right: 200px; }
+
+.popup{
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.popup-box{
+  background:#fff;
+  padding:20px 25px;
+  border-radius:12px;
+  width:300px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.popup-box h3{
+  margin-bottom:15px;
+}
+
+.popup-box input{
+  width:100%;
+  padding:6px;
+  margin-bottom:10px;
+}
+
+.popup-actions{
+  display:flex;
+  justify-content:space-between;
+}
+  #fastWrapper{
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 999;
+}
+
+/* popup nằm bên trái icon */
+#popup{
+  position: absolute;
+  bottom: 0;
+  right: 160px; /* <-- đẩy sang trái icon */
+  display: none;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.user{
+  width:80px;
+  height:120px;
+  object-fit:cover;
+  cursor:pointer;
+  margin:5px;
+  border-radius:6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user:hover{
+  transform: scale(1.2); /* phóng to */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* đổ bóng */
+}
+#repBox{
+  padding:10px;
+  border:1px solid #ccc;
+  width:250px;
+  border-radius:6px;
+  background:#f9f9f9;
+  font-weight:bold;
+}
+.tab-container{
+  display:flex;
+  gap:10px;
+  margin-top:25px;
+  margin-bottom:15px;
+}
+
+.tab-btn{
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  background:#ddd;
+}
+
+.tab-btn.active{
+  background:#007bff;
+  color:white;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+/* Nền tối phía sau Popup */
+.export-modal {
+  display: none; 
+  position: fixed; 
+  z-index: 9999; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  background-color: rgba(0, 0, 0, 0.5); 
+  backdrop-filter: blur(3px);
+}
+
+/* Khung nội dung chính của Popup */
+.export-modal-content {
+  background-color: #fff;
+  margin: 15% auto; 
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: animatetop 0.3s;
+}
+
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
+/* Header */
+.export-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+.export-modal-header h3 { margin: 0; font-size: 16px; color: #333; }
+.close-btn { font-size: 24px; cursor: pointer; color: #aaa; }
+.close-btn:hover { color: #000; }
+
+/* Body */
+.export-modal-body {
+  padding: 20px 0;
+}
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.date-input-group label {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #555;
+}
+.date-input-group input[type="date"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Footer & Buttons */
+.export-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+.export-modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-cancel { background-color: #e0e0e0; color: #333; }
+.btn-cancel:hover { background-color: #d5d5d5; }
+.btn-confirm { background-color: #28a745; color: white; }
+.btn-confirm:hover { background-color: #218838; }
+/* Hiệu ứng vòng xoay Spinner */
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db; /* Màu xanh chủ đạo */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.popup-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.popup-box{
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    text-align:center;
+}
+.spinner{
+    display:inline-block;
+    width:16px;
+    height:16px;
+    margin-right:8px;
+    border:2px solid rgba(255,255,255,.35);
+    border-top:2px solid #fff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    vertical-align:middle;
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+button:disabled{
+    cursor:not-allowed;
+    opacity:.75;
+}
+</style>
+<link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Thư viện chụp ảnh thẻ HTML thành ảnh -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+<button id="logoutBtn" style="
+  position:fixed;
+  top:15px;
+  right:20px;
+  padding:8px 12px;
+  background:#dc3545;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+">
+  🔒 LOG OUT
+</button>
 <body>
-  <div class="container">
-    <div class="login-box">
-      <img src="logo.png" alt="Logo" class="logo">
+<!-- Bộ phận hiển thị Loading (Ẩn mặc định bằng CSS) -->
+<div id="loadingOverlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px;">
+  <div class="loader"></div>
+  <p style="margin-top: 15px; font-weight: bold; color: #333;">⏳ Hệ thống đang xử lý và tải file, vui lòng đợi trong giây lát...</p>
+</div>
 
-      <h2>Đăng nhập</h2>
+<!-- POPUP MODAL (Bao gồm lớp nền mờ và hộp thoại chính) -->
+<div id="immiCargoContainer" style="display: none; position: fixed; top: 80px; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+  
+  <!-- Hộp thoại nội dung (White Box) -->
+  <div style="background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; position: relative;">
+    
+    <!-- Tiêu đề & Thanh điều khiển -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; margin-bottom: 15px;">
+      <h3 style="margin: 0; color: #333; font-size: 18px;">BẢNG THEO DÕI ĐỐI SOÁT IMMI CARGO</h3>
+      
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; font-size: 14px;">Chọn Tháng:</label>
+        <input type="month" id="immiMonthPicker" onchange="renderImmiCargoCalendar()" style="display:inline-block; width:auto; padding: 6px; border-radius:4px; border:1px solid #ccc;">
+        <button type="button" class="btn btn-secondary" onclick="closeImmiCargoModal()" style="padding: 6px 12px; background: #6c757d; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Đóng</button>
+      </div>
+    </div>
+    
+    <!-- Lưới hiển thị nội dung lịch -->
+    <div id="immiDaysGrid" class="immi-grid" style="flex: 1;"></div>
+  </div>
+</div>
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/adult.png" class="top-right-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/children.png" class="top-mid-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/baby.png" class="top-left-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/fuel.png" class="top-leftt-img">
+<img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/payload.png" class="top-lefttt-img">
+<input class="top-input input-adult" id="adultCount" placeholder="ADT">
+<input class="top-input input-children" id="childrenCount" placeholder="CHD">
+<input class="top-input input-baby" id="babyCount" placeholder="INF">
+<input class="top-output input-fuel" id="fuel" placeholder="TOF">
+<input class="top-output input-payload" id="payload" placeholder="APLD">
 
-      <form onsubmit="return login()">
-        <div class="input-group">
-          <input type="text" id="username" required>
-          <label>Tên đăng nhập</label>
-        </div>
+<h2 class="center-title">
+  PHU QUOC FLIGHT MANAGER
+  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg" class="logo-inline">
+</h2>
 
-        <div class="input-group">
-          <input type="password" id="password" required>
-          <label>Mật khẩu</label>
-        </div>
+<div class="three-main">
 
-        <button type="submit">Đăng nhập</button>
-      </form>
+  <!-- 🔵 THÔNG TIN CHUNG -->
+<div class="main-box blue-box">
+<div class="section-header">
+  ✈️ THÔNG TIN CHUNG
+</div>
+    <label for="ngay">DATE</label>
+    <input id="ngay" type="date" required="">
 
-      <p class="footer">© Vietnam Airlines</p>
+    <label for="soDangKy">A/C REG</label>
+    <input id="soDangKy" class="uppercase" required="" oninput="fillConfig()">
+
+   <label for="config">CONFIG</label>
+   <input id="config">
+
+  <!-- 👇 CHIA 3 CỘT -->
+  <div class="info-grid">
+
+    <!-- CỘT TRÁI -->
+    <div>
+   <label for="soHieu">ARR FLIGHT</label>
+    <input id="soHieu" class="uppercase" required="">
+
+    <label for="soHieu1">DEP FLIGHT</label>
+    <input id="soHieu1" class="uppercase" required="">
+
+    </div>
+
+    <!-- CỘT GIỮA -->
+    <div>
+
+    <label for="from">FROM</label>
+    <input id="from" class="uppercase" required="">
+
+    <label for="to">TO</label>
+    <input id="to" class="uppercase" required="">
+
+    </div>
+
+    <!-- CỘT PHẢI -->
+    <div>
+
+ <label for="sta">STA</label>
+    <input id="sta" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+
+   <label for="std">STD</label>
+    <input id="std" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- 🟢 ĐẠI DIỆN -->
+  <div class="main-box green-box">
+     <div class="section-daidien">
+  🔭 ĐẠI DIỆN
+</div>
+    <div id="repBox">Rep: ---</div>
+
+    <div class="info-grid">
+
+      <div>
+   <label for="eta">ETA</label>
+    <input id="eta" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+      <!-- DEPARTURE -->
+      <div>
+   <label for="etd">ETD</label>
+    <input id="etd" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+      <div>
+        <label for="pushback">Pushback</label>
+    <input id="pushback" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+      </div>
+
+    </div>
+<!-- HÀNG 2: CODE1 + TIME1 -->
+  <div class="doc-title">DELAY CODE</div>
+  <div class="doc-row-2">
+    <div>
+      <label>CODE1</label>
+      <input id="code1" class="uppercase">
+    </div>
+
+    <div>
+      <label>TIME1</label>
+      <input id="time1" class="uppercase">
+    </div>
+  </div>
+<!-- HÀNG 3: CODE2 + TIME2 -->
+  <div class="doc-row-2">
+    <div>
+      <label>CODE2</label>
+      <input id="code2" class="uppercase">
+    </div>
+
+    <div>
+      <label>TIME2</label>
+      <input id="time2" class="uppercase">
+    </div>
+  </div>
+         <label for="details">DETAILS</label>
+   <textarea id="details" class="uppercase"></textarea>
+
+<!-- HÀNG 4: MOPLUS + LOTUS -->
+  <div class="doc-row-4">
+    <div>
+          <label for="lotus">LOTUS</label>
+   <input type="checkbox" id="lotus">
+    </div>
+
+    <div>
+          <label for="moplus">MOPLUS</label>
+   <input type="checkbox" id="moplus">
     </div>
   </div>
 
-  <script>
-  function login() {
-    const user = document.getElementById("username").value;
-    const pass = document.getElementById("password").value;
 
-    const users = [
-      { username: "admin1", password: "admin1", redirect: "admin1.html" },
-      { username: "khaithac", password: "khaithac", redirect: "khaithac.html" },
-      { username: "tailieu", password: "tailieu", redirect: "tailieu.html" }
-    ];
+  </div>
 
-    const foundUser = users.find(u => u.username === user && u.password === pass);
+  <!-- 🟡 TÀI LIỆU -->
+<div class="main-box yellow-box">
+<div class="section-tailieu">
+  📚 TÀI LIỆU
+</div>
 
-    if (foundUser) {
-      window.location.href = foundUser.redirect;
+  <!-- HÀNG 1: COOR + W&B -->
+  <div class="doc-row-2">
+    <div>
+      <label for="coor">COOR</label>
+    <input id="coor" class="uppercase">
+    </div>
+
+    <div>
+      <label for="wnb">W&amp;B</label>
+    <input id="wnb" class="uppercase">
+    </div>
+  </div>
+
+  <!-- HÀNG 2: ARRIVAL -->
+  <div class="doc-title">ARRIVAL</div>
+
+  <!-- HÀNG 3: LANDING + ATA -->
+  <div class="doc-row-2">
+    <div>
+      <label for="landing">LANDING</label>
+    <input id="landing" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+   <label for="ata">ATA</label>
+    <input id="ata" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+  </div>
+
+  <!-- HÀNG 4: DEPARTURE -->
+  <div class="doc-title">DEPARTURE</div>
+
+  <!-- HÀNG 5: FHT + ATD + TAKEOFF -->
+  <div class="doc-row-3">
+    <div>
+      <label for="fht">FHT</label>
+    <input id="fht" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+      <label for="atd">ATD</label>
+    <input id="atd" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+
+    <div>
+      <label for="takeoff">TAKEOFF</label>
+    <input id="takeoff" type="text" placeholder="HH:MM" pattern="[0-2][0-9]:[0-5][0-9]">
+    </div>
+  </div>
+         <label for="ldm">LDM</label>
+   <textarea id="ldm" class="uppercase"></textarea>
+<button type="button" id="upload">UPLOAD</button>
+
+</div>
+</div>
+<!-- TAB -->
+<div class="tab-container">
+
+  <button class="tab-btn active"
+          onclick="showTab('operationTab', event)">
+    OPERATION
+  </button>
+
+  <button class="tab-btn"
+          onclick="showTab('cargoTab', event)">
+    CARGO
+  </button>
+
+<button class="tab-btn"
+          onclick="showTab('rosterTab', event)">
+    ROSTER
+  </button>
+<button class="tab-btn"
+        onclick="showTab('configTab', event); loadConfigMap();">
+  CONFIG
+</button>
+</div>
+<div id="configTab" class="tab-content">
+
+  <h3>⚙️ CONFIG MAP</h3>
+
+<body>
+
+<label>ACREG</label><br>
+<input type="text" id="acreg"><br><br>
+
+<label>CONFIG</label><br>
+<textarea id="configInput" rows="8" cols="60"></textarea><br><br>
+
+<!-- Nút bấm gọi hàm update() -->
+<button onclick="upload()">Update</button>
+
+<p id="msg"></p>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; 
+
+// Hàm xử lý khi người dùng bấm nút Update
+function upload() {
+  let acreg = document.getElementById("acreg").value.trim().toUpperCase();
+  let config = document.getElementById("configInput").value.trim();
+
+  // Kiểm tra nếu chưa nhập đủ thông tin thì cảnh báo và dừng lại
+  if (acreg === "" || config === "") {
+    document.getElementById("msg").innerHTML = "⚠️ Vui lòng nhập đầy đủ ACREG và CONFIG!";
+    return; 
+  }
+
+  // Thông báo trạng thái đang gửi dữ liệu
+  document.getElementById("msg").innerHTML = "⏳ Đang lưu dữ liệu...";
+
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    mode: "no-cors", 
+    body: JSON.stringify({
+      action: "upload",
+      acreg: acreg,
+      config: config
+    })
+  })
+  .then(() => {
+    document.getElementById("msg").innerHTML = "✅ Đã cập nhật thành công!";
+    if(typeof loadConfigMap === "function") loadConfigMap();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("msg").innerHTML = "❌ Lỗi khi đồng bộ dữ liệu.";
+  });
+}
+</script>
+
+</body>
+
+  <table id="configTable">
+    <thead>
+      <tr>
+        <th>A/C REG</th>
+        <th>CONFIG</th>
+       </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+
+<div id="operationTab" class="tab-content active">
+
+
+
+<form id="form">
+
+    <button type="submit">➕ Thêm</button>
+    <button type="button" id="deleteBtn">➖ Xoá</button>
+    <button type="button" id="btnUpdate">✏️ Update</button>
+
+</form>
+
+<table id="table"><tbody><tr><th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th><th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th><th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&amp;B</th><th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr></tbody></table>
+<button type="button" id="mvaBtn">MVA</button>
+<button type="button" id="mvdBtn">MVD</button>
+<button type="button" id="occBtn">OCC</button>
+<button type="button" id="fhtBtn">FHT</button>
+<button type="button" id="exportBtn">📤 EXPORT</button>
+<input type="file" id="importFile" accept=".xlsx,.xls" style="display:none">
+<button type="button" id="importBtn">📥 IMPORT</button>
+<button type="button" id="lomo">🔍LOMO CHECK</button>
+<button type="button" onclick="showLinkPopup()">
+  🌐 LINK
+</button>
+<button type="button" id="ganttBtn" onclick="showGanttPopup()">
+  📊 GANTT
+</button>
+<button id="importACV">📊 IMPORT ACV</button>
+<input type="file" id="acvFile" style="display: none;" accept=".xlsx, .xls">
+<div id="loading" style="
+  display:none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+">
+  <div style="
+    background:white;
+    padding:20px 30px;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+  ">
+    ⏳ Processing...
+  </div>
+</div>
+<button
+  type="button"
+  onclick="openBCPTCNModal()"
+  style="background:#4caf50">
+  📋 BC PTCN
+</button>
+<button
+  type="button"
+  onclick="openBCTCNModal()"
+  style="background:#009688">
+  📊 BC TCN
+</button>
+<div id="bctcnModal"
+     style="
+       display:none;
+       position:fixed;
+       top:0;
+       left:0;
+       width:100%;
+       height:100%;
+       background:rgba(0,0,0,.5);
+       z-index:9999;
+       justify-content:center;
+       align-items:center;">
+
+  <div style="
+      width:900px;
+      max-width:95%;
+      height:80vh;
+      background:#fff;
+      border-radius:8px;
+      padding:20px;
+      display:flex;
+      flex-direction:column;">
+
+    <h3>📊 BC TCN</h3>
+
+    <div style="margin-bottom:10px">
+
+      <label>Từ ngày:</label>
+      <input type="date" id="bctcnFrom">
+
+      <label style="margin-left:15px">Đến ngày:</label>
+      <input type="date" id="bctcnTo">
+
+<button
+  onclick="viewReport()"
+  style="margin-left:15px">
+  Xem báo cáo
+</button>
+
+      <button
+        onclick="copyBCTCN()"
+        style="margin-left:5px">
+        Copy
+      </button>
+
+<button
+  onclick="showBCTCNChart()"
+  style="margin-left:5px;background:#ff9800;color:white">
+  📈 Chart
+</button>
+
+      <button
+        onclick="closeBCTCNModal()"
+        style="float:right">
+        Đóng
+      </button>
+
+    </div>
+
+    <div id="bctcnReportContainer">
+
+  <textarea
+    id="bctcnResult"
+    style="width:100%;height:600px">
+  </textarea>
+
+</div>
+<div id="bctcnChartContainer"
+     style="
+       display:none;
+       margin-top:15px;
+       height:600px;
+       border:1px solid #ddd;
+       padding:10px;
+       border-radius:8px;
+     ">
+
+  <canvas id="bctcnChart"></canvas>
+
+</div>
+
+  </div>
+
+</div>
+<button type="button" id="exportAcvBtn" onclick="openExportPopup()">
+  📤 EXPORT ACV
+</button>
+<!-- POPUP MODAL CHỌN NGÀY -->
+<div id="exportModal" class="export-modal">
+  <div class="export-modal-content">
+    <div class="export-modal-header">
+      <h3>📅 Chọn khoảng ngày xuất dữ liệu ACV</h3>
+      <span class="close-btn" onclick="closeExportPopup()">&times;</span>
+    </div>
+    <div class="export-modal-body">
+      <div class="date-input-group">
+        <label for="startDate">Từ ngày:</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="date-input-group">
+        <label for="endDate">Đến ngày:</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+    <div class="export-modal-footer">
+      <button type="button" class="btn-cancel" onclick="closeExportPopup()">Hủy bỏ</button>
+      <button type="button" id="confirmExportBtn" class="btn-confirm" onclick="processExportToACV()">🚀 Xác nhận xuất Excel</button>
+    </div>
+  </div>
+</div>
+<!-- THÊM NÚT PBB NÀY NGAY BÊN CẠNH -->
+<button type="button" onclick="showPbbPopup()" style="background:#007bff; color:white;">
+    📊 PBB
+</button>
+
+<!-- THÊM POPUP THỐNG KÊ PBB -->
+<div id="pbbPopup" class="popup">
+  <div class="popup-box" style="width: 380px;">
+    <h3>📊 TỈ LỆ CẬP ỐNG LỒNG</h3>
+    
+    <div style="text-align: left; margin-bottom: 15px;">
+      <label style="font-weight: bold; display: block; margin-top: 5px;">Từ ngày:</label>
+      <input type="date" id="pbbFromDate" style="width: 100%; box-sizing: border-box;">
+      
+      <label style="font-weight: bold; display: block; margin-top: 10px;">Đến ngày:</label>
+      <input type="date" id="pbbToDate" style="width: 100%; box-sizing: border-box;">
+    </div>
+
+    <div class="popup-actions" style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button type="button" onclick="thongKePBB()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        🚀 Báo cáo
+      </button>
+      <button type="button" onclick="closePbbPopup()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+        ❌ Đóng
+      </button>
+    </div>
+  </div>
+</div
+
+<!-- POPUP LOADING (BÁNH XE QUAY VÒNG) -->
+<div id="pbbLoadingPopup" class="popup" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+  <div class="popup-box" style="width: 280px; text-align: center; padding: 25px 20px;">
+    <div class="spinner" style="margin: 0 auto 15px auto;"></div>
+    <h4 style="margin: 0; color: #333; font-size: 15px; font-weight: 600;">Đang xử lý dữ liệu...</h4>
+    <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">Vui lòng chờ trong giây lát</p>
+  </div>
+</div>
+
+<style>
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<button class="btn-9g" onclick="open9GModal()">✈️ Thống kê 9G</button>
+<style>
+  /* Modal Overlay 9G */
+  .g9-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .g9-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    max-width: 750px;
+    width: 90%;
+  }
+
+  /* Khung chụp ảnh 9G */
+  #g9TableCapture {
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Bảng Excel 9G */
+  .g9-excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  background: #fff;
+}
+
+.g9-excel-table th, .g9-excel-table td {
+  border: 1px solid #000;
+  padding: 5px 4px;
+  text-align: center;
+  /* 1. Cấm tuyệt đối chữ rớt dòng */
+  white-space: nowrap; 
+}
+
+/* 2. Tăng độ rộng cột ROUTE và đặt căn trái nhẹ cho đẹp */
+.g9-excel-table td:nth-child(1),
+.g9-excel-table td:nth-child(6) {
+  min-width: 80px; /* Đảm bảo đủ chiều rộng cho chuỗi XXX-YYY */
+  font-weight: bold;
+}
+
+.g9-excel-table .title-row td {
+  border: none;
+}
+
+.g9-excel-table .header-arr {
+  background-color: #ffff00; /* Vàng ARRIVAL */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.g9-excel-table .header-dep {
+  background-color: #92d050; /* Xanh DEPARTURE */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.g9-excel-table .sub-header th {
+  font-weight: bold;
+  background-color: #fff;
+}
+</style>
+
+<div id="g9Modal" class="g9-modal">
+  <div class="g9-modal-content">
+    
+    <!-- Bộ lọc ngày -->
+    <div class="vj-filter-group">
+      <label><b>Từ ngày:</b></label>
+      <input type="date" id="g9FromDate">
+      <label><b>Đến ngày:</b></label>
+      <input type="date" id="g9ToDate">
+      <button id="btnFetch9G" onclick="load9GData()" style="padding: 6px 14px; cursor:pointer; font-weight:bold;">
+        🔍 Xem dữ liệu
+      </button>
+    </div>
+
+    <!-- KHUNG CHỤP ẢNH BẢNG 9G -->
+    <div id="g9TableCapture">
+      <table class="g9-excel-table">
+        <thead>
+          <tr class="title-row">
+            <td style="width: 8%;">FROM</td>
+            <td id="lbl9GFrom" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td style="width: 5%;">TO</td>
+            <td id="lbl9GTo" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; font-family: 'Times New Roman', serif;">
+              SUN PHU QUOC AIR
+            </td>
+          </tr>
+          <tr>
+            <th colspan="5" class="header-arr">ARRIVAL</th>
+            <th colspan="5" class="header-dep">DEPARTURE</th>
+          </tr>
+          <tr class="sub-header">
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+          </tr>
+        </thead>
+        <tbody id="g9TableBody">
+          <tr>
+            <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- NÚT CHỨC NĂNG -->
+    <div class="vj-actions" style="margin-top: 15px; text-align: right;">
+      <button class="btn-snapshot" onclick="take9GSnapshot()">📸 Copy Ảnh (Snapshot)</button>
+      <button onclick="close9GModal()" style="padding: 8px 16px; cursor:pointer;">Đóng</button>
+    </div>
+
+  </div>
+</div>
+<button class="btn-vj" onclick="openVJModal()">✈️ Thống kê VJ</button>
+<!-- Style cho Popup và Bảng VJ đẹp chuẩn như hình mẫu -->
+<style>
+/* Style cho nút khi đang tải */
+.btn-loading {
+  opacity: 0.65;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* Spinner xoay tròn nhỏ trên nút */
+.spinner-inline {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Hiệu ứng xoay */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hiệu ứng mờ nhẹ bảng khi đang tải dữ liệu mới */
+.table-loading {
+  opacity: 0.4;
+  transition: opacity 0.2s ease-in-out;
+}
+  /* Modal Overlay */
+  .vj-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal Content */
+  .vj-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    max-width: 750px;
+    width: 90%;
+  }
+
+  /* Filter Controls */
+  .vj-filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  /* VJ Table Container - Khung sẽ chụp ảnh */
+  #vjTableCapture {
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Style Bảng Excel VJ */
+.vj-excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  background: #fff;
+}
+
+.vj-excel-table th, .vj-excel-table td {
+  border: 1px solid #000; /* Đổi sang viền đen nét rõ nét */
+  padding: 5px 4px;
+  text-align: center;
+  white-space: nowrap; /* Cấm rớt dòng tuyệt đối */
+}
+
+/* Tăng độ rộng không gian riêng cho cột ROUTE (Cột 1 và Cột 6) */
+.vj-excel-table td:nth-child(1),
+.vj-excel-table td:nth-child(6) {
+  min-width: 85px;
+  font-weight: bold;
+}
+
+.vj-excel-table .title-row td {
+  font-weight: bold;
+  border: none;
+}
+
+.vj-excel-table .header-arr {
+  background-color: #ffff00; /* Vàng ARRIVAL */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.vj-excel-table .header-dep {
+  background-color: #92d050; /* Xanh DEPARTURE */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.vj-excel-table .sub-header {
+  font-weight: bold;
+  background-color: #fff;
+}
+
+  /* Action Buttons */
+  .vj-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .btn-snapshot {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .btn-snapshot:hover { background-color: #0b5ed7; }
+</style>
+
+<!-- MODAL POPUP VJ -->
+<div id="vjModal" class="vj-modal">
+  <div class="vj-modal-content">
+    
+    <!-- Bộ lọc ngày -->
+    <div class="vj-filter-group">
+      <label><b>Từ ngày:</b></label>
+      <input type="date" id="vjFromDate">
+      <label><b>Đến ngày:</b></label>
+      <input type="date" id="vjToDate">
+      <button id="btnFetchVJ" onclick="loadVJData()" style="padding: 6px 14px; cursor:pointer; font-weight:bold;">
+    🔍 Xem dữ liệu
+  </button>
+    </div>
+
+    <!-- KHUNG HIỂN THỊ BẢNG (KHUNG NÀY SẼ ĐƯỢC CHỤP ẢNH) -->
+    <div id="vjTableCapture">
+      <table class="vj-excel-table">
+        <tr class="title-row">
+          <td style="width: 8%;">FROM</td>
+          <td id="lblFrom" style="width: 12%; text-align: left; font-weight: bold;">--</td>
+          <td style="width: 5%;">TO</td>
+          <td id="lblTo" style="width: 12%; text-align: left; font-weight: bold;">--</td>
+          <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; padding: 4px 0;">VIETJET AIR</td>
+        </tr>
+        <tr>
+          <td colspan="5" class="header-arr">ARRIVAL</td>
+          <td colspan="5" class="header-dep">DEPARTURE</td>
+        </tr>
+        <tr class="sub-header">
+          <td>ROUTE</td>
+          <td>CONFIG</td>
+          <td>PAX</td>
+          <td>LF</td>
+          <td>CB</td>
+          <td>ROUTE</td>
+          <td>CONFIG</td>
+          <td>PAX</td>
+          <td>LF</td>
+          <td>CB</td>
+        </tr>
+        <tr>
+          <td>HPH-PQC</td>
+          <td id="vjArrConfig">0</td>
+          <td id="vjArrPax">0</td>
+          <td id="vjArrLF">0%</td>
+          <td id="vjArrCB">0</td>
+          <td>PQC-HPH</td>
+          <td id="vjDepConfig">0</td>
+          <td id="vjDepPax">0</td>
+          <td id="vjDepLF">0%</td>
+          <td id="vjDepCB">0</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- NÚT CHỨC NĂNG -->
+    <div class="vj-actions">
+      <button class="btn-snapshot" onclick="takeVJSnapshot()">📸 Copy Ảnh (Snapshot)</button>
+      <button onclick="closeVJModal()" style="padding: 8px 16px; cursor:pointer;">Đóng</button>
+    </div>
+
+  </div>
+</div>
+<button type="button" onclick="showImmiPopup()">
+    👮‍♂️ IMMI
+</button>
+<div id="immiPopup" class="popup">
+
+    <div class="popup-box" style="width:350px">
+
+        <h3>👮 EXPORT IMMI</h3>
+
+
+<label>Ngày bay</label>
+<input type="date" id="immiDate">
+
+<div style="
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    margin-top:15px;
+    margin-bottom:15px;
+">
+    <label style="
+        display:flex;
+        align-items:center;
+        gap:6px;
+        cursor:pointer;
+    ">
+        <input type="checkbox" id="immiVN">
+        VN
+    </label>
+
+    <label style="
+        display:flex;
+        align-items:center;
+        gap:6px;
+        cursor:pointer;
+    ">
+        <input type="checkbox" id="immiBL">
+        BL
+    </label>
+</div>
+
+<div class="popup-actions">
+
+            <button onclick="exportIMMI()">
+                📤 EXPORT
+            </button>
+
+            <button onclick="closeImmiPopup()">
+                ❌ CLOSE
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+ 
+<div id="lomoResult" style="margin-top:10px;"></div>
+<div id="mvaOutput" style="white-space:pre; margin-top:10px;"></div>
+<div id="mvdOutput" style="white-space:pre; margin-top:10px;"></div>
+<div id="occOutput" style="white-space:pre; margin-top:10px;"></div>  
+<div id="fhtOutput" style="white-space:pre; margin-top:10px;"></div>
+<fieldset style="background: #fff3cd; border-radius: 8px; padding: 15px;">
+  <legend>🤖 Trợ lý AI Fast and Smile</legend>
+  
+  <textarea id="aiPrompt" placeholder="Nhập câu hỏi cho Fast and Smile..." 
+            style="width: 100%; height: 60px; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; font-family: inherit;"
+            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); guiCauHoiAI(); }"></textarea>
+         
+  <div style="margin-top: 8px; display: flex; gap: 8px;">
+    <button onclick="guiCauHoiAI()" style="padding: 6px 12px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px;">Hỏi AI</button>
+    
+    <button onclick="document.getElementById('aiPrompt').value = ''; document.getElementById('aiPrompt').focus();" 
+            style="padding: 6px 12px; cursor: pointer; background: #6c757d; color: white; border: none; border-radius: 4px;">Xóa câu hỏi</button>
+  </div>
+
+  <div id="aiResponse" style="margin-top: 15px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; min-height: 40px; white-space: pre-line;">
+    🤖 Câu trả lời F&S sẽ xuất hiện tại đây...
+  </div>
+</fieldset>
+  <!-- 📊 WRAPPER -->
+<div class="chart-wrapper">
+
+  <!-- W&B -->
+  <div class="main-box chart-panel">
+    <div class="section-header">
+      📊 W&B STATISTIC
+    </div>
+
+    <div class="chart-box">
+      <canvas id="wbChart"></canvas>
+    </div>
+  </div>
+</div>
+  <!-- COOR -->
+  <div class="main-box chart-panel">
+    <div class="section-header">
+      📊 COOR STATISTIC
+    </div>
+
+    <div class="chart-box">
+      <canvas id="coorChart"></canvas>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- CARGO TAB -->
+<div id="cargoTab" class="tab-content">
+
+<div style="display:flex; gap:10px; margin-bottom:10px;">
+
+  <button type="button" onclick="showDepCargoPopup()">
+    🛫 DEP CARGO
+  </button>
+
+  <button type="button" onclick="showArrCargoPopup()">
+    🛬 ARR CARGO
+  </button>  
+<button type="button" onclick="openImmiCargoModal()">
+    📦 IMMI CARGO
+  </button>
+
+</div>
+
+<div id="depCargoPopup" class="popup">
+
+  <div class="popup-box" style="width:900px;">
+
+  <h3 id="cargoPopupTitle">🛫 DEP CARGO SQL</h3>
+
+    <textarea id="depCargoText"
+      style="
+        width:100%;
+        height:400px;
+        font-family:monospace;
+        font-size:12px;
+      "></textarea>
+
+    <div class="popup-actions">
+
+      <button onclick="copyDepCargo()">
+        📋 COPY
+      </button>
+
+      <button onclick="closeDepCargoPopup()">
+        ❌ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- Ô paste -->
+  <textarea id="cargoInput"
+    placeholder="Paste cargo data here..."
+    style="
+      width:100%;
+      height:150px;
+      margin-bottom:15px;
+      font-family:monospace;
+    "></textarea>
+
+  <button onclick="loadCargoData()">
+    LOAD CARGO
+  </button>
+  <!-- ✅ NÚT UPDATE -->
+  <button type="button" onclick="updateCargoData()">
+    ✏️ UPDATE
+  </button>
+ <!-- ✅ NÚT Export hanco -->
+<button type="button" onclick="showHancoPopup()">
+  📦 EXPORT
+</button>
+
+ <div class="cargo-table-wrapper">
+
+  <table class="cargo-table">
+    <thead>
+      <tr>
+        <th>ISSUE DATE</th>
+        <th>AWB</th>
+        <th>ACC INFO</th>
+        <th>ORIGIN</th>
+        <th>DEST</th>
+        <th>NATURE GOODS</th>
+        <th>SHIPPER</th>
+        <th>FLIGHT</th>
+        <th>PIECES</th>
+        <th>WEIGHT</th>
+        <th>CHARGE WEIGHT</th>
+        <th>COMMODITY</th>
+        <th>RATE</th>
+        <th>TOTAL</th>
+        <th>DT/KG</th>
+      </tr>
+    </thead>
+
+    <tbody id="cargoBody"></tbody>
+  </table>
+
+</div>
+
+</div>
+<div id="rosterTab" class="tab-content">
+  <div style="background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ccc; margin-top: 15px;">
+    
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <span class="section-daidien" style="background: linear-gradient(90deg, #6f42c1, #a92fd8);">📅 LỊCH TRỰC ROSTER</span>
+      
+      <label style="font-weight: bold; font-size: 14px;">Chọn Tháng:</label>
+      <select id="rosterMonthSelect" onchange="renderRoster()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; cursor: pointer;">
+        <option value="1">Tháng 1</option>
+        <option value="2">Tháng 2</option>
+        <option value="3">Tháng 3</option>
+        <option value="4">Tháng 4</option>
+        <option value="5">Tháng 5</option>
+        <option value="6">Tháng 6</option> 
+        <option value="7" selected>Tháng 7</option>
+        <option value="8">Tháng 8</option>
+        <option value="9">Tháng 9</option>
+        <option value="10">Tháng 10</option>
+        <option value="11">Tháng 11</option>
+        <option value="12">Tháng 12</option>
+      </select>
+    </div>
+
+    <div style="overflow-x: auto; max-width: 100%;">
+      <table id="rosterTable" style="margin-top: 0; min-width: 1200px;"></table>
+    </div>
+
+    <div style="margin-top: 15px; display: flex; gap: 10px;">
+      <button id="saveRosterBtn" onclick="window.saveAllRoster()" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        LƯU LỊCH TRỰC
+      </button>
+      
+      <button id="syncApiBtn" type="button" onclick="dongBoThongKeTuAPI()" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        🔄 ĐỒNG BỘ DỮ LIỆU DATA
+      </button>
+    </div>
+
+    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0;">
+
+    <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #6f42c1;">📈 THỐNG KÊ PHÉP / BÙ / LỄ TRONG NĂM </div>
+    <div style="overflow-x: auto;">
+      <table class="roster-stat-table" style="width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+          <tr style="background: linear-gradient(90deg, #6f42c1, #a92fd8); color: white;">
+            <th rowspan="2" style="border: 1px solid #aaa; padding: 8px;">Nhân Viên</th>
+            <th colspan="3" style="border: 1px solid #aaa; padding: 8px;">Đã Sử Dụng (Tích lũy năm)</th>
+            <th colspan="3" style="border: 1px solid #aaa; padding: 8px;">Chưa Sử Dụng / Còn Lại</th>
+          </tr>
+          <tr style="background: #f2f2f2; color: #333;">
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">P</th>
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">B</th>
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">L</th>
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">P</th>
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">B</th>
+            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">L</th>
+          </tr>
+        </thead>
+        <tbody id="rosterStatBody">
+          <tr data-name="Võ Trung Dũng" data-p="14" data-b="18" data-l="11">
+            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Võ Trung Dũng</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">14</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">18</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
+          </tr>
+          <tr data-name="Nguyễn Quốc Quang" data-p="14" data-b="19" data-l="11">
+            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Nguyễn Quốc Quang</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">14</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">19</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
+          </tr>
+          <tr data-name="Nguyễn Văn Quân" data-p="15" data-b="19" data-l="11">
+            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Nguyễn Văn Quân</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">15</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">19</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
+          </tr>
+          <tr data-name="Từ Đức Nguyên" data-p="12" data-b="0" data-l="11">
+            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Từ Đức Nguyên</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">12</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">0</td>
+            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+<div style="height: 500px;"></div> 
+<div id="fastWrapper">
+  <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DEN%20GIO%20ROI.jpg"
+       id="mainIcon" class="logo-fixed">
+
+  <div id="popup">
+    <!-- 4 ảnh user -->
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/DUNG.jpg" class="user" data-name="Võ Trung Dũng" data-phone="0931000600">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUANG.jpg" class="user" data-name="Nguyễn Quốc Quang" data-phone="0947882100">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/QUAN.jpg"  class="user" data-name="Nguyễn Văn Quân" data-phone="0917220723">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/SANG.jpg" class="user" data-name="Lý Minh Sang" data-phone="0376290292">
+    <img src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/NGUYEN.jpg" class="user" data-name="Từ Đức Nguyên" data-phone="0949999406">
+  </div>
+ </div>
+
+
+ <script>
+
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+async function loadConfigMap() {
+
+  try {
+
+    const response = await fetch(
+      GAS_URL + "?action=loadConfigMap"
+    );
+
+    const data = await response.json();
+
+    const tbody =
+      document.querySelector("#configTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.slice(1).forEach(row => {
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td contenteditable="true">${row[0] || ""}</td>
+        <td contenteditable="true">${row[1] || ""}</td>
+            </td>
+      `;
+
+      tbody.appendChild(tr);
+
+    });
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Không tải được CONFIG_MAP");
+
+  }
+
+}
+
+</script>
+<script>
+  document.getElementById("lomo").addEventListener("click", function(){
+      // 👉 CLEAR toàn bộ output khác
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("occOutput").textContent = "";
+  const resultDiv = document.getElementById("lomoResult");
+  resultDiv.innerHTML = "⏳ Đang kiểm tra dữ liệu siêu nhanh...";
+
+  // 🔥 2. Gọi đúng nhánh ?type=lomo đã tối ưu trên Apps Script của bạn
+  fetch(API + "?type=lomo&t=" + Date.now()) 
+    .then(res => res.json())
+    .then(res => {
+      // Đọc mảng data và tổng số lượng lỗi từ cấu trúc { data: [...], total: X }
+      const errorFlights = res.data || [];
+      const totalErrors = res.total !== undefined ? res.total : errorFlights.length;
+
+      let resultText = "";
+
+      if (totalErrors === 0) {
+        resultDiv.innerHTML = "<b style='color:green'>✔ Không có chuyến lỗi</b>";
+      } else {
+        // Duyệt qua dữ liệu gọn nhẹ đã lọc từ Server
+        errorFlights.forEach(flight => {
+          // Lấy đúng các key (arr, dep, rep, date) bạn đã cấu hình trong Apps Script
+          const arr  = flight.arr  || "";
+          const dep  = flight.dep  || "";
+          const rep  = flight.rep  || "";
+ 	// Thay thế dòng date cũ bằng 2 dòng này:
+const UTCDate = new Date(flight.date);
+const date = flight.date ? new Date(UTCDate.getTime() + (7 * 60 * 60 * 1000)).toISOString().slice(0, 10) : "";
+
+          resultText += `✈️ ${arr} | ${dep} | ${rep} | ${date}\n`;
+        });
+
+        resultDiv.innerHTML = `
+          <b style="color:red">⚠ ${totalErrors} chuyến lỗi toàn hệ thống</b><br>
+          <pre style="background: #fff5f5; padding: 10px; border: 1px solid #feb2b2; border-radius: 4px; margin-top: 5px; font-family: monospace; white-space: pre-wrap; word-break: break-all;">${resultText}</pre>
+        `;
+      }
+    })
+    .catch(err => {
+      resultDiv.innerHTML = "❌ Lỗi gọi API";
+      console.error(err);
+    });
+}); // <--- Kết thúc sự kiện click nút LOMO hợp pháp
+  let selectedRep = "";
+
+  // xử ly sự kiện chọn đại diện
+const mainIcon = document.getElementById("mainIcon");
+const popup = document.getElementById("popup");
+const users = document.querySelectorAll(".user");
+const result = document.getElementById("result");   // nếu bạn có input
+const repBox = document.getElementById("repBox");   // nếu bạn có box hiển thị
+
+// Bấm icon → hiện popup
+mainIcon.onclick = () => {
+  popup.style.display =
+    popup.style.display === "none" ? "block" : "none";
+};
+
+// Bấm vào từng người
+users.forEach(u => {
+  u.onclick = () => {
+    const name = u.dataset.name;
+    const phone = u.dataset.phone;
+
+    selectedRep = `Rep. ${name} ${phone}`;
+
+    if(repBox) repBox.innerText = selectedRep;
+
+    popup.style.display = "none";
+  };
+});
+document.getElementById("logoutBtn").onclick = function(){
+  // Xoá trạng thái đăng nhập
+  localStorage.clear();
+
+  // Chuyển về trang login
+  window.location.href = "index.html";
+};
+
+//// config
+const configMap = {
+  // A
+  "334":"178/32A","335":"178/32A","336":"178/32A",
+  "602":"178/32A","606":"178/32A","610":"178/32A","398":"178/32A",
+
+  // B
+  "322":"184/32B","360":"184/32B","361":"184/32B","362":"184/32B",
+  "363":"184/32B","365":"184/32B","366":"184/32B","367":"184/32B","390":"184/32B",
+
+  // E
+  "350":"203/32E","351":"203/32E","352":"203/32E","353":"203/32E",
+  "354":"203/32E","356":"203/32E","357":"203/32E","359":"203/32E",
+
+  // C
+  "323":"184/32C","324":"184/32C","325":"184/32C","326":"184/32C",
+  "327":"184/32C","329":"184/32C","331":"184/32C","332":"184/32C",
+  "338":"184/32C","339":"184/32C","392":"184/32C","393":"184/32C",
+  "395":"184/32C","396":"184/32C","397":"184/32C","399":"184/32C",
+  "601":"184/32C","603":"184/32C","604":"184/32C","605":"184/32C",
+  "608":"184/32C","609":"184/32C","611":"184/32C","612":"184/32C",
+
+  // D
+  "344":"203/32D","345":"203/32D","347":"203/32D","348":"203/32D",
+  "349":"203/32D","358":"203/32D","613":"203/32D","614":"203/32D","615":"203/32D",
+
+  // N
+  "501":"203/32N","503":"203/32N","505":"203/32N","506":"203/32N",
+  "507":"203/32N","508":"203/32N","509":"203/32N","510":"203/32N",
+  "511":"203/32N","512":"203/32N","616":"203/32N","617":"203/32N",
+  "618":"203/32N","619":"203/32N","620":"203/32N","621":"203/32N",
+  "622":"203/32N","623":"203/32N","624":"203/32N","625":"203/32N",
+
+  // K
+  "513":"184/32K","514":"184/32K","515":"184/32K",
+
+  // ATR
+  "223":"72/AT7",
+
+  // W
+  "SAF":"178/32S",
+  "SAG":"178/32W",
+  "266":"186/32W",
+
+  // X
+  "MLX":"180/32X",
+  "MLO":"180/32X",
+
+  // A350
+  "890":"305/35B","891":"305/35B","892":"305/35B","893":"305/35B",
+  "894":"305/35B","895":"305/35B","896":"305/35B","897":"305/35B",
+  "898":"305/35B","899":"305/35B",
+
+  "886":"305/35A","887":"305/35A","888":"305/35A","889":"305/35A"
+  // thêm tuỳ bạn
+};
+//// 
+let selectedDate = "";
+let selectedRowId = null;
+let selectedRowData = null;
+const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; // Thay bằng link deploy mới
+
+function formatDateForInput(iso) {
+  if(!iso) return "";
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatTimeForInput(val){
+  if(!val) return "";
+
+  // ✅ Nếu đã là dạng HH:mm thì giữ nguyên (QUAN TRỌNG)
+  if (typeof val === "string" && /^\d{2}:\d{2}$/.test(val)) {
+    return val;
+  }
+
+  // ✅ Nếu là ISO (có T hoặc Z) thì mới parse Date
+  if (typeof val === "string" && val.includes("T")) {
+    const d = new Date(val);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  return "";
+}
+ function autoFormatTime(input) {
+    let value = input.value.replace(/[^0-9]/g, ""); // chỉ giữ số
+
+    if (value.length === 4) {
+      let hours = parseInt(value.slice(0, 2), 10);
+      let minutes = parseInt(value.slice(2, 4), 10);
+
+      // Giới hạn giờ và phút
+      if (hours > 23) hours = 23;
+      if (minutes > 59) minutes = 59;
+
+      // Đảm bảo luôn có 2 chữ số
+      let hh = hours.toString().padStart(2, "0");
+      let mm = minutes.toString().padStart(2, "0");
+
+      input.value = hh + ":" + mm;
     } else {
-      alert("Sai tên đăng nhập hoặc mật khẩu!");
+      input.value = value;
+    }
+  }
+
+  // Gắn sự kiện cho tất cả ô nhập giờ
+ document.addEventListener("DOMContentLoaded", function(){
+
+  document.querySelectorAll('#sta, #eta, #landing, #ata, #std, #etd, #atd, #fht, #pushback, #takeoff')
+    .forEach(el => {
+      el.addEventListener('input', () => autoFormatTime(el));
+    });
+
+});
+function applyBlinkEffect(cellElement, planned, actual){
+  cellElement.classList.remove("blink-red","blink-green","solid-green","blink-gold");
+  if(planned && actual){
+    if(actual > planned) cellElement.classList.add("blink-red");
+    else cellElement.classList.add("solid-green");
+  } else {
+    cellElement.classList.add("blink-gold");
+  }
+}
+
+function parseTime(str){
+  if(!str) return null;
+  const [h,m] = str.split(":").map(Number);
+  return h*60 + m; // tổng số phút
+}
+
+function formatMinutes(total){
+  if(total==null) return "";
+  const h = String(Math.floor(total/60)).padStart(2,"0");
+  const m = String(total%60).padStart(2,"0");
+  return `${h}:${m}`;
+}
+
+function loadData(){
+  const table = document.getElementById("table");
+
+  let url = API + "?t=" + Date.now();
+
+  if(selectedDate){
+    url += "&date=" + selectedDate;
+  }
+
+  fetch(url, {cache:"no-store"})
+    .then(r=>r.json())
+    .then(res=>{
+      const data = res.data;
+
+      if(!data || data.length === 0){
+        table.innerHTML = "<tr><td colspan='27'>No data</td></tr>";
+        return;
+      }
+
+      // giữ nguyên phần render bảng của bạn
+
+      // Header
+      let html = "<tr>";
+      html += "<th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th>";
+      html += "<th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th>";
+      html += "<th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&B</th>";
+      html += "<th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr>";
+
+      data.slice(1).forEach(row=>{
+        html += `<tr id="row-${row[0]}" onclick='selectRow(${JSON.stringify(row)})'>`;
+        html += `<td>${formatDateForInput(row[1])}</td>`; //NGAY
+        html += `<td>${(row[2]||"").toUpperCase()}</td>`; //ACREG
+        html += `<td>${(row[3]||"").toUpperCase()}</td>`; //ARRFLIGHT
+        html += `<td>${(row[4]||"").toUpperCase()}</td>`; //FROM
+        html += `<td>${formatTimeForInput(row[5])}</td>`; //STA
+        html += `<td>${formatTimeForInput(row[6])}</td>`; //ETA
+        html += `<td>${formatTimeForInput(row[7])}</td>`; //LANDING
+        html += `<td>${formatTimeForInput(row[8])}</td>`; //ATA
+        html += `<td>${(row[9]||"").toUpperCase()}</td>`; //DEPFLIGHT
+        html += `<td>${(row[10]||"").toUpperCase()}</td>`; //TO
+        html += `<td>${formatTimeForInput(row[11])}</td>`; //STD
+        html += `<td>${formatTimeForInput(row[12])}</td>`; //ETD
+        html += `<td>${formatTimeForInput(row[13])}</td>`; //ATD
+        html += `<td>${formatTimeForInput(row[14])}</td>`; //FHT
+        html += `<td>${formatTimeForInput(row[15])}</td>`; //PUSHBACK
+        html += `<td>${formatTimeForInput(row[16])}</td>`; //TAKEOFF
+
+        // GT = FHT - ATA
+        let gt="";
+const fhtStr = formatTimeForInput(row[14]); // FHT
+const ataStr = formatTimeForInput(row[8]);  // ATA
+if(fhtStr && ataStr){
+  const diff = parseTime(fhtStr)-parseTime(ataStr);
+  gt = formatMinutes(diff);
+}
+html += `<td>${gt}</td>`;
+
+        // Delay = ATD - ETD
+ let delay="";
+const atdStr = formatTimeForInput(row[13]); // ATD
+const etdStr = formatTimeForInput(row[12]); // ETD
+if(atdStr && etdStr){
+  const diff = parseTime(atdStr) - parseTime(etdStr);
+  if(diff < 0){
+     delay = "-" + formatMinutes(Math.abs(diff));
+  } else {
+    delay = formatMinutes(diff);
+  }
+}
+html += `<td>${delay}</td>`;
+
+        html += `<td>${(row[19]||"").toUpperCase()}</td>`;  // Delay code1
+        html += `<td>${(row[20]||"").toUpperCase()}</td>`;  // Delay TIME1	
+        html += `<td>${(row[21]||"").toUpperCase()}</td>`;  // Delay CODE2
+        html += `<td>${(row[22]||"").toUpperCase()}</td>`;  // Delay time2
+        html += `<td>${(row[23]||"").toUpperCase()}</td>`;  // COOR
+        html += `<td>${(row[24]||"").toUpperCase()}</td>`;  // W&B
+        html += `<td>${row[25] || ""}</td>`; // CONFIG
+html += `<td class="${row[26] === true || row[26] === "TRUE" ? "tick-green" : "tick-red"}">
+  ${row[26] === true || row[26] === "TRUE" ? "✔" : "✖"}
+</td>`;
+
+html += `<td class="${row[27] === true || row[27] === "TRUE" ? "tick-green" : "tick-red"}">
+  ${row[27] === true || row[27] === "TRUE" ? "✔" : "✖"}
+</td>`;
+
+        html += "</tr>";
+      });
+
+      document.getElementById("table").innerHTML = html;
+
+
+      // Hiệu ứng màu
+      data.slice(1).forEach(row=>{
+        const tr = document.getElementById("row-"+row[0]);
+        if(!tr) return;
+        const cells = tr.querySelectorAll("td");
+
+// So sánh ETA với STA: nếu khác thì STA màu xám
+const etaStr = row[6] ? formatTimeForInput(row[6]) : "";
+const staStr = row[5] ? formatTimeForInput(row[5]) : "";
+if(etaStr && staStr){
+  const etaMin = parseTime(etaStr);
+  const staMin = parseTime(staStr);
+  if(etaMin !== staMin){
+    cells[5].classList.add("solid-gray"); 
+  }
+}
+
+
+        // So sánh ETD với STD: nếu khác thì STD màu xám
+        const etdStr0 = row[12] ? formatTimeForInput(row[12]) : "";
+        const stdStr = row[11] ? formatTimeForInput(row[11]) : "";
+        if(etdStr0 && stdStr){
+          const etdMin0 = parseTime(etdStr0);
+          const stdMin = parseTime(stdStr);
+          if(etdMin0 !== stdMin){
+            cells[11].classList.add("solid-gray");
+          }
+        }
+        // So sánh ATA với ETA
+        const ataStr2 = row[8] ? formatTimeForInput(row[8]) : "";
+        if(ataStr2 && etaStr){
+          const ataMin = parseTime(ataStr2);
+          const etaMin = parseTime(etaStr);
+          const diff = ataMin - etaMin;
+
+          cells[7].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[7].classList.add("blink-red");   // ATA > ETA
+          } else {
+            cells[7].classList.add("solid-green"); // ATA ≤ ETA
+          }
+        }
+
+        // So sánh ATD với ETD
+        const atdStr2 = row[13] ? formatTimeForInput(row[13]) : "";
+        if(atdStr2 && etdStr0){
+          const atdMin = parseTime(atdStr2);
+          const etdMin = parseTime(etdStr0);
+          const diff = atdMin - etdMin;
+
+          cells[12].classList.remove("blink-red","solid-green");
+          if(diff > 0){
+            cells[12].classList.add("blink-red");   // ATD > ETD
+          } else {
+            cells[12].classList.add("solid-green"); // ATD ≤ ETD
+          }
+        }
+
+        // Kiểm tra Pushback vs ETD
+        const pushback = row[15] ? formatTimeForInput(row[15]) : "";
+        if(pushback && etdStr0){
+          const pbMin  = parseTime(pushback);
+          const etdMin = parseTime(etdStr0);
+          const diff   = pbMin - etdMin;
+
+          cells[14].classList.remove("blink-red","solid-green","solid-gold","blink-gold");
+
+          if(diff >= 15){
+            cells[14].classList.add("blink-red");
+          } else if(diff > 0 && diff < 15){
+            cells[14].classList.add("solid-gold");
+          } else {
+            cells[14].classList.add("solid-green");
+          }
+        }
+      });
+    });
+}
+document.getElementById("details").addEventListener("input", function(){
+  this.value = this.value.toUpperCase();
+});
+function selectRow(row){
+  selectedRowId = row[0];
+  selectedRowData = row;
+
+  // Bỏ chọn các dòng khác
+  document.querySelectorAll("#table tr").forEach(tr=>{
+    tr.classList.remove("selected-row");
+  });
+
+
+  // Tô xám dòng hiện tại
+  const currentRow = document.getElementById("row-"+row[0]);
+  if(currentRow){
+    currentRow.classList.add("selected-row");
+  }
+
+  ngay.value = formatDateForInput(row[1]);
+  soDangKy.value = row[2] || "";
+  soHieu.value = row[3] || "";
+  from.value = row[4] || "";
+  sta.value = formatTimeForInput(row[5]);
+  eta.value = formatTimeForInput(row[6]);
+  landing.value = formatTimeForInput(row[7]);
+  ata.value = formatTimeForInput(row[8]);
+  soHieu1.value = row[9] || "";
+  to.value = row[10] || "";
+  std.value = formatTimeForInput(row[11]);
+  etd.value = formatTimeForInput(row[12]);
+  atd.value = formatTimeForInput(row[13]);
+  fht.value = formatTimeForInput(row[14]);
+  pushback.value = formatTimeForInput(row[15]);
+  takeoff.value = formatTimeForInput(row[16]);
+
+  // Các trường text
+  code1.value = row[19] || "";
+ time1.value = row[20] || "";
+ code2.value = row[21] || "";
+ time2.value = row[22] || "";
+  coor.value = row[23] || "";
+  wnb.value = row[24] || "";
+  config.value = row[25] || "";
+lotus.checked = String(row[26]).toUpperCase() === "TRUE";
+moplus.checked = String(row[27]).toUpperCase() === "TRUE";
+details.value = row[28] || "";
+adultCount.value = row[29] || "";
+childrenCount.value = row[30] || "";
+babyCount.value = row[31] || "";
+fuel.value = row[32] || "";
+payload.value = row[33] || "";
+  // 👉 hiển thị lại đại diện (nếu có trong data)
+if(row[34]){   // giả sử cột 34 là REP
+  selectedRep = row[34];
+  repBox.innerText = selectedRep;
+} else {
+  repBox.innerText = "Rep: ---";
+}
+checkMVAEnable();
+}
+
+form.onsubmit = function(e){
+  e.preventDefault();
+  // 👉 Tính GT = FHT - ATA
+  let gt = "";
+  if(fht.value && ata.value){
+    const diff = parseTime(fht.value) - parseTime(ata.value);
+    gt = formatMinutes(diff);
+  }
+
+  // 👉 Tính DELAY = ATD - ETD
+  let delay = "";
+  if(atd.value && etd.value){
+    const diff = parseTime(atd.value) - parseTime(etd.value);
+    if(diff < 0){
+      delay = "-" + formatMinutes(Math.abs(diff));
+    } else {
+      delay = formatMinutes(diff);
+    }
+  }
+  const data = {
+    ngay: ngay.value,
+    soHieu: soHieu.value,
+    from: from.value,
+    soDangKy: soDangKy.value,
+    sta: sta.value,
+    eta: eta.value,
+    landing: landing.value,
+    ata: ata.value,
+    soHieu1: soHieu1.value,
+    to: to.value,
+    std: std.value,
+    etd: etd.value,
+    atd: atd.value,
+    fht: fht.value,
+    pushback: pushback.value,
+    takeoff: takeoff.value,
+    gt:gt,
+    delay:delay,
+    code1: code1.value,
+time1: time1.value,
+code2: code2.value,
+time2: time2.value,
+    coor: coor.value,
+    wnb: wnb.value,
+  config: config.value,
+  lotus: lotus.checked,
+  moplus: moplus.checked,
+details: details.value,
+adult: adultCount.value,
+children: childrenCount.value,
+baby: babyCount.value,
+fuel: fuel.value,
+payload: payload.value,
+    rep: selectedRep,
+    action:"create"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="created"){ 
+        alert("Thêm thành công!");
+        form.reset(); 
+        loadData(); 
+      } else {
+        alert("Thêm thất bại: " + (resp.error || ""));
+      }
+    })
+    .catch(err=>{
+      alert("Có lỗi xảy ra: " + err.message);
+    });
+};
+
+/// tạo nút update
+document.getElementById("btnUpdate").onclick = function(){
+  if(!selectedRowId){
+    alert("Chưa chọn dòng để cập nhật!");
+    return;
+  }
+
+  const data = {
+    id: selectedRowId,   // cần gửi id để biết dòng nào
+    ngay: ngay.value,
+    soHieu: soHieu.value,
+    from: from.value,
+    soDangKy: soDangKy.value,
+    sta: sta.value,
+    eta: eta.value,
+    landing: landing.value,
+    ata: ata.value,
+    soHieu1: soHieu1.value,
+    to: to.value,
+    std: std.value,
+    etd: etd.value,
+    atd: atd.value,
+    fht: fht.value,
+    pushback: pushback.value,
+    takeoff: takeoff.value,
+   code1: code1.value,
+time1: time1.value,
+code2: code2.value,
+time2: time2.value,
+    coor: coor.value,
+    wnb: wnb.value,
+   config: config.value,
+   lotus: lotus.checked,
+   moplus: moplus.checked,
+details: details.value,
+adult: adultCount.value,
+children: childrenCount.value,
+baby: babyCount.value,
+fuel: fuel.value,
+payload: payload.value,
+    rep: selectedRep,
+    action:"update"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="updated"){ 
+        loadData(); 
+        alert("Cập nhật thành công!");
+      } else {
+        alert("Cập nhật thất bại: "+(resp.error||""));
+      }
+    });
+};
+
+
+// SAVE
+function saveRow(id, btn){
+  const tr = btn.closest("tr");
+  const inputs = tr.querySelectorAll("input");
+  const data = {
+    id: id,
+    ngay: inputs[0].value,
+    soHieu: inputs[1].value,
+    soDangKy: inputs[2].value,
+    sta: inputs[3].value,
+    eta: inputs[4].value,
+    ata: inputs[5].value,
+    std: inputs[6].value,
+    etd: inputs[7].value,
+    atd: inputs[8].value,
+    fht: inputs[9].value,
+    pushback: inputs[10].value,
+    delay: inputs[11].value,
+    action:"update"
+  };
+
+  fetch(API,{method:"POST",body:JSON.stringify(data)})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==="updated") loadData();
+      else alert("Cập nhật thất bại: "+(resp.error||""));
+    });
+}
+
+// DELETE
+document.getElementById("deleteBtn").onclick = function(){
+  if(!selectedRowId){
+    alert("Chọn dòng trước (double click)");
+    return;
+  }
+
+  if(!confirm("Xóa dòng này?")) return;
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({id:selectedRowId, action:"delete"})
+  })
+  .then(r=>r.json())
+  .then(resp=>{
+    if(resp.status==="deleted"){
+      form.reset();
+      selectedRowId = null;
+      loadData();
+    } else {
+      alert("Xóa thất bại");
+    }
+  });
+};
+
+
+// INIT
+// --- THAY THẾ ĐOẠN CŨ BẰNG ĐOẠN NÀY ---
+const ngayInput = document.getElementById("ngay");
+
+// Lấy ngày hiện tại theo giờ địa phương (đảm bảo không bị lệch múi giờ)
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+const formattedToday = `${yyyy}-${mm}-${dd}`;
+
+// Gán ngày hôm nay vào biến và ô nhập liệu
+selectedDate = formattedToday;
+ngayInput.value = formattedToday;
+
+// Gọi loadData ngay lập tức để hiện bảng dữ liệu hôm nay
+loadData();
+
+// Lắng nghe sự kiện khi người dùng chọn ngày khác
+ngayInput.addEventListener("change", function(){
+  selectedDate = this.value;
+  loadData();
+});
+
+// Tự động gọi lại loadData mỗi 10 giây (3 phút)
+setInterval(loadData, 180000);
+/// giờ utc
+function convertLocalMinus7(timeStr, dateStr){
+  if(!timeStr || !dateStr) return {time:"", day:""};
+
+  // timeStr dạng HH:MM
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const [year, month, day] = dateStr.split("-").map(Number);
+
+  // Tạo đối tượng Date theo giờ local
+  const localDate = new Date(year, month-1, day, hh, mm);
+
+  // Trừ đi 7 tiếng
+  const newDate = new Date(localDate.getTime() - 7*60*60*1000);
+
+  // Lấy giờ và phút
+  const hours = newDate.getHours().toString().padStart(2,"0");
+  const minutes = newDate.getMinutes().toString().padStart(2,"0");
+
+  // Bỏ dấu “:”
+  const timeOut = hours + minutes;
+
+  // Lấy ngày mới (dd)
+  const newDay = newDate.getDate().toString().padStart(2,"0");
+
+  return {time: timeOut, day: newDay};
+//////// sự kiện OCC
+
+////////
+}
+function openMVAPopup(){
+    if(!selectedRowData) return;
+    document.getElementById("mvaPopup").style.display="flex";
+}
+
+function closeMVAPopup(){
+    document.getElementById("mvaPopup").style.display="none";
+}
+function addMinutes(timeStr, mins){
+    if(!timeStr) return "";
+
+    const [h,m] = normalizeTime(timeStr).split(":").map(Number);
+
+    const d = new Date();
+    d.setHours(h,m+mins,0,0);
+
+    return String(d.getHours()).padStart(2,"0") +
+           String(d.getMinutes()).padStart(2,"0");
+}
+function generateMVA(type){
+
+    closeMVAPopup();
+
+    const row = selectedRowData;
+    if(!row) return;
+
+    const arrFlight = (row[3]||"").toUpperCase();
+    const dateStr   = formatDateForInput(row[1]);
+    const acReg     = (row[2]||"").toUpperCase();
+
+    const landingObj = convertLocalMinus7(formatTimeForInput(row[7]), dateStr);
+    const ataObj = {
+    time: normalizeTime(formatTimeForInput(row[8])).replace(":", ""),
+    day: dateStr ? dateStr.split("-")[2] : ""
+};
+
+    const day = landingObj.day || (dateStr ? dateStr.split("-")[2] : "");
+
+    // ATA LOCAL (không trừ 7)
+    const ataLocal = normalizeTime(formatTimeForInput(row[8]));
+
+    const preBoard =
+        type === "gate"
+            ? addMinutes(ataLocal,15)
+            : addMinutes(ataLocal,10);
+
+    const text = `MVT
+${arrFlight}/${day}.${acReg}.PQC
+CHOCK-ON : ${ataObj.time}
+EST PRE-BOARDING : ${preBoard}
+📌 Theo công văn số: 621/TCTHK-DVHK`;
+
+    document.getElementById("occOutput").textContent = "";
+    document.getElementById("mvdOutput").textContent = "";
+    document.getElementById("fhtOutput").textContent = "";
+    document.getElementById("mvaOutput").textContent = text;
+    document.getElementById("lomoResult").innerHTML = "";
+
+    // Copy nội dung + đổi trạng thái nút
+    navigator.clipboard.writeText(text).then(() => {
+
+        const mvaBtn = document.getElementById("mvaBtn");
+
+        const originalText = mvaBtn.innerText;
+        const originalBg = mvaBtn.style.background;
+
+        mvaBtn.innerText = "✓ COPIED!";
+        mvaBtn.style.background = "#28a745";
+
+        setTimeout(() => {
+            mvaBtn.innerText = originalText;
+            mvaBtn.style.background = originalBg;
+        }, 1500);
+
+    }).catch(err => {
+        console.error("Copy thất bại:", err);
+    });
+}
+
+// Gắn sự kiện cho nút MVA
+document.getElementById("mvaBtn").addEventListener("click", openMVAPopup);
+/// dieu chinh lai format gio
+function normalizeTime(t){
+  if(!t) return "";
+  if(t.includes(":")) return t;
+  return t.slice(0,2) + ":" + t.slice(2);
+}
+
+// Bảng mapping offset phút theo sân bay
+const offsetMap = {
+  "SGN": 65,   // +1h05
+  "HAN": 125,  // +2h05
+  "DAD": 45,   // +0h45
+  "PQC": 30    // +0h30
+};
+
+function showMVD(row){
+  if(!row) return;
+
+  const depFlight = (row[9]||"").toUpperCase();
+  const dateStr   = formatDateForInput(row[1]);
+  const acReg     = (row[2]||"").toUpperCase();
+  const to        = (row[10]||"").toUpperCase();
+  const pax= 
+  Number(row[29] || 0) + 
+  Number(row[30] || 0) + 
+  Number(row[31] || 0);
+const tof        = (row[32]||"").toUpperCase();
+const payload        = (row[33]||"").toUpperCase();
+
+
+  const adObj    = convertLocalMinus7(formatTimeForInput(row[13]), dateStr); // ATD
+  const fht      = convertLocalMinus7(formatTimeForInput(row[14]), dateStr); // FHT
+  const takeoff  = convertLocalMinus7(formatTimeForInput(row[16]), dateStr); // ETA
+
+  // 🔹 EA = ETA + offset
+let eaTime = takeoff.time;
+
+if(offsetMap[to] && takeoff.time){
+  const norm = normalizeTime(takeoff.time);
+  eaTime = addMinutesToTime(norm, offsetMap[to]);
+}
+
+  const day = adObj.day || (dateStr ? dateStr.split("-")[2] : "");
+ const code1 = (row[19]||"").toUpperCase();
+ const time1 = (row[20]||"").toUpperCase();
+ const code2 = (row[21]||"").toUpperCase();
+ const time2 = (row[22]||"").toUpperCase();
+const t1 = (time1 || "").padStart(4, "0");
+const t2 = (time2 || "").padStart(4, "0");
+let delayCode = code2 === ""
+  ? `${code1}${t1}`
+  : `${code1}/${code2}/${t1}/${t2}`;
+
+  let text = `MVT
+${depFlight}/${day}.${acReg}.PQC
+AD${adObj.time}/${takeoff.time}  EA${eaTime}  ${to}`;
+
+  // nếu có delay code thì chèn ngay sau dòng AD
+  if(delayCode){
+    text += `\nDL${delayCode}`;
+  }
+
+  text += `
+PX${pax}
+SI TOF${tof}    APLD${payload}
+FHT ${fht.time}`;
+
+  document.getElementById("mvdOutput").textContent = text;
+  document.getElementById("mvaOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("occOutput").textContent = "";
+  document.getElementById("lomoResult").innerHTML = "";
+}
+
+// Hàm cộng phút vào chuỗi giờ "HH:MM"
+function addMinutesToTime(timeStr, minutes){
+  const [hh, mm] = timeStr.split(":").map(Number);
+  if(isNaN(hh) || isNaN(mm)) return "";
+
+  const d = new Date();
+  d.setHours(hh);
+  d.setMinutes(mm + minutes);
+
+  const newH = String(d.getHours()).padStart(2,"0");
+  const newM = String(d.getMinutes()).padStart(2,"0");
+  return newH + newM; // xuất dạng HHMM
+}
+
+
+// Gắn sự kiện cho nút MVD
+document.getElementById("mvdBtn").addEventListener("click", ()=>{
+  showMVD(selectedRowData);
+});
+
+//// sự kiện nút mva mvd
+function checkMVAEnable(){
+  const landingVal = document.getElementById("landing").value.trim();
+  const ataVal     = document.getElementById("ata").value.trim();
+  const coorVal    = document.getElementById("coor").value.trim();
+  const wnbVal     = document.getElementById("wnb").value.trim();
+
+  const mvaBtn = document.getElementById("mvaBtn");
+
+  if(ataVal){
+    mvaBtn.disabled = false;
+  } else {
+    mvaBtn.disabled = true;
+  }
+}
+const landingEl = document.getElementById("landing");
+const ataEl     = document.getElementById("ata");
+const coorEl    = document.getElementById("coor");
+const wnbEl     = document.getElementById("wnb");
+
+[landingEl, ataEl, coorEl, wnbEl].forEach(el => {
+  if(el){
+    el.addEventListener("input", checkMVAEnable);
+  }
+});
+/// tạo sự kiện nút OCC
+function showOCC(row){
+  if(!row){
+    alert("Bạn chưa chọn dòng (double click vào bảng)");
+    return;
+  }
+
+  const dateStr = formatDateForInput(row[1]);
+  const depFlight = (row[9] || "").toUpperCase();
+  const from = (row[4] || "").toUpperCase();
+  const to = (row[10] || "").toUpperCase();
+  const acReg = (row[2] || "").toUpperCase();
+
+  const etd = formatTimeForInput(row[12]);
+  const pushback = formatTimeForInput(row[15]);
+
+  const code1 = (row[19] || "").toUpperCase();
+  const time1 = (row[20] || "").toUpperCase();
+  const code2 = (row[21] || "").toUpperCase();
+  const time2 = (row[22] || "").toUpperCase();
+  const config = (row[25] || "").toUpperCase();
+  const details = (row[28] || "").toUpperCase();
+
+  // ===== MAP DELAY CAUSE =====
+  const delayCauseMap = {
+    OA:"KHÔNG CÓ GATE/ BÃI ĐỖ", SG:"GROUNDTIME THẤP HƠN TIÊU CHUẨN",
+    PD:"NHẬN KHÁCH MUỘN", PL:"QUẦY THỦ TỤC QUÁ TẢI",
+    PE:"LỖI CHỦ QUAN DO LÀM THỦ TỤC", PO:"OVERBOOK, LỖI BOOKING",
+    PH:"LỖI BOARDING", PS:"THIẾU TIỆN NGHI PHỤC VỤ KHÁCH/ KHÁCH BỊ MẤT ĐỒ",
+    PC:"ĐẶT SUẤT ĂN SAI", PB:"PHÂN LOẠI HÀNH LÝ CHẬM",
+    PW:"KHÁCH HẠN CHẾ DI CHUYỂN",
+
+    CD:"SAI TÀI LIỆU HÀNG HÓA", CP:"HÀNG HÓA TẬP KẾT CHẬM",
+    CC:"CHẤP NHẬN HÀNG HÓA CHẬM", CI:"LỖI ĐÓNG GÓI HÀNG HÓA",
+    CO:"LỖI ĐẶT CHỖ / BÁN QUÁ CHỖ", CU:"CARGO KÉO RA TÀU MUỘN",
+
+    GD:"TÀI LIỆU CHUYẾN BAY SAI, CHẬM", GE:"THIẾU PHƯƠNG TIỆN CHẤT XẾP",
+    GS:"THIẾU PHƯƠNG TIỆN PHỤC VỤ KHÁCH", GC:"VỆ SINH TÀU BAY CHẬM",
+    GF:"NẠP/ RÚT DẦU",
+    GT:"PHƯƠNG TIỆN PHỤC VỤ KỸ THUẬT",
+
+    TD:"LỖI KỸ THUẬT", TM:"BẢO DƯỠNG CHẬM",
+    TN:"BẢO DƯỠNG BẤT THƯỜNG", TC:"ĐỔI TÀU BAY DO KỸ THUẬT",
+    TL:"THIẾU TÀU BAY DỰ BỊ", TV:"THAY ĐỔI CONFIG",
+
+    WO:"THỜI TIẾT TẠI SÂN BAY KHỞI HÀNH",
+    WT:"THỜI TIẾT TẠI SÂN BAY ĐẾN",
+    WI:"CHỐNG PHÁ BĂNG",
+    WG:"THỜI TIẾT ẢNH HƯỞNG PVMĐ", FF:"NẠP THÊM DẦU",
+
+    AD:"ATC", AM:"ATC",
+
+    RA:"TÀU VỀ MUỘN", RO:"QUẢN LÝ ĐIỀU HÀNH KHAI THÁC",
+    MX:"BÁO CÁO TRONG DETAILS", AF:"QUÁ NĂNG LỰC CHK"
+  };
+
+  function getCause(code){
+    return delayCauseMap[(code || "").trim()] || "UNKNOWN";
+  }
+
+  function toMinutes(t){
+    if(!t) return 0;
+    return parseInt(t,10) || 0;
+  }
+
+  // ===== FORMAT DATE =====
+  let dateFormatted = "";
+  if(dateStr){
+    const [y,m,d] = dateStr.split("-");
+    dateFormatted = `${d}/${m}/${y}`;
+  }
+
+  // ===== FORMAT TIME =====
+  const etdText = etd ? etd.replace(":","") : "";
+  const pushbackText = pushback ? pushback.replace(":","") : "";
+
+  // ===== TÍNH DELAY =====
+  let delayMinutes = 0;
+  const t1 = Number(time1) || 0;
+  const t2 = Number(time2) || 0;
+  let delayMin = t1 + t2;
+  if(etd && pushback){
+    delayMinutes = parseTime(pushback) - parseTime(etd);
+    if(delayMinutes < 0) delayMinutes = 0;
+  }
+
+  let delayText = delayMinutes ? delayMinutes + " phút" : "";
+  let delayFinal = delayMinutes - delayMin
+  // ===== DELAY CODE =====
+  let delayCode = "";
+  let causeText = "";
+
+  if(code1 && !code2 && delayFinal > 0){
+    delayCode = `${code1}${time1} + AM${delayFinal}`;
+    causeText = `${getCause(code1)} + ATC`;
+  } else if(code1 && !code2 && delayFinal <= 0){
+    delayCode = `${code1}${time1}`;
+    causeText = `${getCause(code1)}`;
+  } else if(code1 && code2 && delayFinal > 0){
+    delayCode = `${code1}${time1} + ${code2}${time2} + AM${delayFinal}`;
+    causeText = `${getCause(code1)} + ${getCause(code2)} + ATC`;
+  } else if(code1 && code2 && delayFinal <= 0){
+    delayCode = `${code1}${time1} + ${code2}${time2}`;
+    causeText = `${getCause(code1)} + ${getCause(code2)}`;
+  } else if (!code1 && !code2 && delayMinutes>0 ) {
+    delayCode = `AM${delayMinutes}`;
+    causeText = 'ATC'; 
+  }
+
+  // ===== OUTPUT =====
+  const text = `Station : PQC
+Date: ${dateFormatted}
+Reporter : VNPQC 
+Flight : ${depFlight}
+Route : PQC${to}
+A/C Reg : ${acReg}
+A/C Type : ${config}
+STD : ${etdText}
+ATD : ${pushbackText}
+Delay : ${delayText}
+Delay code : ${delayCode}
+Delay Cause : ${causeText}
+Details :${details}`;
+
+  document.getElementById("occOutput").textContent = text;
+
+  // 👉 THÊM VÀO ĐÂY: Tự động copy toàn bộ đoạn text trên vào Clipboard
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        console.log("🤖 Đã tự động copy nội dung OCC vào bộ nhớ tạm!");
+      })
+      .catch(err => {
+        console.error("Lỗi tự động copy: ", err);
+      });
+  }
+
+  // clear output khác
+  if(document.getElementById("mvaOutput")) document.getElementById("mvaOutput").textContent = "";
+  if(document.getElementById("mvdOutput")) document.getElementById("mvdOutput").textContent = "";
+  if(document.getElementById("fhtOutput")) document.getElementById("fhtOutput").textContent = "";
+  if(document.getElementById("lomoResult")) document.getElementById("lomoResult").innerHTML = "";
+}
+
+// Lắng nghe nút bấm OCC và thêm hiệu ứng đổi tên nút tạm thời cho trực quan
+document.getElementById("occBtn").addEventListener("click", ()=>{
+  showOCC(selectedRowData);
+  
+  // Hiển thị trạng thái đã copy lên nút bấm để nhân viên dễ nhận biết
+  const originalText = occBtn.innerText;
+  occBtn.innerText = "✓ COPIED!";
+  occBtn.style.background = "#28a745"; // Đổi sang màu xanh lá tạm thời
+  
+  setTimeout(() => {
+    occBtn.innerText = originalText;
+    occBtn.style.background = ""; // Trả về màu cũ
+  }, 1500);
+});
+  /// get config map
+function getConfigFromAcreg(acreg){
+  const clean = (acreg || "").toString().trim().toUpperCase();
+
+  // lấy 3 ký tự cuối
+  const match = clean.match(/[A-Z0-9]{3}$/);
+  const key = match ? match[0] : "";
+
+  return configMap[key] || "";
+}
+///
+function fillConfig(){
+  let acreg = document.getElementById("soDangKy").value.toUpperCase();
+  let configInput = document.getElementById("config");
+
+  // lấy 3 ký tự chữ/số cuối cùng
+  let match = acreg.match(/[A-Z0-9]{3}$/);
+  let key = match ? match[0] : "";
+
+  if(configMap[key]){
+    configInput.value = configMap[key];
+  } else {
+    configInput.value = "";
+  }
+}
+document.getElementById("upload").onclick = function () {
+  const ldmText = document.getElementById("ldm").value;
+
+  // ===== LẤY PAX =====
+  const paxMatch = ldmText.match(/-[A-Z]{3}\.(\d+)\/(\d+)\/(\d+)/);
+
+  if (paxMatch) {
+    document.getElementById("adultCount").value = paxMatch[1];
+    document.getElementById("childrenCount").value = paxMatch[2];
+    document.getElementById("babyCount").value = paxMatch[3];
+  } else {
+    alert("Không đọc được PAX!");
+  }
+
+  // ===== LẤY ACREG =====
+  const acMatch = ldmText.match(/\.[A-Z0-9]{3,6}\./);
+
+  if (acMatch) {
+    const acReg = acMatch[0].replace(/\./g, ""); // bỏ dấu .
+    document.getElementById("soDangKy").value = acReg;
+fillConfig();
+  } else {
+    alert("Không đọc được ACreg!");
+  }
+
+  document.getElementById("ldm").value = "";
+};
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const popup = document.getElementById("exportPopup");
+  const btnExport = document.getElementById("exportBtn");
+  const btnClose = document.getElementById("closePopup");
+  const btnConfirm = document.getElementById("confirmExport");
+
+  const defaultBtnHTML = "🚀 Xác nhận xuất Excel";
+
+  btnExport.onclick = () => {
+    popup.style.display = "flex";
+  };
+
+  btnClose.onclick = () => {
+    if (btnConfirm.disabled) return; // Không cho đóng khi đang export
+    popup.style.display = "none";
+  };
+
+  btnConfirm.onclick = async () => {
+
+    const from = document.getElementById("fromDate").value;
+    const to   = document.getElementById("toDate").value;
+
+    if (!from || !to) {
+      alert("Chọn đủ From - To");
+      return;
     }
 
-    return false;
+    // Hiển thị trạng thái đang xử lý
+    btnConfirm.disabled = true;
+    btnConfirm.innerHTML = `<span class="spinner"></span> Đang xuất dữ liệu...`;
+
+    let url = API + `?from=${from}&to=${to}&t=${Date.now()}`;
+
+    try {
+
+      const res = await fetch(url);
+      const json = await res.json();
+
+      if (!json.data || json.data.length <= 1) {
+        alert("Không có dữ liệu");
+        return;
+      }
+
+      const rows = json.data.slice(1);
+
+      const exportData = rows.map(row => ({
+        DATE: formatDateForInput(row[1]),
+        ACREG: row[2],
+        ARR_FLIGHT: row[3],
+        FROM: row[4],
+        STA: formatTimeForInput(row[5]),
+        ETA: formatTimeForInput(row[6]),
+        LANDING: formatTimeForInput(row[7]),
+        ATA: formatTimeForInput(row[8]),
+        DEP_FLIGHT: row[9],
+        TO: row[10],
+        STD: formatTimeForInput(row[11]),
+        ETD: formatTimeForInput(row[12]),
+        ATD: formatTimeForInput(row[13]),
+        FHT: formatTimeForInput(row[14]),
+        PUSHBACK: formatTimeForInput(row[15]),
+        TAKEOFF: formatTimeForInput(row[16]),
+        GT: formatTimeForInput(row[17]),
+        DELAY: row[18],
+        CODE1: row[19],
+        TIME1: row[20],
+        CODE2: row[21],
+        TIME2: row[22],
+        COOR: row[23],
+        WB: row[24],
+        CONFIG: row[25],
+        LOTUS: row[26],
+        MOPLUS: row[27],
+        DETAILS: row[28],
+        ADUL: row[29],
+        CHD: row[30],
+        INF: row[31],
+        TOF: row[32],
+        PAYLOAD: row[33],
+        REP: row[34]
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(wb, ws, "DATA");
+
+      XLSX.writeFile(wb, `FLIGHT_${from}_TO_${to}.xlsx`);
+
+      popup.style.display = "none";
+
+    } catch (err) {
+
+      console.error(err);
+      alert("Lỗi export: " + err.message);
+
+    } finally {
+
+      // Khôi phục trạng thái nút
+      btnConfirm.disabled = false;
+      btnConfirm.innerHTML = defaultBtnHTML;
+
+    }
+
+  };
+
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const fromEl = document.getElementById("fromDate");
+  const toEl   = document.getElementById("toDate");
+
+  if(fromEl && toEl){
+    fromEl.value = todayStr;
+    toEl.value = todayStr;
   }
+});
+///DOM FHT POPUP
+document.addEventListener("DOMContentLoaded", () => {
+
+  const fhtPopup = document.getElementById("fhtPopup");
+  const fhtBtn   = document.getElementById("fhtBtn");
+
+  fhtBtn.onclick = () => {
+    fhtPopup.style.display = "flex";
+  };
+
+  document.getElementById("closeFHT").onclick = () => {
+    fhtPopup.style.display = "none";
+  };
+
+});
+///// GẮN SỰ KIỆN FHT
+document.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("confirmFHT").onclick = async () => {
+    console.log("CLICK FHT");
+
+    const from = document.getElementById("fhtFrom").value;
+    const to   = document.getElementById("fhtTo").value;
+    const includeBL = document.getElementById("fhtBL").checked;
+
+    console.log(from, to, includeBL);
+
+    if(!from || !to){
+      alert("Chọn đủ From - To");
+      return;
+    }
+
+    let url = API + `?from=${from}&to=${to}&t=${Date.now()}`;
+    console.log("URL:", url);
+
+    try{
+      const res = await fetch(url);
+      const json = await res.json();
+
+      console.log("DATA:", json);
+
+      if(!json.data || json.data.length <= 1){
+        alert("Không có dữ liệu");
+        return;
+      }
+
+      const rows = json.data.slice(1);
+
+      let total = 0;
+      let pass  = 0;
+
+      rows.forEach(row => {
+
+        const depFlight = (row[9] || "").toUpperCase();
+
+        // filter hãng bay
+        if(!includeBL && depFlight.startsWith("BL")) return;
+        if(!depFlight.startsWith("VN") && !depFlight.startsWith("BL")) return;
+
+        const fht = formatTimeForInput(row[14]);
+        const ata = formatTimeForInput(row[8]);
+        const etd = formatTimeForInput(row[12]);
+
+        if(!fht || !ata || !etd) return;
+
+        const fhtMin = parseTime(fht);
+        const ataMin = parseTime(ata);
+        const etdMin = parseTime(etd);
+
+        const gt = fhtMin - ataMin;
+        const diff = fhtMin - etdMin;
+
+        total++;
+
+        if(gt <= 35 || diff <= 0){
+          pass++;
+        }
+      });
+
+      console.log("TOTAL:", total, "PASS:", pass);
+
+      let percent = total ? ((pass / total) * 100).toFixed(2) : 0;
+
+      const result = `FHT REPORT
+FROM ${from} TO ${to}
+TOTAL: ${total}
+PASS: ${pass}
+RATE: ${percent}%`;
+
+  document.getElementById("occOutput").textContent = "";
+  document.getElementById("mvdOutput").textContent = "";
+  document.getElementById("fhtOutput").textContent = "";
+  document.getElementById("mvaOutput").textContent = "";  
+      document.getElementById("lomoResult").innerHTML = "";
+      document.getElementById("fhtOutput").textContent = result;
+
+      fhtPopup.style.display = "none";
+
+    }catch(err){
+      alert("Lỗi: " + err.message);
+      console.error(err);
+    }
+
+  };
+
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  document.getElementById("fhtFrom").value = today;
+  document.getElementById("fhtTo").value   = today;
+});
+/////IMPORT BUTTON
+
+  const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+
+importBtn.addEventListener("click", () => {
+  importFile.click();
+});
+
+importFile.addEventListener("change", handleImportFile);
+function handleImportFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(evt){
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, {type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        const rows = XLSX.utils.sheet_to_json(sheet, {
+  header: 1,
+  raw: false
+});
+
+    console.log("DATA IMPORT:", rows);
+
+    importToSheet(rows);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+async function importToSheet(rows){
+  // bỏ header
+  const dataRows = rows.slice(0);
+  
+  const payload = dataRows.map(r => ({
+  ngay: selectedDate,
+  soDangKy: r[0],
+  soHieu: r[2],
+  from: (r[4] || "").toString().slice(0, 3),
+  sta: r[5],
+  eta: r[5],
+  landing: "",
+  ata: "",
+  soHieu1: r[3],
+  to: (r[4] || "").toString().slice(-3),
+  std: r[6],
+  etd: r[6],
+  atd: r[12],
+  fht: r[13],
+  pushback: r[14],
+  takeoff: r[15],
+  code1: r[18],
+  time1: r[19],
+  code2: r[20],
+  time2: r[21],
+  coor: r[22],
+  wnb: r[23],
+  config: getConfigFromAcreg(r[0]) || config.value,
+  lotus: r[25] === true || r[25] === "TRUE",
+  moplus: r[26] === true || r[26] === "TRUE",
+  details: r[27],
+  adult: r[28],
+  children: r[29],
+  baby: r[30],
+  fuel: r[31],
+  payload: r[32]
+}));
+
+fetch(API,{
+  method:"POST",
+  body: JSON.stringify({
+    action: "import",
+    data: payload
+  })
+})
+.then(r=>r.json())
+.then(()=>{
+  alert("IMPORT XONG 🚀");
+  loadData();
+});
+}
+////// gọi AI
   </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<script>
+
+
+//const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+fetch(API + "?type=wbchart&t=" + Date.now())
+.then(r => r.json())
+.then(res => {
+
+  const map = res.data;
+
+  // object -> array
+  let arr = Object.entries(map);
+
+  // sắp xếp giảm dần
+  arr.sort((a,b) => b[1] - a[1]);
+
+  const labels = arr.map(x => x[0]);
+  const values = arr.map(x => x[1]);
+
+  new Chart(document.getElementById("wbChart"), {
+
+    type: "bar",
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: "Số chuyến",
+        data: values,
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+     maintainAspectRatio: false,
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+
+  });
+
+});
+// ===== COOR =====
+fetch(API + "?type=coorchart&t=" + Date.now())
+.then(r => r.json())
+.then(res => {
+
+  const map = res.data;
+
+  let arr = Object.entries(map);
+
+  arr.sort((a,b) => b[1] - a[1]);
+
+  const labels = arr.map(x => x[0]);
+  const values = arr.map(x => x[1]);
+
+  new Chart(document.getElementById("coorChart"), {
+
+    type: "bar",
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: "Số chuyến",
+        data: values,
+        backgroundColor: "#ff1744",
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+
+  });
+
+});
+
+// =========================================================================
+// 1. HÀM CHUYỂN TAB AN TOÀN TUYỆT ĐỐI (Tự động load Roster & Cargo khi đổi tab)
+// =========================================================================
+window.showTab = function(tabId, event) {
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(content => {
+    content.classList.remove('active');
+    content.style.display = 'none'; 
+  });
+  
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add('active');
+    targetTab.style.display = 'block'; 
+  }
+  
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
+  }
+
+  // Tự động vẽ và tải lịch trực nếu mở tab Roster
+  if (tabId === 'rosterTab') {
+    setTimeout(function() {
+      if (typeof window.renderRoster === 'function') {
+        window.renderRoster();
+      }
+    }, 50);
+  }
+
+  // Tự động tải dữ liệu nếu mở tab Cargo (Giải quyết lỗi không tự load)
+  if (tabId === 'cargoTab') { 
+    setTimeout(function() {
+      if (typeof window.loadCargoFromSheet === 'function') {
+        window.loadCargoFromSheet();
+      }
+    }, 50);
+  }
+};
+
+// ==========================================
+// 2. DANH SÁCH NHÂN SỰ
+// ==========================================
+const staffList = [
+  "VÕ TRUNG DŨNG",
+  "NGUYỄN VĂN QUÂN",
+  "NGUYỄN QUỐC QUANG",
+  "TỪ ĐỨC NGUYÊN"
+];
+
+// ==========================================
+// 3. HÀM VẼ LỊCH TRỰC VÀ TẢI DỮ LIỆU TỪ SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// ==========================================
+window.renderRoster = function() {
+  const selectBox = document.getElementById("rosterMonthSelect");
+  const table = document.getElementById("rosterTable");
+  if (!selectBox || !table) return;
+  
+  const month = parseInt(selectBox.value) || 6;
+  const year = 2026; 
+  
+  const totalDays = new Date(year, month, 0).getDate();
+  
+  let headerRow1 = '<tr><th rowspan="2" style="vertical-align: middle; min-width: 150px;">NAME</th>';
+  let headerRow2 = '<tr>';
+  
+  const isWeekendArr = [];
+  
+  for (let d = 1; d <= totalDays; d++) {
+    const dateObj = new Date(year, month - 1, d);
+    const dayOfWeek = dateObj.getDay(); 
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    isWeekendArr.push(isWeekend);
+    
+    const weekendClass = isWeekend ? 'class="roster-weekend"' : '';
+    const dayName = dayOfWeek === 0 ? "CN" : "T" + (dayOfWeek + 1);
+    
+    headerRow1 += `<th ${weekendClass}>${d}</th>`;
+    headerRow2 += `<th ${weekendClass} style="font-size:10px; font-weight:normal;">${dayName}</th>`;
+  }
+  
+  headerRow1 += '</tr>';
+  headerRow2 += '</tr>';
+  
+  let bodyRows = "";
+  staffList.forEach(staff => {
+    const nameStyle = staff === "TỪ ĐỨC NGUYÊN" ? 'style="color: red;"' : '';
+    bodyRows += `<tr id="row-${btoa(encodeURIComponent(staff))}"> <td ${nameStyle}>${staff}</td>`;
+    
+    for (let d = 1; d <= totalDays; d++) {
+      const isWeekend = isWeekendArr[d - 1];
+      const weekendClass = isWeekend ? "roster-weekend" : "";
+      const colIndex = d + 1; 
+      
+      bodyRows += `<td class="${weekendClass}">
+        <input class="roster-input" data-col="${colIndex}" data-staff="${staff}" value="" oninput="window.updateShiftColor(this)">
+      </td>`;
+    }
+    bodyRows += '</tr>';
+  });
+  
+  table.innerHTML = `<thead>${headerRow1}${headerRow2}</thead><tbody>${bodyRows}</tbody>`;
+
+  // --- THAY THẾ ĐOẠN LOAD ROSTER THÀNH FETCH API (GET) ---
+  const sheetName = month.toString(); 
+  
+  fetch(`${API}?action=loadRoster&sheet=${sheetName}`)
+    .then(response => response.json())
+    .then(dataArray => {
+      if (!dataArray || dataArray.length === 0) return;
+      
+      dataArray.forEach(row => {
+        const staffName = row.name;
+        const colIndex = row.date; 
+        const shiftValue = row.value;
+        
+        const input = table.querySelector(`input[data-staff="${staffName}"][data-col="${colIndex}"]`);
+        if (input) {
+          input.value = shiftValue;
+          
+          const td = input.parentElement;
+          if (td) {
+            td.classList.remove("shift-n", "shift-p", "shift-t");
+            if (shiftValue.startsWith("N")) td.classList.add("shift-n");
+            else if (shiftValue.startsWith("P")) td.classList.add("shift-p");
+            else if (shiftValue.startsWith("T")) td.classList.add("shift-t");
+          }
+        }
+      });
+    })
+    .catch(error => console.error("Lỗi khi tải lịch trực từ API:", error));
+};
+
+// =========================================================================
+// 4. HÀM ĐỔI MÀU Ô TRỰC QUAN
+// =========================================================================
+window.updateShiftColor = function(input) {
+  const val = input.value.toUpperCase();
+  input.value = val;
+  const td = input.parentElement;
+  if (!td) return;
+  
+  td.classList.remove("shift-n", "shift-p", "shift-t");
+  if (val.startsWith("N")) {
+    td.classList.add("shift-n");
+  } else if (val.startsWith("P")) {
+    td.classList.add("shift-p");
+  } else if (val.startsWith("T")) {
+    td.classList.add("shift-t");
+  }
+};
+
+// =========================================================================
+// 5. HÀM LƯU TOÀN BỘ LỊCH TRỰC VÀO SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// =========================================================================
+window.saveAllRoster = function() {
+  const table = document.getElementById("rosterTable");
+  const selectBox = document.getElementById("rosterMonthSelect");
+  if (!table || !selectBox) return;
+
+  const sheetName = selectBox.value.toString(); 
+  const inputs = table.querySelectorAll(".roster-input");
+  const rosterData = [];
+
+  inputs.forEach(input => {
+    const val = input.value.trim().toUpperCase();
+    rosterData.push({
+      staffName: input.getAttribute("data-staff"),
+      colIndex: parseInt(input.getAttribute("data-col"), 10),
+      value: val
+    });
+  });
+
+  const saveBtn = document.getElementById("saveRosterBtn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Đang lưu dữ liệu...";
+  }
+
+  // --- THAY THẾ ĐOẠN SAVE ROSTER THÀNH FETCH API (POST) ---
+  const payload = {
+    action: "saveBulk",
+    sheet: sheetName,
+    data: rosterData
+  };
+
+  fetch(API, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(res => {
+    alert("Hệ thống: " + (res.message || "Đã lưu thành công!"));
+  })
+  .catch(error => {
+    alert("Lỗi kết nối máy chủ hoặc lỗi lưu dữ liệu: " + error.message);
+    console.error(error);
+  })
+  .finally(() => {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerText = "LƯU LỊCH TRỰC";
+    }
+  });
+};
+// ==========================
+// LOAD CARGO DATA
+// ==========================
+function loadCargoData(){
+
+  const input = document
+    .getElementById("cargoInput")
+    .value;
+
+  const tbody = document.getElementById("cargoBody");
+
+  tbody.innerHTML = "";
+
+  if(!input.trim()) return;	
+
+  // Tách từng dòng
+  const lines = input
+    .split("\n")
+    .filter(line => line.trim() !== "");
+
+  lines.forEach((line, index)=>{
+
+    // Bỏ dòng header đầu tiên
+    if(index === 0) return;
+
+    // ==========================
+    // TÁCH THEO 1000000
+    // ==========================
+    let arr = line.split("1000000");
+
+    // trim nhưng KHÔNG xoá rỗng
+    arr = arr.map(x => x.trim());
+
+    // Nếu phần tử đầu rỗng -> bỏ
+    if(arr[0] === ""){
+      arr.shift();
+    }
+
+    // Nếu phần tử cuối rỗng -> bỏ
+    if(arr[arr.length - 1] === ""){
+      arr.pop();
+    }
+
+    // ==========================
+    // TẠO ROW
+    // ==========================
+    const tr = document.createElement("tr");
+
+    arr.forEach(col=>{
+
+      const td = document.createElement("td");
+
+      // giữ ô trống đúng vị trí
+      td.textContent = col || "";
+
+      tr.appendChild(td);
+
+    });
+
+    tbody.appendChild(tr);
+
+  });
+document.getElementById("cargoInput").value = "";
+}
+document.getElementById("awbSearch")
+  .addEventListener("input", function(){
+    loadHancoData(); // gọi lại filter
+});
+
+function showDepCargoPopup(){
+document.getElementById("cargoPopupTitle")
+  .innerText = "🛫 DEP CARGO SQL";
+
+  const today = new Date();
+
+  const yyyy = today.getFullYear();
+
+  const mm = String(today.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd = String(today.getDate())
+    .padStart(2, "0");
+
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  const sql = `SELECT DISTINCT 
+    a.issue_date, 1000000,
+    a.prefix || a.serial AS AWB, 1000000,
+    NVL(T.TEXT, ' ') AS ACC_INFO, 1000000, 
+    a.origin, 1000000,
+    a.dest, 1000000,
+    a.nature_goods, 1000000,
+    e.shipper, 1000000, 
+    F1.FLIGHT_NUMBER AS FLIGHT, 1000000,
+    a.pieces, 1000000,
+    a.weight, 1000000,
+    e.charge_weight, 1000000,
+    I1.COMMODITY AS COMMODITY1, 1000000,
+    e.sell_total / NULLIF(e.charge_weight, 0) AS RATE, 1000000,
+    (e.sell_total + e.pp_carrier + e.vat_carrier) AS TOTAL, 1000000,
+    /* Cắt bỏ số lẻ, chỉ lấy phần nguyên 9213 */
+    TRUNC((e.sell_total + e.pp_carrier + e.vat_carrier) / NULLIF(a.weight, 0)) AS "DT/KG"
+FROM awb a
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE = 1
+LEFT OUTER JOIN AWB_FLT F1 ON A.SEQ = F1.AWB_SEQ AND F1.LINE = 1 AND F1.AWB_MOVE_SEQ = 0
+LEFT OUTER JOIN AWB_IATA I1 ON A.SEQ = I1.AWB_SEQ AND I1.LINE = 1, 
+awb_exp e, 
+AWB_MOVE M 
+WHERE ((prefix != '368') 
+    AND a.ISSUE_DATE = '${dateStr}' 
+    AND a.ORIGIN = 'PQC' 
+    AND e.ACCOUNT_DATE = '${dateStr}' 
+    AND e.ORIGIN = 'PQC' 
+    AND awb_exp_seq = e.seq 
+    AND awb_exp_seq != 0) 
+    AND (ROWNUM <= 200) 
+    AND A.SEQ = M.AWB_SEQ 
+ORDER BY AWB`;
+
+  document.getElementById("depCargoText")
+    .value = sql;
+
+  document.getElementById("depCargoPopup")
+    .style.display = "flex";
+}
+
+
+function closeDepCargoPopup(){
+
+  document.getElementById("depCargoPopup")
+    .style.display = "none";
+}
+
+
+function copyDepCargo(){
+
+  const text = document.getElementById("depCargoText");
+
+  text.select();
+
+  document.execCommand("copy");
+
+  alert("✅ Copied");
+}
+function showArrCargoPopup(){
+document.getElementById("cargoPopupTitle")
+  .innerText = "🛬 ARR CARGO SQL";
+
+  const today = new Date();
+
+  const yyyy = today.getFullYear();
+
+  const mm = String(today.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd = String(today.getDate())
+    .padStart(2, "0");
+
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  const sql = `SELECT TO_CHAR(M.FLIGHT_DATE,'DD-MON-YYYY') AS FLIGHT_DATE,
+M.CARRIER || M.FLIGHT_NUMBER AS FL_NO,
+A.PREFIX||A.SERIAL AS AWB_NO,
+M.NATURE_GOODS NATURE,
+M.EXP_PIECES AS UNIT,
+M.EXP_WEIGHT AS WEIGHT,
+NVL(M.SHC,'NML') || ' ' || NVL(A.REMARKS,' ')  AS SHC,
+P.NAME AS SNAME,
+P1.NAME || ' - ' || P1.TEL1 AS CNAME,
+NVL(P1.ADDRESS1,' ') || ' ' || NVL(P1.ADDRESS2,'') AS CADD,
+DECODE(SUBSTR(M.ULD_NUMBER,1,1),'-','BULK',REPLACE(REPLACE(M.ULD_NUMBER,'=',''),'-','')) AS BUCKET,
+M.ORIGIN||'/'||M.DEST AS ROUTE,
+NVL(T.TEXT,' ') ACC_INFO
+FROM AWB A
+JOIN AWB_MOVE M ON A.SEQ = M.AWB_SEQ
+JOIN AWB_EXP E ON A.SEQ = E.AWB_SEQ AND E.EXP_IMP = 'E'
+LEFT OUTER JOIN PART P ON E.SHIPPER = P.CODE
+LEFT OUTER JOIN PART P1 ON E.CONSIGNEE = P1.CODE
+LEFT OUTER JOIN AWB_ACC_TEXT T ON A.SEQ = T.AWB_SEQ AND T.LINE =1
+WHERE A.PREFIX|| A.SERIAL<>'MAL'
+AND ACTION_STATUS='DEP'
+AND A.ORIGIN IN ('BMV','CXR','DAD','DFD','DIN','DLI','HAN','HPH','HUI','NHA','PQC','PXV','SGN','SQH','TBB','UIH','VIH','VII','VKG','THD','VDH')
+AND A.DEST = 'PQC'
+AND M.DEST = 'PQC'
+AND M.FLIGHT_DATE BETWEEN '${dateStr}' AND '${dateStr}'
+ORDER BY M.FLIGHT_DATE, M.CARRIER || M.FLIGHT_NUMBER`;
+
+  document.getElementById("depCargoText")
+    .value = sql;
+
+  document.getElementById("depCargoPopup")
+    .style.display = "flex";
+}
+//UPDATE CARGO TO GAS
+function updateCargoData(){
+
+  const rows = document.querySelectorAll("#cargoBody tr");
+  let data = [];
+
+  rows.forEach(tr => {
+    const cells = tr.querySelectorAll("td");
+    let row = [];
+
+    cells.forEach(td => {
+      row.push(td.innerText.trim());
+    });
+
+    if(row.length > 0){
+      data.push(row);
+    }
+  });
+
+  if(data.length === 0){
+    alert("❌ Không có dữ liệu cargo");
+    return;
+  }
+
+  // 👉 GỬI LÊN GOOGLE APPS SCRIPT
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "updatecargo",
+      cargo: data
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.status === "success"){
+      alert("✅ Update CARGO thành công");
+    } else {
+      alert("❌ Lỗi: " + res.message);
+    }
+  })
+  .catch(err => {
+    alert("❌ Lỗi kết nối API");
+    console.error(err);
+  });
+
+}
+// lấy cargo update lên cargo body
+function loadCargoFromSheet(){
+
+  const tbody = document.getElementById("cargoBody");
+
+  tbody.innerHTML = "⏳ Loading...";
+
+  fetch(API + "?action=getCargo&t=" + Date.now())
+    .then(res => res.json())
+    .then(res => {
+
+      const data = res.data || res;
+
+      tbody.innerHTML = "";
+
+      if(!data || data.length <= 1){
+        tbody.innerHTML = "<tr><td colspan='15'>Không có dữ liệu</td></tr>";
+        return;
+      }
+
+      // ❗ bỏ header (row 0)
+      data.slice(1).forEach(row => {
+
+        const tr = document.createElement("tr");
+
+        row.forEach(col => {
+          const td = document.createElement("td");
+          td.textContent = col || "";
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+
+      });
+
+    })
+    .catch(err => {
+      tbody.innerHTML = "<tr><td colspan='15'>❌ Lỗi load dữ liệu</td></tr>";
+      console.error(err);
+    });
+
+}
+function showHancoPopup(){
+  document.getElementById("hancoPopup").style.display = "flex";
+}
+
+function closeHancoPopup(){
+  document.getElementById("hancoPopup").style.display = "none";
+}
+function toDate(val) {
+    if (!val) return null;
+
+    // Xử lý định dạng dd/mm/yyyy hoặc yyyy-mm-dd
+    if (typeof val === "string") {
+        let parts;
+        if (val.includes("/")) {
+            parts = val.split("/"); // dd/mm/yyyy
+            const date = new Date(parts[2], parts[1] - 1, parts[0]);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        } else if (val.includes("-")) {
+            parts = val.split("-"); // yyyy-mm-dd
+            // Kiểm tra xem là yyyy-mm-dd hay dd-mm-yyyy
+            const date = parts[0].length === 4 
+                ? new Date(parts[0], parts[1] - 1, parts[2]) 
+                : new Date(parts[2], parts[1] - 1, parts[0]);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+    }
+
+    const d = new Date(val);
+    if (isNaN(d)) return null;
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+function loadHancoData() {
+    // 1. Lấy giá trị các ô input lọc
+    const awbKey = (document.getElementById("awbSearch").value || "").toUpperCase().trim();
+    const keyword = (document.getElementById("hancoShipper").value || "").toUpperCase().trim();
+    const natureInput = (document.getElementById("hancoNatureSearch").value || "").toUpperCase().trim();
+    const natureKeys = natureInput ? natureInput.split(",").map(k => k.trim()) : [];
+
+    const from = document.getElementById("hancoFrom").value;
+    const to = document.getElementById("hancoTo").value;
+
+    if (!from || !to) {
+        alert("❌ Chọn đủ FROM - TO");
+        return;
+    }
+
+    // 2. KHAI BÁO CÁC PHẦN TỬ HIỂN THỊ (QUAN TRỌNG: Phải có các dòng này)
+    const tbody = document.getElementById("hancoBody");
+    const sumPcsEl = document.getElementById("sumPcs");
+    const sumWeightEl = document.getElementById("sumWeight");
+    const sumTotalEl = document.getElementById("sumTotal");
+    const accPcsEl = document.getElementById("accPcs");
+    const accWeightEl = document.getElementById("accWeight");
+    const accTotalEl = document.getElementById("accTotal");
+
+    tbody.innerHTML = "⏳ Loading...";
+
+    // 3. Xử lý ngày tháng
+    const fromD = toDate(from);
+    const toD = toDate(to);
+    const startOfMonth = new Date(fromD.getFullYear(), fromD.getMonth(), 1);
+
+    // 4. Gọi API
+    fetch(API + "?action=getCargo&t=" + Date.now())
+        .then(res => res.json())
+        .then(res => {
+            const data = res.data || []; // Đảm bảo data không bị null
+            tbody.innerHTML = "";
+            
+            let totalPcs = 0, totalWeight = 0, totalMoney = 0;
+            let accPcs = 0, accWeight = 0, accMoney = 0;
+            let count = 0;
+
+            data.slice(1).forEach((row) => {
+                const issue = toDate(row[0]);
+                if (!issue) return;
+
+                const natureVal = String(row[5] || "").toUpperCase(); 
+                const pcs = parseFloat(row[8]) || 0;
+                const weight = parseFloat(row[9]) || 0;
+                const total = parseFloat(row[13]) || 0;
+
+                // LOGIC LỌC
+                const matchAWB = (!awbKey || String(row[1] || "").toUpperCase().includes(awbKey));
+                const matchShipper = (!keyword || String(row[6] || "").toUpperCase().includes(keyword));
+                const matchNature = natureKeys.length === 0 || natureKeys.some(key => natureVal.includes(key));
+
+                // Tính Lũy kế tháng (từ mùng 1 đến ngày "To")
+                if (issue >= startOfMonth && issue <= toD && matchAWB && matchShipper && matchNature) {
+                    accPcs += pcs;
+                    accWeight += weight;
+                    accMoney += total;
+                }
+
+                // Hiển thị Table & Tính Tổng cộng trong khoảng chọn (From - To)
+                if (issue >= fromD && issue <= toD && matchAWB && matchShipper && matchNature) {
+                    totalPcs += pcs;
+                    totalWeight += weight;
+                    totalMoney += total;
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${row[0]}</td>
+                        <td>${row[7] || ""}</td>
+                        <td>${row[1]}</td>
+                        <td>${row[3]}</td>
+                        <td>${row[4]}</td>
+                        <td style="color: blue; font-weight: bold;">${row[5] || ""}</td>
+                        <td>${row[6]}</td>
+                        <td>${pcs.toLocaleString()}</td>
+                        <td>${weight.toLocaleString()}</td>
+                        <td>${total.toLocaleString()}</td>
+                        <td>${row[14] || ""}</td>
+                    `;
+                    tbody.appendChild(tr);
+                    count++;
+                }
+            });
+
+            // Gán giá trị vào footer (toLocaleString để định dạng số có dấu phẩy)
+            sumPcsEl.innerText = totalPcs.toLocaleString();
+            sumWeightEl.innerText = totalWeight.toLocaleString();
+            sumTotalEl.innerText = totalMoney.toLocaleString();
+            accPcsEl.innerText = accPcs.toLocaleString();
+            accWeightEl.innerText = accWeight.toLocaleString();
+            accTotalEl.innerText = accMoney.toLocaleString();
+
+            if (count === 0) {
+                tbody.innerHTML = "<tr><td colspan='11'>❌ Không tìm thấy dữ liệu</td></tr>";
+            }
+        })
+        .catch(err => {
+            tbody.innerHTML = "<tr><td colspan='11'>❌ Lỗi load dữ liệu. Vui lòng kiểm tra console log.</td></tr>";
+            console.error("Fetch Error:", err);
+        });
+}
+function captureHancoTable() {
+    // Chỉ chọn đúng bảng để chụp, bỏ qua filter và các nút bấm
+    const exportArea = document.querySelector("#hancoPopup table"); 
+
+    const btn = event.target;
+    btn.innerText = "⏳ Capturing...";
+    btn.disabled = true;
+
+    html2canvas(exportArea, {
+        backgroundColor: "#ffffff",
+        scale: 3, // Tăng lên 3 cho cực nét vì table thường nhiều chữ nhỏ
+        useCORS: true,
+    }).then(canvas => {
+        const link = document.createElement("a");
+        const today = new Date().toISOString().slice(0, 10);
+        link.download = `HANCO_REPORT_${today}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        btn.innerText = "📸 SCREENSHOT";
+        btn.disabled = false;
+    }).catch(err => {
+        console.error(err);
+        alert("❌ Lỗi chụp bảng");
+        btn.disabled = false;
+    });
+}
+function showLinkPopup(){
+  document.getElementById("linkPopup").style.display = "flex";
+}
+
+function closeLinkPopup(){
+  document.getElementById("linkPopup").style.display = "none";
+}
+
+function guiCauHoiAI() {
+  const promptInput = document.getElementById("aiPrompt").value.trim();
+  const responseDiv = document.getElementById("aiResponse");
+
+  if (!promptInput) {
+    alert("Vui lòng nhập câu hỏi!");
+    return;
+  }
+
+  // Hiển thị trạng thái chờ để người dùng biết AI đang xử lý
+  responseDiv.style.color = "#333";
+  responseDiv.innerHTML = "⏳ <b>AI đang suy nghĩ, vui lòng đợi trong giây lát...</b>";
+
+  // 🔥 ĐÃ SỬA: Đưa link trực tiếp vào chuỗi, chỉ bọc biến promptInput trong ${}
+  const url = `https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec?action=askGemini&prompt=${encodeURIComponent(promptInput)}`;
+  fetch(url)
+    .then(response => response.json())
+    .then(json => {
+      if (json && json.reply) {
+        // 🔥 Đổ câu trả lời của Gemini vào ô hiển thị trên màn hình
+        responseDiv.innerHTML = `🤖 <b>F&S trả lời:</b>\n${json.reply}`;
+      } else {
+        responseDiv.innerHTML = "❌ Không nhận được phản hồi đúng cấu trúc từ Script.";
+      }
+    })
+    .catch(error => {
+      console.error("Lỗi:", error);
+      responseDiv.innerHTML = "❌ Lỗi kết nối đến AI: " + error.message;
+    });
+}
+
+async function dongBoThongKeTuAPI() {
+  // 1. Kiểm tra mật khẩu trước khi cho phép chạy code phía dưới
+  const matKhauNhap = prompt("Vui lòng nhập mật khẩu để đồng bộ dữ liệu:");
+  
+  if (matKhauNhap === null) {
+    return; // Người dùng bấm "Hủy" (Cancel) -> Thoát hàm
+  }
+  
+  if (matKhauNhap !== "846721") {
+    alert("❌ Mật khẩu không chính xác! Hành động bị từ chối.");
+    return; // Sai mật khẩu -> Thoát hàm
+  }
+
+  // 2. Nội dung xử lý cũ của bạn sau khi đã qua vòng gửi xe
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec?action=loadYearlyStat";
+  const syncBtn = document.getElementById("syncApiBtn");
+  
+  syncBtn.innerText = "⏳ ĐANG TẢI DATA...";
+  syncBtn.disabled = true;
+
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error("Mất kết nối API");
+    
+    const thongKeNam = await response.json();
+
+    const rows = document.querySelectorAll("#rosterStatBody tr");
+    rows.forEach(row => {
+      const name = row.getAttribute("data-name");
+      
+      if (thongKeNam[name]) {
+        const pUsed = parseInt(thongKeNam[name].P) || 0;
+        const bUsed = parseInt(thongKeNam[name].B) || 0;
+        const lUsed = parseInt(thongKeNam[name].L) || 0;
+
+        const maxP = Number(row.getAttribute("data-p")) || 0;
+        const maxB = Number(row.getAttribute("data-b")) || 0;
+        const maxL = Number(row.getAttribute("data-l")) || 0;
+
+        row.querySelector(".p-used").innerText = pUsed;
+        row.querySelector(".b-used").innerText = bUsed;
+        row.querySelector(".l-used").innerText = lUsed;
+
+        row.querySelector(".p-remain").innerText = maxP - pUsed;
+        row.querySelector(".b-remain").innerText = maxB - bUsed;
+        row.querySelector(".l-remain").innerText = maxL - lUsed;
+      }
+    });
+
+    alert("🎉 Đã đồng bộ dữ liệu P, B, L từ 12 Tab thành công!");
+
+  } catch (error) {
+    console.error("Lỗi đồng bộ hệ thống:", error);
+    alert("❌ Lỗi đồng bộ dữ liệu hệ thống.");
+  } finally {
+    syncBtn.innerText = "🔄 ĐỒNG BỘ DATA 12 THÁNG TỪ API";
+    syncBtn.disabled = false;
+  }
+}
+
+// Hàm hiển thị Popup Gantt
+function showGanttPopup() {
+  document.getElementById("ganttPopup").style.display = "flex";
+  
+  // Tự động lấy giờ ATA hoặc STA từ form chính điền vào làm mặc định nếu có
+  const ataValue = document.getElementById("ata") ? document.getElementById("ata").value : "";
+  if (ataValue) {
+    document.getElementById("ganttChockOnInput").value = ataValue;
+  }
+  tinhToanGanttTimeline();
+}
+
+// Hàm đóng Popup Gantt
+function closeGanttPopup() {
+  document.getElementById("ganttPopup").style.display = "none";
+}
+
+// Hàm xử lý cộng giờ phút và hiển thị chuỗi mũi tên
+function tinhToanGanttTimeline() {
+  const chockOnTime = document.getElementById("ganttChockOnInput").value.trim();
+  const wrapper = document.getElementById("ganttTimelineWrapper");
+  
+  // Kiểm tra định dạng thời gian HH:MM
+  if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(chockOnTime)) {
+    alert("Vui lòng nhập đúng định dạng giờ dạng HH:MM (Ví dụ: 09:00)");
+    return;
+  }
+
+  // Tách giờ và phút gốc
+  const [hours, minutes] = chockOnTime.split(":").map(Number);
+
+  // Định nghĩa danh sách cấu trúc mốc thời gian và số phút cộng thêm (offset)
+  const quyTrinhTurnaround = [
+    { name: "🛬 Chock-on (Đóng chèn)", offset: 0 },
+    { name: "🚶 Disembarkation Started (Bắt đầu khách xuống)", offset: 3 },
+    { name: "💼 Loading Started (Bắt đầu dỡ hầm hàng)", offset: 3 },
+    { name: "⛽ Fuel Started (Bắt đầu nạp nhiên liệu)", offset: 9 },
+    { name: "🛑 Disembarkation Completed (Khách xuống hết)", offset: 9 },
+    { name: "🧹 Cleaning Started (Bắt đầu dọn dẹp cabin)", offset: 9 },
+    { name: "🚌 Preboarding (Bắt đầu cho khách lên xe)", offset: 10 },
+    { name: "🚠 Preboarding (Bắt đầu cho khách ra ống)", offset: 15 },
+    { name: "✨ Cleaning Completed (Dọn dẹp xong cabin)", offset: 17 },
+    { name: "✅ Fuel Completed (Nạp xong nhiên liệu)", offset: 20 },
+    { name: "🧑‍✈️ Embarkation Started (Bắt đầu đón khách lên)", offset: 20 },
+    { name: "🔒 Embarkation Completed (Đóng cửa tàu/Khách lên hết)", offset: 33 },
+    { name: "📦 Loading Completed (Chất xếp xong hầm hàng)", offset: 33 },
+    { name: "⏰ Aero Bridge/Steps Started Release (Bắt đầu rút ống/thang)", offset: 33 },
+    { name: "✈️ Aero Bridge/Steps Released (Rút xong - Sẵn sàng đẩy lùi)", offset: 35 },
+  ];
+
+  wrapper.innerHTML = ""; // Xóa dữ liệu cũ để vẽ lại
+
+  // Vòng lặp tính toán thời gian thực tế cho từng mốc
+  quyTrinhTurnaround.forEach(step => {
+    // Thuật toán cộng phút xử lý trường hợp tràn qua giờ mới (quá 60 phút)
+    let tongPhut = minutes + step.offset;
+    let gioThucTe = hours + Math.floor(tongPhut / 60);
+    let phutThucTe = tongPhut % 60;
+    
+    // Xử lý nếu giờ vượt quá 24h đêm
+    gioThucTe = gioThucTe % 24;
+
+    // Định dạng chuỗi hiển thị số có 2 chữ số (Ví dụ: 09:05)
+    const gioIn = String(gioThucTe).padStart(2, '0');
+    const phutIn = String(phutThucTe).padStart(2, '0');
+    const thoiGianKetQua = `${gioIn}:${phutIn}`;
+
+    // Đổi màu sắc đặc biệt cho điểm mốc Chock-on đầu và FHT cuối để làm nổi bật tiến trình
+    let mauVien = "#6f42c1"; // Tím mặc định
+    let nenMoc = "#e9ecef";
+    if (step.offset === 0) { mauVien = "#28a745"; nenMoc = "#d4edda"; } // Xanh lá cho Chock-on
+    if (step.offset === 35) { mauVien = "#dc3545"; nenMoc = "#f8d7da"; } // Đỏ nổi bật cho mốc FHT kết thúc
+
+    // Tạo phần tử giao diện mũi tên hàng dọc
+    const stepHtml = `
+      <div class="gantt-step" style="border-left-color: ${mauVien}; background-color: ${nenMoc};">
+        <div class="gantt-time">${thoiGianKetQua}</div>
+        <div class="gantt-name">${step.name}</div>
+        <div class="gantt-offset">+${step.offset} min</div>
+      </div>
+    `;
+    wrapper.insertAdjacentHTML("beforeend", stepHtml);
+  });
+}
+// =======================
+// IMMI POPUP
+// =======================
+
+function showImmiPopup() {
+
+    // Nếu có ô ngày chính thì lấy mặc định
+    const mainDate = document.getElementById("ngay");
+    if (mainDate) {
+        document.getElementById("immiDate").value = mainDate.value;
+    }
+
+    document.getElementById("immiPopup").style.display = "flex";
+}
+
+function closeImmiPopup() {
+    document.getElementById("immiPopup").style.display = "none";
+}
+
+function showLoadingExport() {
+    document.getElementById("loadingExport").style.display = "flex";
+}
+
+function hideLoadingExport() {
+    document.getElementById("loadingExport").style.display = "none";
+}
+
+
+// =======================
+// EXPORT IMMI
+// =======================
+
+async function exportIMMI() {
+
+    showLoadingExport();
+
+    try {
+
+        const selectedDate = document.getElementById("immiDate").value;
+const vnChecked = document.getElementById("immiVN").checked;
+const blChecked = document.getElementById("immiBL").checked;
+
+if (!vnChecked && !blChecked) {
+    alert("Vui lòng chọn hãng muốn trích xuất dữ liệu.");
+    return;
+}
+
+        if (!selectedDate) {
+            alert("Vui lòng chọn ngày bay.");
+            return;
+        }
+
+        const res = await fetch(
+            API +
+            "?action=immi" +
+            "&date=" + encodeURIComponent(selectedDate) +
+            "&t=" + Date.now()
+        );
+
+        const json = await res.json();
+        const data = json.data || [];
+
+        if (data.length <= 1) {
+            alert("Không có chuyến bay trong ngày " + selectedDate);
+            return;
+        }
+
+        const output = [];
+
+        // Header
+        output.push([
+            "Số hiệu (*)",
+            "Ngày bay yyyy-MM-dd (*)",
+            "Mã hãng (*)",
+            "Cảng đi (*)",
+            "Cảng đến (*)",
+            "Khởi hành yyyy-MM-dd HH:mm",
+            "Loại chuyến (DOMESTIC/INTERNATIONAL)",
+            "Số ĐK tàu bay",
+            "PAX"
+        ]);
+
+        for (let i = 1; i < data.length; i++) {
+
+            const row = data[i];
+
+const flightNo = String(row[9] || "").trim();
+const airlineCode = flightNo.substring(0, 2).toUpperCase();
+
+// Lọc theo checkbox
+if (
+    (airlineCode === "VN" && !vnChecked) ||
+    (airlineCode === "BL" && !blChecked)
+) {
+    continue;
+}
+
+// Nếu là hãng khác VN/BL thì bỏ qua
+if (airlineCode !== "VN" && airlineCode !== "BL") {
+    continue;
+}
+
+            const ngay = formatDateForInput(row[1]);
+
+            const pax =
+                (+row[29] || 0) +
+                (+row[30] || 0) +
+                (+row[31] || 0);
+
+            const gio = formatTimeForInput(row[13]);
+
+            // Chuyển VNA321 -> VN-A321
+            let reg = String(row[2] || "").trim();
+
+            if (/^VN[A-Z]/.test(reg)) {
+                reg = reg.replace(/^VN([A-Z])/, "VN-$1");
+            }
+
+output.push([
+    row[9] || "",
+    ngay,
+    airlineCode,
+    "PQC",
+    row[10] || "",
+    ngay + " " + gio,
+    "DOMESTIC",
+    reg,
+    pax
+]);
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(output);
+
+        // Ép cột H (Số ĐK) thành Text
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+
+        for (let r = 1; r <= range.e.r; r++) {
+
+            const cell = XLSX.utils.encode_cell({
+                r: r,
+                c: 7 // cột H
+            });
+
+            if (ws[cell]) {
+                ws[cell].t = "s";
+            }
+        }
+
+        XLSX.utils.book_append_sheet(wb, ws, "Import");
+
+        XLSX.writeFile(
+            wb,
+            "IMMI_" + selectedDate.replaceAll("-", "") + ".xlsx"
+        );
+
+        closeImmiPopup();
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Có lỗi khi xuất dữ liệu: " + err.message);
+
+    } finally {
+
+        hideLoadingExport();
+
+    }
+}
+
+</script>
+<script>
+
+const airlineColors = {
+  "VN":"#0066cc",
+  "VJ":"#ff0000",
+  "QH":"#00aa00",
+  "BL":"#ff9900",
+  "9G":"#c9a27a",
+  "VU":"#ffff00",
+  "0V":"#003399"
+};
+
+let bctcnChartInstance = null;
+let currentReportType = "TCN";
+
+async function showBCTCNChart(){
+  document.getElementById(
+    "bctcnReportContainer"
+  ).style.display = "none";
+
+  document.getElementById(
+    "bctcnChartContainer"
+  ).style.display = "block";
+
+  const from =
+    document.getElementById("bctcnFrom").value;
+
+  const to =
+    document.getElementById("bctcnTo").value;
+
+  try{
+
+    const res = await fetch(
+      `${GAS_URL}?action=getBCTCNChart&from=${from}&to=${to}`
+    );
+
+    const json = await res.json();
+
+    if(!json.success){
+      alert("Không có dữ liệu");
+      return;
+    }
+
+    document.getElementById(
+      "bctcnChartContainer"
+    ).style.display = "block";
+
+    const airlines = [
+      "VN",
+      "VJ",
+      "QH",
+      "BL",
+      "9G",
+      "VU",
+      "0V"
+    ];
+
+    const datasets =
+      airlines.map(airline => ({
+
+        label: airline,
+
+        backgroundColor:
+          airlineColors[airline],
+
+        data: [
+
+          json.data[airline]?.arrival || 0,
+
+          json.data[airline]?.departure || 0
+
+        ]
+
+      }));
+
+    const ctx =
+      document.getElementById("bctcnChart")
+      .getContext("2d");
+
+    if (bctcnChartInstance) {
+      bctcnChartInstance.destroy();
+    }
+
+    bctcnChartInstance =
+      new Chart(ctx,{
+
+        type:"bar",
+
+        data:{
+
+          labels:[
+            "KHÁCH ĐẾN",
+            "KHÁCH ĐI"
+          ],
+
+          datasets: datasets
+
+        },
+
+        options:{
+
+          responsive:true,
+          maintainAspectRatio:false,
+
+          plugins:{
+
+            title:{
+              display:true,
+              text:"SẢN LƯỢNG KHÁCH THEO HÃNG"
+            },
+
+            legend:{
+              position:"bottom"
+            }
+
+          },
+
+          scales:{
+
+            y:{
+              beginAtZero:true
+            }
+
+          }
+
+        }
+
+      });
+
+  }catch(err){
+
+    console.error(err);
+    alert(err.message);
+
+  }
+
+}
+
+</script>
+<script>
+// 1. Mở Pop-up 9G (Mở tức thì - Không tự động tải dữ liệu)
+function open9GModal() {
+  document.getElementById("g9Modal").style.display = "flex";
+  const today = new Date().toISOString().slice(0, 10);
+  
+  if (!document.getElementById("g9FromDate").value) {
+    document.getElementById("g9FromDate").value = today;
+  }
+  if (!document.getElementById("g9ToDate").value) {
+    document.getElementById("g9ToDate").value = today;
+  }
+
+  // Cập nhật nhãn ngày hiển thị
+  document.getElementById("lbl9GFrom").innerText = formatDateShort(document.getElementById("g9FromDate").value);
+  document.getElementById("lbl9GTo").innerText = formatDateShort(document.getElementById("g9ToDate").value);
+
+  // Reset bảng về trạng thái chờ
+  reset9GTable();
+}
+
+// 2. Đóng Pop-up 9G
+function close9GModal() {
+  document.getElementById("g9Modal").style.display = "none";
+}
+
+// 3. Reset lại bảng 9G khi mở Popup
+function reset9GTable() {
+  const tbody = document.getElementById("g9TableBody");
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+      </tr>
+    `;
+  }
+}
+
+// 4. Lấy và render toàn bộ các chặng của 9G
+async function load9GData() {
+  const fromDate = document.getElementById("g9FromDate").value;
+  const toDate = document.getElementById("g9ToDate").value;
+  
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  const btn = document.getElementById("btnFetch9G");
+  const tableContainer = document.getElementById("g9TableCapture");
+
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="spinner-inline"></span> ⏳ Đang tải...`;
+  }
+  if (tableContainer) tableContainer.classList.add("table-loading");
+
+  document.getElementById("lbl9GFrom").innerText = formatDateShort(fromDate);
+  document.getElementById("lbl9GTo").innerText = formatDateShort(toDate);
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  try {
+    const res = await fetch(`${API_URL}?action=get9GStats&fromDate=${fromDate}&toDate=${toDate}`);
+    const data = await res.json();
+
+    if (data.error) {
+      alert("Lỗi hệ thống: " + data.error);
+      return;
+    }
+
+    const arrMap = data.arr || {};
+    const depMap = data.dep || {};
+
+    // Lấy danh sách mã sân bay kết nối (VD: SGN, HAN, CXR, DAD...)
+    const stations = Array.from(new Set([...Object.keys(arrMap), ...Object.keys(depMap)]));
+    const tbody = document.getElementById("g9TableBody");
+    tbody.innerHTML = "";
+
+    if (stations.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: red;">Không tìm thấy chuyến bay 9G nào trong khoảng thời gian này!</td></tr>`;
+      return;
+    }
+
+    // Duyệt ghép cặp chặng ARRIVAL và DEPARTURE
+    stations.forEach(st => {
+      const arr = arrMap[st] || { route: `${st}-PQC`, config: 0, pax: 0, cb: 0 };
+      const dep = depMap[st] || { route: `PQC-${st}`, config: 0, pax: 0, cb: 0 };
+
+      const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) + "%" : (arr.cb > 0 ? "#DIV/0!" : "0%");
+      const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) + "%" : (dep.cb > 0 ? "#DIV/0!" : "0%");
+
+      const row = `
+        <tr>
+          <!-- ARRIVAL -->
+          <td style="font-weight:bold;">${arr.route}</td>
+          <td style="text-align:right;">${arr.config}</td>
+          <td style="text-align:right;">${arr.pax}</td>
+          <td style="text-align:right;">${arrLF}</td>
+          <td style="text-align:right;">${arr.cb}</td>
+
+          <!-- DEPARTURE -->
+          <td style="font-weight:bold;">${dep.route}</td>
+          <td style="text-align:right;">${dep.config}</td>
+          <td style="text-align:right;">${dep.pax}</td>
+          <td style="text-align:right;">${depLF}</td>
+          <td style="text-align:right;">${dep.cb}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+
+  } catch (err) {
+    console.error("Lỗi lấy dữ liệu 9G:", err);
+    alert("Không thể kết nối lấy số liệu 9G! ❌");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("btn-loading");
+      btn.innerHTML = "🔍 Xem dữ liệu";
+    }
+    if (tableContainer) tableContainer.classList.remove("table-loading");
+  }
+}
+
+// 5. CHỨC NĂNG SNAPSHOT 9G: Copy Ảnh vào Clipboard
+function take9GSnapshot() {
+  const target = document.getElementById("g9TableCapture");
+
+  if (!target) {
+    alert("Không tìm thấy khung bảng 9G!");
+    return;
+  }
+
+  html2canvas(target, { scale: 2 }).then(canvas => {
+    canvas.toBlob(blob => {
+      try {
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([item]).then(() => {
+          alert("📸 Đã copy hình ảnh bảng 9G vào Clipboard!\nBạn có thể nhấn Ctrl + V để dán (paste) vào Zalo, Excel, Word...");
+        });
+      } catch (e) {
+        const link = document.createElement('a');
+        link.download = `ThongKe_9G_${document.getElementById("g9FromDate").value}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert("📸 Đã tải hình ảnh về máy!");
+      }
+    });
+  });
+}
+</script>
+<script>
+// 1. Định dạng Ngày hiển thị dạng DD-MMM (ví dụ: 28-Jul)
+function formatDateShort(dateStr) {
+  if (!dateStr) return "--";
+  const date = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}-${months[date.getMonth()]}`;
+}
+
+// 2. Mở Pop-up (Bật tức thì - KHÔNG tự động tải dữ liệu)
+function openVJModal() {
+  document.getElementById("vjModal").style.display = "flex";
+  const today = new Date().toISOString().slice(0, 10);
+  
+  // Tự động gán ngày mặc định nếu chưa chọn
+  if (!document.getElementById("vjFromDate").value) {
+    document.getElementById("vjFromDate").value = today;
+  }
+  if (!document.getElementById("vjToDate").value) {
+    document.getElementById("vjToDate").value = today;
+  }
+
+  // Cập nhật nhãn ngày lên tiêu đề bảng
+  document.getElementById("lblFrom").innerText = formatDateShort(document.getElementById("vjFromDate").value);
+  document.getElementById("lblTo").innerText = formatDateShort(document.getElementById("vjToDate").value);
+
+  // Reset bảng về số 0 ban đầu
+  resetVJTable();
+
+  // ❌ ĐÃ BỎ: loadVJData() để tránh bị chờ khi vừa mở popup
+}
+
+// 3. Hàm reset lại dữ liệu trên bảng
+function resetVJTable() {
+  document.getElementById("vjArrConfig").innerText = "0";
+  document.getElementById("vjArrPax").innerText = "0";
+  document.getElementById("vjArrLF").innerText = "0%";
+  document.getElementById("vjArrCB").innerText = "0";
+
+  document.getElementById("vjDepConfig").innerText = "0";
+  document.getElementById("vjDepPax").innerText = "0";
+  document.getElementById("vjDepLF").innerText = "0%";
+  document.getElementById("vjDepCB").innerText = "0";
+}
+
+// 4. Đóng Pop-up
+function closeVJModal() {
+  document.getElementById("vjModal").style.display = "none";
+}
+
+// 5. Lấy dữ liệu VJ (Chỉ chạy khi người dùng bấm nút "Xem dữ liệu")
+async function loadVJData() {
+  const fromDate = document.getElementById("vjFromDate").value;
+  const toDate = document.getElementById("vjToDate").value;
+  
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  // Lấy các phần tử DOM
+  const btn = document.getElementById("btnFetchVJ");
+  const tableContainer = document.getElementById("vjTableCapture");
+  const originalBtnText = "🔍 Xem dữ liệu";
+
+  // 1. BẬT HIỆU ỨNG ĐANG XỬ LÝ (Loading)
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="spinner-inline"></span> ⏳ Đang tải...`;
+  }
+  if (tableContainer) {
+    tableContainer.classList.add("table-loading");
+  }
+
+  // Cập nhật nhãn ngày hiển thị
+  document.getElementById("lblFrom").innerText = formatDateShort(fromDate);
+  document.getElementById("lblTo").innerText = formatDateShort(toDate);
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  try {
+    const res = await fetch(`${API_URL}?action=getVJStats&fromDate=${fromDate}&toDate=${toDate}`);
+    const data = await res.json();
+
+    if (data.error) {
+      alert("Lỗi hệ thống: " + data.error);
+      return;
+    }
+
+    const arr = data.arr || { config: 0, pax: 0, cb: 0 };
+    const dep = data.dep || { config: 0, pax: 0, cb: 0 };
+
+    // Tính Tỷ lệ lấp đầy (Load Factor)
+    const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) : 0;
+    const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) : 0;
+
+    // Cập nhật kết quả lên bảng HTML
+    document.getElementById("vjArrConfig").innerText = arr.config;
+    document.getElementById("vjArrPax").innerText = arr.pax;
+    document.getElementById("vjArrLF").innerText = arrLF + "%";
+    document.getElementById("vjArrCB").innerText = arr.cb;
+
+    document.getElementById("vjDepConfig").innerText = dep.config;
+    document.getElementById("vjDepPax").innerText = dep.pax;
+    document.getElementById("vjDepLF").innerText = depLF + "%";
+    document.getElementById("vjDepCB").innerText = dep.cb;
+
+  } catch (err) {
+    console.error("Lỗi lấy dữ liệu VJ:", err);
+    alert("Không thể kết nối lấy số liệu VJ! ❌");
+  } finally {
+    // 2. TẮT HIỆU ỨNG (Trả lại giao diện ban đầu)
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("btn-loading");
+      btn.innerHTML = originalBtnText;
+    }
+    if (tableContainer) {
+      tableContainer.classList.remove("table-loading");
+    }
+  }
+}
+
+// 6. CHỨC NĂNG SNAPSHOT: Chụp hình bảng và lưu vào Clipboard để Paste (Ctrl+V)
+function takeVJSnapshot() {
+  const target = document.getElementById("vjTableCapture");
+
+  if (!target) {
+    alert("Không tìm thấy khung bảng VJ!");
+    return;
+  }
+
+  html2canvas(target, { scale: 2 }).then(canvas => {
+    canvas.toBlob(blob => {
+      try {
+        // Sao chép trực tiếp ảnh vào Clipboard
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([item]).then(() => {
+          alert("📸 Đã copy hình ảnh bảng VJ vào Clipboard!\nBạn có thể nhấn Ctrl + V để dán (paste) vào Zalo, Excel, Word...");
+        });
+      } catch (e) {
+        // Dự phòng nếu trình duyệt chặn Clipboard API -> Tự tải ảnh xuống
+        const link = document.createElement('a');
+        link.download = `ThongKe_VJ_${document.getElementById("vjFromDate").value}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert("📸 Đã tải hình ảnh về máy!");
+      }
+    });
+  });
+}
+</script>
+<script>
+async function viewReport(){
+
+  if(currentReportType === "TCN"){
+    await loadBCTCN();
+  }else{
+    await loadBCPTCN();
+  }
+
+}
+async function loadBCPTCN(){
+
+  document.getElementById(
+    "bctcnReportContainer"
+  ).style.display = "block";
+
+  document.getElementById(
+    "bctcnChartContainer"
+  ).style.display = "none";
+
+  const from =
+    document.getElementById("bctcnFrom").value;
+
+  const to =
+    document.getElementById("bctcnTo").value;
+
+  document.getElementById("bctcnResult").value =
+    "Đang tạo báo cáo tuần...";
+
+  try{
+
+    const res = await fetch(
+      `${GAS_URL}?action=getBCPTCN&from=${from}&to=${to}`
+    );
+
+    const json = await res.json();
+
+    if(json.success){
+
+      document.getElementById("bctcnResult").value =
+        json.report;
+
+    }else{
+
+      document.getElementById("bctcnResult").value =
+        "Không có dữ liệu";
+
+    }
+
+  }catch(err){
+
+    document.getElementById("bctcnResult").value =
+      err.message;
+
+  }
+}
+</script>
+<script>
+////// import acv
+
+// 1. Khi bấm nút Import, ta kích hoạt cái input file ẩn
+document.getElementById("importACV").onclick = function () {
+  document.getElementById("acvFile").click();
+};
+
+// 2. Khi người dùng đã chọn file xong (cửa sổ chọn file đóng lại)
+document.getElementById("acvFile").onchange = function (event) {
+  const file = event.target.files[0];
+
+  if (!file) return; // Nếu mở ra mà bấm Cancel thì thôi
+
+  const loading = document.getElementById("loading");
+  const btn = document.getElementById("importACV");
+
+  // Hiện loading và khóa nút bấm
+  loading.style.display = "flex";
+  btn.disabled = true;
+
+  const reader = new FileReader();
+
+  reader.onerror = function (err) {
+    console.error("❌ FileReader lỗi:", err);
+    finish(false);
+  };
+
+  reader.onload = function (e) {
+    let jsonData;
+
+    // 👉 BƯỚC 1: đọc Excel
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      console.log("✅ Đọc Excel OK");
+    } catch (err) {
+      console.error("❌ Lỗi đọc Excel:", err);
+      finish(false);
+      return;
+    }
+
+    // 👉 BƯỚC 2: gửi API
+    fetch("https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec", {
+      method: "POST",
+      mode: "no-cors",
+      cache: "no-cache",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "importACV",
+        data: jsonData
+      })
+    })
+    .then(() => {
+      finish(true);
+    })
+    .catch(err => {
+      console.error("Fetch error:", err);
+      finish(false);
+    })
+    .finally(() => {
+      // Quan trọng: Reset input file để lần sau chọn lại chính file đó vẫn ăn event 'onchange'
+      event.target.value = "";
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
+
+  function finish(success) {
+    loading.style.display = "none";
+    btn.disabled = false;
+    if (success) {
+      alert("✅ Import ACV thành công!");
+    } else {
+      alert("❌ Lỗi import!");
+    }
+  }
+};
+</script>
+<script>
+// Hàm mở popup chọn ngày
+function openExportPopup() {
+  const modal = document.getElementById("exportModal");
+  modal.style.display = "block"; 
+  
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (!document.getElementById("startDate").value) {
+    document.getElementById("startDate").value = todayStr;
+  }
+  if (!document.getElementById("endDate").value) {
+    document.getElementById("endDate").value = todayStr;
+  }
+}
+
+// Hàm đóng popup
+function closeExportPopup() {
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  if (loadingOverlay && loadingOverlay.style.display === "flex") {
+    return;
+  }
+  document.getElementById("exportModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("exportModal");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  
+  if (event.target == modal && (!loadingOverlay || loadingOverlay.style.display !== "flex")) {
+    modal.style.display = "none";
+  }
+}
+
+async function processExportToACV() {
+  const fromDateVal = document.getElementById("startDate").value;
+  const toDateVal = document.getElementById("endDate").value;
+
+  if (!fromDateVal || !toDateVal) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  const confirmBtn = document.getElementById("confirmExportBtn");
+  const cancelBtn = document.querySelector("#exportModal .close-btn") || {};
+  const originalText = confirmBtn.innerHTML;
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  
+  confirmBtn.innerHTML = "⏳ Đang tải...";
+  confirmBtn.disabled = true;
+  if (cancelBtn) cancelBtn.disabled = true;
+  
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "flex";
+  }
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  const newHeaders = [
+    "Ngày", 
+    "Tháng", 
+    "Năm", 
+    "Hãng", 
+    "Sector", 
+    "Số hiệu chuyến bay", 
+    "Loại tàu bay", 
+    "STD (Local time)", 
+    "Cap", 
+    "Pax đi",
+    "Pax đến",
+    "LINKFLIGHTNO",
+    "Route" // Cột M
+  ];
+
+  try {
+    // 1. Tải toàn bộ dữ liệu gốc từ Tab ACV
+    const response = await fetch(`${API_URL}?action=read&sheet=ACV&fromDate=${fromDateVal}&toDate=${toDateVal}`);
+    if (!response.ok) throw new Error("Không thể kết nối đến máy chủ!");
+    
+    const acvRawRows = await response.json();
+    
+    if (acvRawRows.error) {
+      alert(`Lỗi hệ thống: ${acvRawRows.error} ❌`);
+      return;
+    }
+
+    if (!acvRawRows || acvRawRows.length === 0) {
+      alert(`Không tìm thấy dữ liệu từ ngày ${fromDateVal} đến ngày ${toDateVal}! 🔍`);
+      return;
+    }
+
+    // 2. TẠO BẢNG VLOOKUP TỪ TAB ACV GỐC
+    // Key: Cột A (FlightNo) -> Value: Cột C (Route)
+    const acvVlookupMap = {};
+    
+    acvRawRows.forEach(row => {
+      // Đọc mã ở Cột A của Tab ACV
+      const flightNoA = row["FlightNo"] || row["Số hiệu chuyến bay"] || row["A"] || "";
+      // Đọc Chặng ở Cột C của Tab ACV
+      const routeC = row["Route"] || row["Sector"] || row["C"] || "";
+
+      if (flightNoA) {
+        const key = String(flightNoA).trim().toUpperCase();
+        acvVlookupMap[key] = String(routeC).trim().toUpperCase();
+      }
+    });
+
+    // 3. THỰC HIỆN VLOOKUP CHO DANH SÁCH CHUYẾN ĐI EXPORT
+    const exportRows = acvRawRows.map(row => {
+      // Giá trị ở Cột CL (GATECLOSEDTIME / LINKFLIGHTNO)
+      const colCL_Value = row["GATECLOSEDTIME"] || row["CL"] || row["cl"] || row["LINKFLIGHTNO"] || row["LINKFLIGHT"] || "";
+      const searchKey = String(colCL_Value).trim().toUpperCase();
+
+      // VLOOKUP searchKey (VJ767) vào Cột A tab ACV -> Kết quả trả về Cột C (HPH-PQC)
+      let routeM = acvVlookupMap[searchKey] || "";
+
+      // Nếu không VLOOKUP được thì giữ nguyên Sector/Route ban đầu
+      if (!routeM) {
+        routeM = row["Sector"] || row["Route"] || "";
+      }
+
+      return {
+        ...row,
+        "LINKFLIGHTNO": searchKey, // Cột L: VJ767
+        "Route": routeM           // Cột M: HPH-PQC
+      };
+    });
+
+    // --- TẠO WORKBOOK VÀ CÁC TAB EXCEL ---
+    const workbook = XLSX.utils.book_new();
+
+    // Tab 1: Tất cả chuyến đi
+    const wsAll = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
+    XLSX.utils.book_append_sheet(workbook, wsAll, "Chuyến đi");
+
+    // Tab 2: Thống kê hãng 9G
+    const rows9G = exportRows.filter(row => row["Hãng"] === "9G");
+    const ws9G = XLSX.utils.json_to_sheet(rows9G.length > 0 ? rows9G : [{}], { header: newHeaders });
+    XLSX.utils.book_append_sheet(workbook, ws9G, "9G");
+
+    // Tab 3: Thống kê hãng VJ
+    const rowsVJ = exportRows.filter(row => row["Hãng"] === "VJ");
+    const wsVJ = XLSX.utils.json_to_sheet(rowsVJ.length > 0 ? rowsVJ : [{}], { header: newHeaders });
+    XLSX.utils.book_append_sheet(workbook, wsVJ, "VJ");
+
+    // Xuất file Excel
+    XLSX.writeFile(workbook, `ChuyenDi_${fromDateVal}_den_${toDateVal}.xlsx`);
+    
+    if (loadingOverlay) loadingOverlay.style.display = "none";
+    document.getElementById("exportModal").style.display = "none";
+
+  } catch (error) {
+    console.error("Lỗi:", error);
+    alert("Có lỗi xảy ra khi xuất file! ❌");
+  } finally {
+    confirmBtn.innerHTML = originalText;
+    confirmBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+    
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "none";
+    }
+  }
+}
+</script>
+<script>
+// Quản lý hiển thị Popup PBB
+function showPbbPopup() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("pbbFromDate").value = today;
+  document.getElementById("pbbToDate").value = today;
+  document.getElementById("pbbPopup").style.display = "flex";
+}
+
+function closePbbPopup() {
+  document.getElementById("pbbPopup").style.display = "none";
+}
+
+function showLoading(show) {
+  const loading = document.getElementById("pbbLoadingPopup");
+  if (loading) {
+    loading.style.display = show ? "flex" : "none";
+  }
+}
+
+// Hàm tính toán và xuất kết quả PBB
+async function thongKePBB() {
+  const fromDate = document.getElementById("pbbFromDate").value;
+  const toDate = document.getElementById("pbbToDate").value;
+
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ Từ ngày và Đến ngày!");
+    return;
+  }
+
+  // Đóng popup chọn ngày & mở popup bánh xe quay vòng
+  closePbbPopup();
+  showLoading(true);
+
+  // Đổi định dạng hiển thị ngày DD/MM/YY
+  const formatDateStr = (dStr) => {
+    const [y, m, d] = dStr.split("-");
+    return `${d}/${m}/${y.slice(2)}`;
+  };
+
+  try {
+    const url = `${API}?action=getPbbStats&from=${fromDate}&to=${toDate}&t=${Date.now()}`;
+    const res = await fetch(url);
+    const result = await res.json();
+
+    if (result.status !== "success") {
+      alert("Lỗi tải dữ liệu: " + (result.message || ""));
+      return;
+    }
+
+    const data = result.data;
+    
+    // Tạo chuỗi báo cáo chuẩn theo mẫu
+    let text = `TỈ LỆ CẬP ỐNG LỒNG\n`;
+    text += `FROM ${formatDateStr(fromDate)} TO ${formatDateStr(toDate)}\n`;
+    text += `AIRLINES  CB  ỐNG  TỈ LỆ    \n`;
+
+    let totalCB = 0;
+    let totalOng = 0;
+
+    data.forEach(item => {
+      const code = item.code.padEnd(10, ' ');
+      const cb = item.cb.toString().padEnd(4, ' ');
+      const ong = item.ong.toString().padEnd(5, ' ');
+      const rate = item.rate + "%";
+      
+      text += `${code}${cb}${ong}${rate}\n`;
+      totalCB += item.cb;
+      totalOng += item.ong;
+    });
+
+    // In tổng nếu có dữ liệu
+    if (totalCB > 0) {
+      const totalRate = ((totalOng / totalCB) * 100).toFixed(2) + "%";
+      text += `-----------------------------\n`;
+      text += `${"TỔNG".padEnd(10, ' ')}${totalCB.toString().padEnd(4, ' ')}${totalOng.toString().padEnd(5, ' ')}${totalRate}`;
+    }
+
+    // Hiển thị kết quả ra các vùng Output và tự động copy
+    document.getElementById("mvaOutput").textContent = "";
+    document.getElementById("mvdOutput").textContent = "";
+    document.getElementById("fhtOutput").textContent = text;
+    document.getElementById("occOutput").textContent = "";
+    if (document.getElementById("lomoResult")) document.getElementById("lomoResult").innerHTML = "";
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+  } catch (err) {
+    alert("Có lỗi xảy ra: " + err.message);
+    console.error(err);
+  } finally {
+    showLoading(false);
+  }
+}
+</script>
+<script>
+// URL ứng dụng Google Apps Script Web App của bạn
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; 
+let immiSavedData = {}; 
+
+// --- LOGIC XỬ LÝ CHỨC NĂNG CHÍNH 
+ CARGO ---
+
+// 1. Hàm mở Popup Modal
+function openImmiCargoModal() {
+  const container = document.getElementById('immiCargoContainer');
+  container.style.display = 'flex'; // Chuyển thành 'flex' để căn giữa theo CSS mới của modal
+  
+  const picker = document.getElementById('immiMonthPicker');
+  if (!picker.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    picker.value = `${yyyy}-${mm}`;
+  }
+  
+  // Đã bỏ scrollIntoView vì modal dạng fixed luôn hiển thị trung tâm màn hình
+  fetchAndRenderImmiCargo();
+}
+
+// 2. Hàm đóng Popup Modal
+function closeImmiCargoModal() {
+  const container = document.getElementById('immiCargoContainer');
+  container.style.display = 'none';
+}
+
+async function fetchAndRenderImmiCargo() {
+  const grid = document.getElementById('immiDaysGrid');
+  grid.innerHTML = "<p style='color:#666; font-style:italic;'>Đang tải dữ liệu trạng thái IMMI CARGO...</p>";
+  
+  try {
+    const response = await fetch(`${GAS_WEB_APP_URL}?action=loadImmiCargo`);
+    const serverData = await response.json();
+    
+    immiSavedData = {};
+    if (Array.isArray(serverData)) {
+      serverData.forEach(item => {
+        let dKey = "";
+        if (item.date) {
+          // KHẮC PHỤC LỖI LỆCH NGÀY: Chuyển đổi định dạng Timezone đảm bảo lấy đúng ngày cục bộ tại VN (GMT+7)
+          const parsedDate = new Date(item.date);
+          if (!isNaN(parsedDate)) {
+            const yyyy = parsedDate.getFullYear();
+            const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(parsedDate.getDate()).padStart(2, '0');
+            dKey = `${yyyy}-${mm}-${dd}`;
+          } else if (typeof item.date === "string") {
+            dKey = item.date.split("T")[0];
+          }
+        }
+        
+        if (dKey) {
+          immiSavedData[dKey] = {
+            status: item.status || "Chưa đối soát",
+            checker: item.checker || ""
+          };
+        }
+      });
+    }
+    renderImmiCargoCalendar();
+  } catch (error) {
+    console.error("Lỗi khi tải dữ liệu IMMI CARGO:", error);
+    grid.innerHTML = "<p style='color:red; font-weight:bold;'>Không thể tải dữ liệu từ Google Sheets. Vui lòng kiểm tra lại cấu hình Web App!</p>";
+  }
+}
+
+function renderImmiCargoCalendar() {
+  const monthVal = document.getElementById('immiMonthPicker').value; 
+  if (!monthVal) return;
+  
+  const [year, month] = monthVal.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate(); 
+  
+  const grid = document.getElementById('immiDaysGrid');
+  grid.innerHTML = ""; 
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = String(day).padStart(2, '0');
+    const monthStr = String(month).padStart(2, '0');
+    const fullDateStr = `${year}-${monthStr}-${dayStr}`; 
+    
+    const status = immiSavedData[fullDateStr]?.status || "Chưa đối soát";
+    const checker = immiSavedData[fullDateStr]?.checker || "";
+    
+    let colorClass = "immi-chua-doi-soat";
+    if (status === "Đã đối soát") colorClass = "immi-da-doi-soat";
+    if (status === "Chờ xử lý") colorClass = "immi-cho-xu-ly";
+    
+    const dayCard = document.createElement('div');
+    dayCard.id = `card-${fullDateStr}`;
+    dayCard.className = `immi-day-card ${colorClass}`;
+    
+    dayCard.innerHTML = `
+      <div class="immi-day-title">Ngày ${dayStr}/${monthStr}</div>
+      <label class="immi-label">Tình trạng</label>
+      <select class="immi-select" onchange="updateImmiStatus('${fullDateStr}', this.value)">
+        <option value="Chưa đối soát" ${status === "Chưa đối soát" ? "selected" : ""}>Chưa đối soát</option>
+        <option value="Đã đối soát" ${status === "Đã đối soát" ? "selected" : ""}>Đã đối soát</option>
+        <option value="Chờ xử lý" ${status === "Chờ xử lý" ? "selected" : ""}>Chờ xử lý</option>
+      </select>
+      <label class="immi-label">Người đối soát</label>
+      <input type="text" class="immi-input" value="${checker}" placeholder="Nhập tên..." onchange="updateImmiChecker('${fullDateStr}', this.value)">
+    `;
+    grid.appendChild(dayCard);
+  }
+}
+
+function updateImmiStatus(dateStr, newStatus) {
+  const card = document.getElementById(`card-${dateStr}`);
+  card.classList.remove('immi-chua-doi-soat', 'immi-da-doi-soat', 'immi-cho-xu-ly');
+  
+  if (newStatus === "Đã đối soát") card.classList.add('immi-da-doi-soat');
+  else if (newStatus === "Chờ xử lý") card.classList.add('immi-cho-xu-ly');
+  else card.classList.add('immi-chua-doi-soat');
+  
+  if (!immiSavedData[dateStr]) immiSavedData[dateStr] = { status: "", checker: "" };
+  immiSavedData[dateStr].status = newStatus;
+  
+  saveImmiDayToServer(dateStr);
+}
+
+function updateImmiChecker(dateStr, newChecker) {
+  if (!immiSavedData[dateStr]) immiSavedData[dateStr] = { status: "Chưa đối soát", checker: "" };
+  immiSavedData[dateStr].checker = newChecker;
+  
+  saveImmiDayToServer(dateStr);
+}
+
+async function saveImmiDayToServer(dateStr) {
+  const dataPayload = {
+    action: "saveImmiCargo",
+    date: dateStr, // Truyền trực tiếp chuỗi dạng thuần yyyy-mm-dd để tránh bị tự động ép sang định dạng múi giờ UTC độc lập
+    status: immiSavedData[dateStr].status,
+    checker: immiSavedData[dateStr].checker
+  };
+  
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(dataPayload)
+    });
+    const result = await response.text();
+    if (result === "OK") {
+      console.log(`Đã tự động lưu thành công dữ liệu ngày ${dateStr}`);
+    }
+  } catch (error) {
+    console.error(`Lỗi đồng bộ dữ liệu ngày ${dateStr} lên Server:`, error);
+  }
+}
+function openBCTCNModal(){
+
+  currentReportType = "TCN";
+
+  document.getElementById("bctcnModal")
+    .style.display = "flex";
+
+  document.querySelector("#bctcnModal h3")
+    .innerText = "📊 BC TCN";
+}
+function openBCPTCNModal(){
+
+  currentReportType = "PTCN";
+
+  document.getElementById("bctcnModal")
+    .style.display = "flex";
+
+  document.querySelector("#bctcnModal h3")
+    .innerText = "📋 BC PTCN";
+
+  document.getElementById("bctcnResult")
+    .value = "";
+}
+function closeBCTCNModal() {
+  document.getElementById("bctcnModal").style.display = "none";
+}
+
+async function loadBCTCN() {
+document.getElementById(
+  "bctcnReportContainer"
+).style.display = "block";
+
+document.getElementById(
+  "bctcnChartContainer"
+).style.display = "none";
+
+  const from =
+    document.getElementById("bctcnFrom").value;
+
+  const to =
+    document.getElementById("bctcnTo").value;
+
+  document.getElementById("bctcnResult").value =
+    "Đang tạo báo cáo...";
+
+  try {
+
+    const url =
+      `${GAS_URL}?action=getBCTCN&from=${from}&to=${to}`;
+
+    const response = await fetch(url);
+
+    const data = await response.json();
+
+    if (data.success) {
+
+      document.getElementById("bctcnResult").value =
+        data.report
+          .replace(/\\n/g, "\n");
+
+    } else {
+
+      document.getElementById("bctcnResult").value =
+        "Không có dữ liệu";
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
+
+    document.getElementById("bctcnResult").value =
+      "Lỗi: " + err.message;
+
+  }
+
+}
+
+function copyBCTCN() {
+
+  const txt =
+    document.getElementById("bctcnResult");
+
+  txt.select();
+
+  document.execCommand("copy");
+
+  alert("Đã copy báo cáo");
+}
+
+</script>
+
+
+
+<footer style="position:fixed; bottom:0; left:0; width:100%; text-align:left; 
+               background:#f9f9f9; padding:10px; font-size:14px; color:#555;">
+  • © 2026. All rights reserved. Any unauthorized copying, modification, or distribution of this content is strictly prohibited and subject to legal action.
+  • Developed and owned by Fast &amp; Smile.
+</footer>
+<div id="exportPopup" class="popup">
+  <div class="popup-box">
+    <h3>Export dữ liệu</h3>
+
+    <label>Từ ngày</label>
+    <input type="date" id="fromDate">
+
+    <label>Đến ngày</label>
+    <input type="date" id="toDate">
+
+    <div class="popup-actions">
+      <button type="button" id="confirmExport">Export</button>
+      <button type="button" id="closePopup">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<div id="fhtPopup" class="popup">
+  <div class="popup-box">
+    <h3>FHT REPORT</h3>
+
+    <label>Từ ngày</label>
+    <input type="date" id="fhtFrom">
+
+    <label>Đến ngày</label>
+    <input type="date" id="fhtTo">
+
+    <div class="doc-row-4">
+      <input type="checkbox" id="fhtBL">
+      <label for="fhtBL">BL</label>
+    </div>
+
+    <div class="popup-actions">
+      <button type="button" id="confirmFHT">Tính</button>
+      <button type="button" id="closeFHT">Huỷ</button>
+    </div>
+  </div>
+</div>
+<div id="hancoPopup" class="popup">
+  <div class="popup-box" style="width:1000px;">
+
+    <h3>📦 FILTER CARGO</h3>
+
+    <!-- filter -->
+    <!-- filter -->
+<div style="display:flex; gap:15px; margin-bottom:15px; align-items: flex-end; flex-wrap: wrap; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+  
+  <div style="display: flex; flex-direction: column; flex: 1; min-width: 120px;">
+    <label style="font-weight: bold; font-size: 12px;">FROM</label>
+    <input type="date" id="hancoFrom" style="padding: 5px;">
+  </div>
+
+  <div style="display: flex; flex-direction: column; flex: 1; min-width: 120px;">
+    <label style="font-weight: bold; font-size: 12px;">TO</label>
+    <input type="date" id="hancoTo" style="padding: 5px;">
+  </div>
+
+  <div style="display: flex; flex-direction: column; flex: 1; min-width: 150px;">
+    <label style="font-weight: bold; font-size: 12px;">SHIPPER</label>
+    <input id="hancoShipper" placeholder="Nhập shipper..." style="padding: 5px;">
+  </div>
+
+  <div style="display: flex; flex-direction: column; flex: 1; min-width: 100px;">
+    <label style="font-weight: bold; font-size: 12px;">AWB</label>
+    <input id="awbSearch" placeholder="Ví dụ: 738" style="padding: 5px;">
+  </div>
+
+  <div style="display: flex; flex-direction: column; flex: 2; min-width: 200px;">
+    <label style="font-weight: bold; font-size: 12px;">NATURE GOODS</label>
+    <input id="hancoNatureSearch" placeholder="vd: clams,clam,shrimp" style="padding: 5px;">
+  </div>
+
+  <button onclick="loadHancoData()" style="padding: 6px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; height: 32px;">🔍 LOAD</button>
+</div>
+
+    <!-- table -->
+    <div style="max-height:400px; overflow:auto;">
+     <!-- Tìm đến table trong hancoPopup -->
+<table style="width:100%; border-collapse:collapse;">
+<thead>
+  <tr>
+    <th>DATE</th>
+    <th>FLIGHT</th>
+    <th>AWB</th>
+    <th>ORIGIN</th>
+    <th>DEST</th>
+    <th>NATURE</th> <!-- Thêm cột này -->
+    <th>SHIPPER</th>
+    <th>PCS</th>
+    <th>WEIGHT</th>
+    <th>TOTAL</th>
+    <th>DT/KG</th>
+  </tr>
+</thead>
+  <tbody id="hancoBody"></tbody>
+  <tfoot id="hancoFoot" style="background: #eee; font-weight: bold; position: sticky; bottom: 0;">
+    <!-- Hàng Tổng cộng hiện tại -->
+    <tr style="background: #e1f5fe;">
+        <td colspan="7" style="text-align: right;">TỔNG CỘNG:</td>
+        <td id="sumPcs">0</td>
+        <td id="sumWeight">0</td>
+        <td id="sumTotal">0</td>
+        <td></td>
+    </tr>
+    <!-- Hàng Lũy kế tháng mới thêm -->
+    <tr style="background: #fff9c4; color: #d32f2f;">
+        <td colspan="7" style="text-align: right;">LŨY KẾ THÁNG:</td>
+        <td id="accPcs">0</td>
+        <td id="accWeight">0</td>
+        <td id="accTotal">0</td>
+        <td></td>
+    </tr>
+</tfoot>
+</table>
+
+    </div>
+<div class="popup-actions">
+  <button onclick="captureHancoTable()" style="background: #673ab7; color: white;">📸 SCREENSHOT</button>
+  <button onclick="exportHancoExcel()">📤 EXPORT</button>
+  <button onclick="closeHancoPopup()">❌ CLOSE</button>
+</div>
+
+  </div>
+</div>
+<!-- LINK POPUP -->
+<div id="linkPopup" class="popup">
+
+  <div class="popup-box" style="width:700px;">
+
+    <h3>🌐 QUICK LINKS</h3>
+
+    <div id="linkContainer"
+         style="
+           max-height:500px;
+           overflow:auto;
+           line-height:2;
+         ">
+
+      <!-- 👇 GẮN LINK TẠI ĐÂY -->
+      <a href="https://vhat.vietnamairlines.com/account/"
+         target="_blank">
+         VĂN HÓA AN TOÀN
+      </a>
+
+      <br>
+      <a href="http://10.111.38.19/thvp/DesktopModules/Login.aspx?ReturnUrl=%2fthvp%2fDefault.aspx"
+         target="_blank">
+         LÀM CÔNG VĂN XUẤT VÉ
+      </a>
+
+      <br>
+
+      <a href="https://thuphianhk.xuatnhapcanh.gov.vn/auth/signin"
+         target="_blank">
+         THU PHÍ ANSC
+      </a>
+
+      <br>
+
+       <a href="https://bpm.vietnamairlines.com/login?ReturnUrl=%2f_layouts%2f15%2fAuthenticate.aspx%3floginasanotheruser%3dtrue%26Source%3d&loginasanotheruser=true&Source="
+         target="_blank">
+         PHÊ DUYỆT GIẤY ĐI ĐƯỜNG
+      </a>
+
+      <br>
+
+      <a href="http://10.222.10.14:8080/Login.aspx"
+         target="_blank">
+         XUẤT HÓA ĐƠN HÀNG HÓA
+      </a>
+
+      <br>
+
+      <a href="https://apo.vietnamairlines.com/login-ldap"
+         target="_blank">
+         LOTUS
+      </a>
+
+      <br>
+
+      <a href="https://idad.vietnamairlines.com/Login.aspx"
+         target="_blank">
+         XUẤT VÉ ID
+      </a>
+
+      <br>
+      <a href="https://skyhr.vietnamairlines.com/web/login"
+         target="_blank">
+         SKYHR
+      </a>
+
+      <br>
+
+            <a href="https://vietnamairlines.au1.qualtrics.com/jfe/form/SV_6PaDSYHAWb9Dalf"
+         target="_blank">
+         KHẢO SÁT NỘI BỘ
+      </a>
+
+      <br>
+
+      <a href="https://moplus.vietnamairlines.com/home"
+         target="_blank">
+         MOPLUS
+      </a>
+ <br>
+            <a href="https://docs.google.com/spreadsheets/d/1TQVNX49b-vcyospeY1R39duimou82h2xH-kcafXstog/edit?gid=1312464800#gid=1312464800"
+         target="_blank">
+         SỐ LIỆU NÓNG
+      </a>
+ <br>
+
+      <a href="https://lib.vietnamairlines.com/psd/"
+         target="_blank">
+         ALL DOCS UPDATED
+      </a>
+
+    </div>
+
+    <div class="popup-actions">
+
+      <button onclick="closeLinkPopup()">
+        ❌ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<div id="ganttPopup" class="popup" style="display:none;">
+  <div class="popup-box" style="width: 95%; max-width: 1200px; height: 80vh; overflow-y: auto;">
+    <h3 style="color: #6f42c1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+      <span>📊 BIỂU ĐỒ TIẾN TRÌNH QUAY ĐẦU TÀU BAY (TURNAROUND GANTT)</span>
+      <button onclick="closeGanttPopup()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px;">❌ ĐÓNG</button>
+    </h3>
+    
+    <div style="background: #eef2f3; border-left: 5px solid #0072ff; padding: 10px 15px; margin-bottom: 15px; border-radius: 0 6px 6px 0; font-size: 12px; line-height: 1.6; color: #495057;">
+      📌 <b>Theo công văn số:</b> 621/TCTHK-DVHK <br>
+      <b>Vv:</b> Triển khai thực hiện phục vụ mặt đất theo Ground time 35’ chuyến bay NĐ-NĐ khai thác tàu A320/A321.
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+      <label style="font-weight: bold; font-size: 14px;">Nhập giờ Chock-on gốc:</label>
+      <input type="text" id="ganttChockOnInput" placeholder="HH:MM" style="width: 100px; padding: 6px; font-size: 16px; text-align: center; font-weight: bold;" value="09:00">
+      <button onclick="tinhToanGanttTimeline()" style="padding: 7px 15px; background: #6f42c1; color: white; border: none; border-radius: 5px; font-weight: bold;">📊 VẼ TIẾN TRÌNH</button>
+    </div>
+
+    <div id="ganttTimelineWrapper" style="display: flex; flex-direction: column; gap: 12px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+       </div>
+  </div>
+</div>
+<style>
+.gantt-step {
+  display: flex;
+  align-items: center;
+  background: #e9ecef;
+  border-left: 5px solid #6f42c1;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.gantt-time {
+  font-size: 15px;
+  color: #d946ef;
+  font-weight: 800;
+  margin-right: 15px;
+  min-width: 60px;
+}
+.gantt-name {
+  font-weight: bold;
+  color: #333;
+  flex-grow: 1;
+}
+.gantt-offset {
+  font-size: 11px;
+  color: #6c757d;
+  background: #dee2e6;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+.loading-overlay{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.35);
+    z-index:99999;
+
+    justify-content:center;
+    align-items:center;
+}
+
+.loading-box{
+    background:#fff;
+    padding:20px 30px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+.spinner{
+    width:50px;
+    height:50px;
+    border:5px solid #ddd;
+    border-top:5px solid #0066cc;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:0 auto 10px;
+}
+
+@keyframes spin{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
+/* --- HỆ THỐNG STYLES IMMI CARGO MỚI --- */
+.nav-tabs { list-style: none; display: flex; padding: 0; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+.nav-tabs li { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -2px; font-weight: bold; }
+.nav-tabs li.active { background: #fff; border-color: #ddd #ddd #fff; border-radius: 4px 4px 0 0; color: #007bff; }
+.tab-content { display: none; }
+.tab-content.active-tab { display: block; }
+
+.immi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+.immi-day-card { border: 1px solid #ccc; border-radius: 6px; padding: 10px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.immi-day-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.immi-label { font-size: 0.85em; color: #555; margin-top: 6px; display: block; font-weight: 650; }
+.immi-select, .immi-input { width: 100%; padding: 4px; margin-top: 2px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9em; background: #fff; }
+
+.immi-chua-doi-soat { background-color: #f9f9f9; color: #333; }
+.immi-da-doi-soat { background-color: #28a745 !important; color: white !important; }
+.immi-da-doi-soat .immi-label { color: #eee !important; }
+.immi-cho-xu-ly { background-color: #dc3545 !important; color: white !important; }
+.immi-cho-xu-ly .immi-label { color: #eee !important; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
+/* --- HỆ THỐNG STYLES IMMI CARGO MỚI --- */
+.nav-tabs { list-style: none; display: flex; padding: 0; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+.nav-tabs li { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -2px; font-weight: bold; }
+.nav-tabs li.active { background: #fff; border-color: #ddd #ddd #fff; border-radius: 4px 4px 0 0; color: #007bff; }
+.tab-content { display: none; }
+.tab-content.active-tab { display: block; }
+
+.immi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+.immi-day-card { border: 1px solid #ccc; border-radius: 6px; padding: 10px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.immi-day-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.immi-label { font-size: 0.85em; color: #555; margin-top: 6px; display: block; font-weight: 650; }
+.immi-select, .immi-input { width: 100%; padding: 4px; margin-top: 2px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9em; background: #fff; }
+
+.immi-chua-doi-soat { background-color: #f9f9f9; color: #333; }
+.immi-da-doi-soat { background-color: #28a745 !important; color: white !important; }
+.immi-da-doi-soat .immi-label { color: #eee !important; }
+.immi-cho-xu-ly { background-color: #dc3545 !important; color: white !important; }
+.immi-cho-xu-ly .immi-label { color: #eee !important; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
+</style>
+<div id="loadingExport" class="loading-overlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <div>Đang xuất dữ liệu IMMI...</div>
+    </div>
+</div>
+<div id="mvaPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h3>Chọn vị trí đỗ</h3>
+
+    <button class="btn btn-success" onclick="generateMVA('gate')">
+      🛬 Vào ống
+    </button>
+
+    <button class="btn btn-danger" onclick="generateMVA('remote')">
+      🚍 Ra bãi
+    </button>
+
+    <br><br>
+
+    <button class="btn btn-secondary" onclick="closeMVAPopup()">
+      Hủy
+    </button>
+  </div>
+</div>
 </body>
+
 </html>
+
