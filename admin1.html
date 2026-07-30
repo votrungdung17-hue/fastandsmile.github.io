@@ -641,6 +641,8 @@ button:disabled{
 </style>
 <link rel="stylesheet" href="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/VNA.jpg/center-title.css">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Thư viện chụp ảnh thẻ HTML thành ảnh -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <button id="logoutBtn" style="
   position:fixed;
@@ -1199,6 +1201,353 @@ function upload() {
   100% { transform: rotate(360deg); }
 }
 </style>
+<button class="btn-9g" onclick="open9GModal()">✈️ Thống kê 9G</button>
+<style>
+  /* Modal Overlay 9G */
+  .g9-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .g9-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    max-width: 750px;
+    width: 90%;
+  }
+
+  /* Khung chụp ảnh 9G */
+  #g9TableCapture {
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Bảng Excel 9G */
+  .g9-excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  background: #fff;
+}
+
+.g9-excel-table th, .g9-excel-table td {
+  border: 1px solid #000;
+  padding: 5px 4px;
+  text-align: center;
+  /* 1. Cấm tuyệt đối chữ rớt dòng */
+  white-space: nowrap; 
+}
+
+/* 2. Tăng độ rộng cột ROUTE và đặt căn trái nhẹ cho đẹp */
+.g9-excel-table td:nth-child(1),
+.g9-excel-table td:nth-child(6) {
+  min-width: 80px; /* Đảm bảo đủ chiều rộng cho chuỗi XXX-YYY */
+  font-weight: bold;
+}
+
+.g9-excel-table .title-row td {
+  border: none;
+}
+
+.g9-excel-table .header-arr {
+  background-color: #ffff00; /* Vàng ARRIVAL */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.g9-excel-table .header-dep {
+  background-color: #92d050; /* Xanh DEPARTURE */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.g9-excel-table .sub-header th {
+  font-weight: bold;
+  background-color: #fff;
+}
+</style>
+
+<div id="g9Modal" class="g9-modal">
+  <div class="g9-modal-content">
+    
+    <!-- Bộ lọc ngày -->
+    <div class="vj-filter-group">
+      <label><b>Từ ngày:</b></label>
+      <input type="date" id="g9FromDate">
+      <label><b>Đến ngày:</b></label>
+      <input type="date" id="g9ToDate">
+      <button id="btnFetch9G" onclick="load9GData()" style="padding: 6px 14px; cursor:pointer; font-weight:bold;">
+        🔍 Xem dữ liệu
+      </button>
+    </div>
+
+    <!-- KHUNG CHỤP ẢNH BẢNG 9G -->
+    <div id="g9TableCapture">
+      <table class="g9-excel-table">
+        <thead>
+          <tr class="title-row">
+            <td style="width: 8%;">FROM</td>
+            <td id="lbl9GFrom" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td style="width: 5%;">TO</td>
+            <td id="lbl9GTo" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; font-family: 'Times New Roman', serif;">
+              SUN PHU QUOC AIR
+            </td>
+          </tr>
+          <tr>
+            <th colspan="5" class="header-arr">ARRIVAL</th>
+            <th colspan="5" class="header-dep">DEPARTURE</th>
+          </tr>
+          <tr class="sub-header">
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+          </tr>
+        </thead>
+        <tbody id="g9TableBody">
+          <tr>
+            <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- NÚT CHỨC NĂNG -->
+    <div class="vj-actions" style="margin-top: 15px; text-align: right;">
+      <button class="btn-snapshot" onclick="take9GSnapshot()">📸 Copy Ảnh (Snapshot)</button>
+      <button onclick="close9GModal()" style="padding: 8px 16px; cursor:pointer;">Đóng</button>
+    </div>
+
+  </div>
+</div>
+<button class="btn-vj" onclick="openVJModal()">✈️ Thống kê VJ</button>
+<!-- Style cho Popup và Bảng VJ đẹp chuẩn như hình mẫu -->
+<style>
+/* Style cho nút khi đang tải */
+.btn-loading {
+  opacity: 0.65;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* Spinner xoay tròn nhỏ trên nút */
+.spinner-inline {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Hiệu ứng xoay */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hiệu ứng mờ nhẹ bảng khi đang tải dữ liệu mới */
+.table-loading {
+  opacity: 0.4;
+  transition: opacity 0.2s ease-in-out;
+}
+  /* Modal Overlay */
+  .vj-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal Content */
+  .vj-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    max-width: 750px;
+    width: 90%;
+  }
+
+  /* Filter Controls */
+  .vj-filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  /* VJ Table Container - Khung sẽ chụp ảnh */
+  #vjTableCapture {
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Style Bảng Excel VJ */
+.vj-excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  background: #fff;
+}
+
+.vj-excel-table th, .vj-excel-table td {
+  border: 1px solid #000; /* Đổi sang viền đen nét rõ nét */
+  padding: 5px 4px;
+  text-align: center;
+  white-space: nowrap; /* Cấm rớt dòng tuyệt đối */
+}
+
+/* Tăng độ rộng không gian riêng cho cột ROUTE (Cột 1 và Cột 6) */
+.vj-excel-table td:nth-child(1),
+.vj-excel-table td:nth-child(6) {
+  min-width: 85px;
+  font-weight: bold;
+}
+
+.vj-excel-table .title-row td {
+  font-weight: bold;
+  border: none;
+}
+
+.vj-excel-table .header-arr {
+  background-color: #ffff00; /* Vàng ARRIVAL */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.vj-excel-table .header-dep {
+  background-color: #92d050; /* Xanh DEPARTURE */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.vj-excel-table .sub-header {
+  font-weight: bold;
+  background-color: #fff;
+}
+
+  /* Action Buttons */
+  .vj-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .btn-snapshot {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .btn-snapshot:hover { background-color: #0b5ed7; }
+</style>
+
+<!-- MODAL POPUP VJ -->
+<div id="vjModal" class="vj-modal">
+  <div class="vj-modal-content">
+    
+    <!-- Bộ lọc ngày -->
+    <div class="vj-filter-group">
+      <label><b>Từ ngày:</b></label>
+      <input type="date" id="vjFromDate">
+      <label><b>Đến ngày:</b></label>
+      <input type="date" id="vjToDate">
+      <button id="btnFetchVJ" onclick="loadVJData()" style="padding: 6px 14px; cursor:pointer; font-weight:bold;">
+    🔍 Xem dữ liệu
+  </button>
+    </div>
+
+    <!-- KHUNG HIỂN THỊ BẢNG (KHUNG NÀY SẼ ĐƯỢC CHỤP ẢNH) -->
+    <div id="vjTableCapture">
+      <table class="vj-excel-table">
+        <tr class="title-row">
+          <td style="width: 8%;">FROM</td>
+          <td id="lblFrom" style="width: 12%; text-align: left; font-weight: bold;">--</td>
+          <td style="width: 5%;">TO</td>
+          <td id="lblTo" style="width: 12%; text-align: left; font-weight: bold;">--</td>
+          <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; padding: 4px 0;">VIETJET AIR</td>
+        </tr>
+        <tr>
+          <td colspan="5" class="header-arr">ARRIVAL</td>
+          <td colspan="5" class="header-dep">DEPARTURE</td>
+        </tr>
+        <tr class="sub-header">
+          <td>ROUTE</td>
+          <td>CONFIG</td>
+          <td>PAX</td>
+          <td>LF</td>
+          <td>CB</td>
+          <td>ROUTE</td>
+          <td>CONFIG</td>
+          <td>PAX</td>
+          <td>LF</td>
+          <td>CB</td>
+        </tr>
+        <tr>
+          <td>HPH-PQC</td>
+          <td id="vjArrConfig">0</td>
+          <td id="vjArrPax">0</td>
+          <td id="vjArrLF">0%</td>
+          <td id="vjArrCB">0</td>
+          <td>PQC-HPH</td>
+          <td id="vjDepConfig">0</td>
+          <td id="vjDepPax">0</td>
+          <td id="vjDepLF">0%</td>
+          <td id="vjDepCB">0</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- NÚT CHỨC NĂNG -->
+    <div class="vj-actions">
+      <button class="btn-snapshot" onclick="takeVJSnapshot()">📸 Copy Ảnh (Snapshot)</button>
+      <button onclick="closeVJModal()" style="padding: 8px 16px; cursor:pointer;">Đóng</button>
+    </div>
+
+  </div>
+</div>
 <button type="button" onclick="showImmiPopup()">
     👮‍♂️ IMMI
 </button>
@@ -4240,6 +4589,313 @@ async function showBCTCNChart(){
 
 </script>
 <script>
+// 1. Mở Pop-up 9G (Mở tức thì - Không tự động tải dữ liệu)
+function open9GModal() {
+  document.getElementById("g9Modal").style.display = "flex";
+  const today = new Date().toISOString().slice(0, 10);
+  
+  if (!document.getElementById("g9FromDate").value) {
+    document.getElementById("g9FromDate").value = today;
+  }
+  if (!document.getElementById("g9ToDate").value) {
+    document.getElementById("g9ToDate").value = today;
+  }
+
+  // Cập nhật nhãn ngày hiển thị
+  document.getElementById("lbl9GFrom").innerText = formatDateShort(document.getElementById("g9FromDate").value);
+  document.getElementById("lbl9GTo").innerText = formatDateShort(document.getElementById("g9ToDate").value);
+
+  // Reset bảng về trạng thái chờ
+  reset9GTable();
+}
+
+// 2. Đóng Pop-up 9G
+function close9GModal() {
+  document.getElementById("g9Modal").style.display = "none";
+}
+
+// 3. Reset lại bảng 9G khi mở Popup
+function reset9GTable() {
+  const tbody = document.getElementById("g9TableBody");
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+      </tr>
+    `;
+  }
+}
+
+// 4. Lấy và render toàn bộ các chặng của 9G
+async function load9GData() {
+  const fromDate = document.getElementById("g9FromDate").value;
+  const toDate = document.getElementById("g9ToDate").value;
+  
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  const btn = document.getElementById("btnFetch9G");
+  const tableContainer = document.getElementById("g9TableCapture");
+
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="spinner-inline"></span> ⏳ Đang tải...`;
+  }
+  if (tableContainer) tableContainer.classList.add("table-loading");
+
+  document.getElementById("lbl9GFrom").innerText = formatDateShort(fromDate);
+  document.getElementById("lbl9GTo").innerText = formatDateShort(toDate);
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  try {
+    const res = await fetch(`${API_URL}?action=get9GStats&fromDate=${fromDate}&toDate=${toDate}`);
+    const data = await res.json();
+
+    if (data.error) {
+      alert("Lỗi hệ thống: " + data.error);
+      return;
+    }
+
+    const arrMap = data.arr || {};
+    const depMap = data.dep || {};
+
+    // Lấy danh sách mã sân bay kết nối (VD: SGN, HAN, CXR, DAD...)
+    const stations = Array.from(new Set([...Object.keys(arrMap), ...Object.keys(depMap)]));
+    const tbody = document.getElementById("g9TableBody");
+    tbody.innerHTML = "";
+
+    if (stations.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: red;">Không tìm thấy chuyến bay 9G nào trong khoảng thời gian này!</td></tr>`;
+      return;
+    }
+
+    // Duyệt ghép cặp chặng ARRIVAL và DEPARTURE
+    stations.forEach(st => {
+      const arr = arrMap[st] || { route: `${st}-PQC`, config: 0, pax: 0, cb: 0 };
+      const dep = depMap[st] || { route: `PQC-${st}`, config: 0, pax: 0, cb: 0 };
+
+      const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) + "%" : (arr.cb > 0 ? "#DIV/0!" : "0%");
+      const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) + "%" : (dep.cb > 0 ? "#DIV/0!" : "0%");
+
+      const row = `
+        <tr>
+          <!-- ARRIVAL -->
+          <td style="font-weight:bold;">${arr.route}</td>
+          <td style="text-align:right;">${arr.config}</td>
+          <td style="text-align:right;">${arr.pax}</td>
+          <td style="text-align:right;">${arrLF}</td>
+          <td style="text-align:right;">${arr.cb}</td>
+
+          <!-- DEPARTURE -->
+          <td style="font-weight:bold;">${dep.route}</td>
+          <td style="text-align:right;">${dep.config}</td>
+          <td style="text-align:right;">${dep.pax}</td>
+          <td style="text-align:right;">${depLF}</td>
+          <td style="text-align:right;">${dep.cb}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+
+  } catch (err) {
+    console.error("Lỗi lấy dữ liệu 9G:", err);
+    alert("Không thể kết nối lấy số liệu 9G! ❌");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("btn-loading");
+      btn.innerHTML = "🔍 Xem dữ liệu";
+    }
+    if (tableContainer) tableContainer.classList.remove("table-loading");
+  }
+}
+
+// 5. CHỨC NĂNG SNAPSHOT 9G: Copy Ảnh vào Clipboard
+function take9GSnapshot() {
+  const target = document.getElementById("g9TableCapture");
+
+  if (!target) {
+    alert("Không tìm thấy khung bảng 9G!");
+    return;
+  }
+
+  html2canvas(target, { scale: 2 }).then(canvas => {
+    canvas.toBlob(blob => {
+      try {
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([item]).then(() => {
+          alert("📸 Đã copy hình ảnh bảng 9G vào Clipboard!\nBạn có thể nhấn Ctrl + V để dán (paste) vào Zalo, Excel, Word...");
+        });
+      } catch (e) {
+        const link = document.createElement('a');
+        link.download = `ThongKe_9G_${document.getElementById("g9FromDate").value}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert("📸 Đã tải hình ảnh về máy!");
+      }
+    });
+  });
+}
+</script>
+<script>
+// 1. Định dạng Ngày hiển thị dạng DD-MMM (ví dụ: 28-Jul)
+function formatDateShort(dateStr) {
+  if (!dateStr) return "--";
+  const date = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}-${months[date.getMonth()]}`;
+}
+
+// 2. Mở Pop-up (Bật tức thì - KHÔNG tự động tải dữ liệu)
+function openVJModal() {
+  document.getElementById("vjModal").style.display = "flex";
+  const today = new Date().toISOString().slice(0, 10);
+  
+  // Tự động gán ngày mặc định nếu chưa chọn
+  if (!document.getElementById("vjFromDate").value) {
+    document.getElementById("vjFromDate").value = today;
+  }
+  if (!document.getElementById("vjToDate").value) {
+    document.getElementById("vjToDate").value = today;
+  }
+
+  // Cập nhật nhãn ngày lên tiêu đề bảng
+  document.getElementById("lblFrom").innerText = formatDateShort(document.getElementById("vjFromDate").value);
+  document.getElementById("lblTo").innerText = formatDateShort(document.getElementById("vjToDate").value);
+
+  // Reset bảng về số 0 ban đầu
+  resetVJTable();
+
+  // ❌ ĐÃ BỎ: loadVJData() để tránh bị chờ khi vừa mở popup
+}
+
+// 3. Hàm reset lại dữ liệu trên bảng
+function resetVJTable() {
+  document.getElementById("vjArrConfig").innerText = "0";
+  document.getElementById("vjArrPax").innerText = "0";
+  document.getElementById("vjArrLF").innerText = "0%";
+  document.getElementById("vjArrCB").innerText = "0";
+
+  document.getElementById("vjDepConfig").innerText = "0";
+  document.getElementById("vjDepPax").innerText = "0";
+  document.getElementById("vjDepLF").innerText = "0%";
+  document.getElementById("vjDepCB").innerText = "0";
+}
+
+// 4. Đóng Pop-up
+function closeVJModal() {
+  document.getElementById("vjModal").style.display = "none";
+}
+
+// 5. Lấy dữ liệu VJ (Chỉ chạy khi người dùng bấm nút "Xem dữ liệu")
+async function loadVJData() {
+  const fromDate = document.getElementById("vjFromDate").value;
+  const toDate = document.getElementById("vjToDate").value;
+  
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ cả Từ ngày và Đến ngày! 📅");
+    return;
+  }
+
+  // Lấy các phần tử DOM
+  const btn = document.getElementById("btnFetchVJ");
+  const tableContainer = document.getElementById("vjTableCapture");
+  const originalBtnText = "🔍 Xem dữ liệu";
+
+  // 1. BẬT HIỆU ỨNG ĐANG XỬ LÝ (Loading)
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="spinner-inline"></span> ⏳ Đang tải...`;
+  }
+  if (tableContainer) {
+    tableContainer.classList.add("table-loading");
+  }
+
+  // Cập nhật nhãn ngày hiển thị
+  document.getElementById("lblFrom").innerText = formatDateShort(fromDate);
+  document.getElementById("lblTo").innerText = formatDateShort(toDate);
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+  
+  try {
+    const res = await fetch(`${API_URL}?action=getVJStats&fromDate=${fromDate}&toDate=${toDate}`);
+    const data = await res.json();
+
+    if (data.error) {
+      alert("Lỗi hệ thống: " + data.error);
+      return;
+    }
+
+    const arr = data.arr || { config: 0, pax: 0, cb: 0 };
+    const dep = data.dep || { config: 0, pax: 0, cb: 0 };
+
+    // Tính Tỷ lệ lấp đầy (Load Factor)
+    const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) : 0;
+    const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) : 0;
+
+    // Cập nhật kết quả lên bảng HTML
+    document.getElementById("vjArrConfig").innerText = arr.config;
+    document.getElementById("vjArrPax").innerText = arr.pax;
+    document.getElementById("vjArrLF").innerText = arrLF + "%";
+    document.getElementById("vjArrCB").innerText = arr.cb;
+
+    document.getElementById("vjDepConfig").innerText = dep.config;
+    document.getElementById("vjDepPax").innerText = dep.pax;
+    document.getElementById("vjDepLF").innerText = depLF + "%";
+    document.getElementById("vjDepCB").innerText = dep.cb;
+
+  } catch (err) {
+    console.error("Lỗi lấy dữ liệu VJ:", err);
+    alert("Không thể kết nối lấy số liệu VJ! ❌");
+  } finally {
+    // 2. TẮT HIỆU ỨNG (Trả lại giao diện ban đầu)
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("btn-loading");
+      btn.innerHTML = originalBtnText;
+    }
+    if (tableContainer) {
+      tableContainer.classList.remove("table-loading");
+    }
+  }
+}
+
+// 6. CHỨC NĂNG SNAPSHOT: Chụp hình bảng và lưu vào Clipboard để Paste (Ctrl+V)
+function takeVJSnapshot() {
+  const target = document.getElementById("vjTableCapture");
+
+  if (!target) {
+    alert("Không tìm thấy khung bảng VJ!");
+    return;
+  }
+
+  html2canvas(target, { scale: 2 }).then(canvas => {
+    canvas.toBlob(blob => {
+      try {
+        // Sao chép trực tiếp ảnh vào Clipboard
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([item]).then(() => {
+          alert("📸 Đã copy hình ảnh bảng VJ vào Clipboard!\nBạn có thể nhấn Ctrl + V để dán (paste) vào Zalo, Excel, Word...");
+        });
+      } catch (e) {
+        // Dự phòng nếu trình duyệt chặn Clipboard API -> Tự tải ảnh xuống
+        const link = document.createElement('a');
+        link.download = `ThongKe_VJ_${document.getElementById("vjFromDate").value}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert("📸 Đã tải hình ảnh về máy!");
+      }
+    });
+  });
+}
+</script>
+<script>
 async function viewReport(){
 
   if(currentReportType === "TCN"){
@@ -4434,35 +5090,23 @@ async function processExportToACV() {
   confirmBtn.innerHTML = "⏳ Đang tải...";
   confirmBtn.disabled = true;
   if (cancelBtn) cancelBtn.disabled = true;
-  
-  if (loadingOverlay) {
-    loadingOverlay.style.display = "flex";
-  }
+  if (loadingOverlay) loadingOverlay.style.display = "flex";
 
   const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
   
-  // 🎯 CẬP NHẬT: Thêm tiêu đề cột "Pax đến" và "Link Flight No" vào newHeaders
   const newHeaders = [
-    "Ngày", 
-    "Tháng", 
-    "Năm", 
-    "Hãng", 
-    "Sector", 
-    "Số hiệu chuyến bay", 
-    "Loại tàu bay", 
-    "STD (Local time)", 
-    "Cap", 
-    "Pax đi",
-    "Pax đến",
-    "LINKFLIGHTNO" // Cột mới lấy từ cột CL
+    "Ngày", "Tháng", "Năm", "Hãng", "Sector", 
+    "Số hiệu chuyến bay", "Loại tàu bay", "STD (Local time)", 
+    "Cap", "Pax đi", "Pax đến", "LINKFLIGHTNO"
   ];
 
   try {
+    // Chỉ gọi 1 API duy nhất lấy toàn bộ dữ liệu ACV
     const response = await fetch(`${API_URL}?action=read&sheet=ACV&fromDate=${fromDateVal}&toDate=${toDateVal}`);
     if (!response.ok) throw new Error("Không thể kết nối đến máy chủ!");
     
     const exportRows = await response.json();
-    
+
     if (exportRows.error) {
       alert(`Lỗi hệ thống: ${exportRows.error} ❌`);
       return;
@@ -4473,28 +5117,106 @@ async function processExportToACV() {
       return;
     }
 
-    // Xuất dữ liệu ra file Excel với đúng thứ tự cột trong newHeaders
-    const worksheet = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Chuyến đi");
 
+    // ==========================================
+    // TAB 1: Tất cả chuyến đi
+    // ==========================================
+    const wsAll = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
+    XLSX.utils.book_append_sheet(workbook, wsAll, "Chuyến đi");
+
+    // ==========================================
+    // TAB 2: Thống kê hãng 9G
+    // ==========================================
+    const rows9G = exportRows.filter(row => (row["Hãng"] || "").toString().trim().toUpperCase() === "9G");
+    const ws9G = XLSX.utils.json_to_sheet(rows9G.length > 0 ? rows9G : [{}], { header: newHeaders });
+    XLSX.utils.book_append_sheet(workbook, ws9G, "9G");
+
+   // ==========================================
+// ==========================================
+    // TAB 3: THỐNG KÊ VJ TRỰC TIẾP TRÊN DỮ LIỆU
+    // ==========================================
+    let arr = { route: "HPH-PQC", config: 0, pax: 0, cb: 0 };
+    let dep = { route: "PQC-HPH", config: 0, pax: 0, cb: 0 };
+
+    exportRows.forEach(row => {
+      const hang = (row["Hãng"] || "").toString().trim().toUpperCase();
+      const flightNo = (row["Số hiệu chuyến bay"] || "").toString().trim().toUpperCase();
+
+      // Chỉ lọc các chuyến bay của Vietjet
+      if (hang === "VJ" || flightNo.startsWith("VJ")) {
+        const sector = (row["Sector"] || "").toString().replace(/\s+/g, "").toUpperCase();
+        const cap = Number(row["Cap"]) || 0;
+        
+        // Lấy linh hoạt lượng khách (ưu tiên Pax đến, nếu bằng 0 thì lấy Pax đi hoặc Pax tổng)
+        const paxDen = Number(row["Pax đến"]) || 0;
+        const paxDi = Number(row["Pax đi"]) || 0;
+        const paxTong = Number(row["Pax"]) || Number(row["Tổng pax"]) || 0;
+
+        // 1. CHUYẾN ĐẾN HPH-PQC
+        if (sector === "HPH-PQC" || sector === "HPHPQC") {
+          arr.cb += 1;
+          arr.config += cap;
+          // Lấy paxDen, nếu paxDen = 0 thì lấy paxDi hoặc paxTong của dòng đó
+          arr.pax += (paxDen || paxDi || paxTong);
+        }
+
+        // 2. CHUYẾN ĐI PQC-HPH
+        if (sector === "PQC-HPH" || sector === "PQCHPH") {
+          dep.cb += 1;
+          dep.config += cap;
+          // Lấy paxDi, nếu paxDi = 0 thì lấy paxDen hoặc paxTong của dòng đó
+          dep.pax += (paxDi || paxDen || paxTong);
+        }
+      }
+    });
+
+    // Tỷ lệ lấp đầy Load Factor
+    const arrLF = arr.config > 0 ? (arr.pax / arr.config) : 0;
+    const depLF = dep.config > 0 ? (dep.pax / dep.config) : 0;
+
+    const vjTableData = [
+      ["FROM", fromDateVal, "TO", toDateVal, "", "VIETJET AIR", "", "", "", ""],
+      ["ARRIVAL", "", "", "", "", "DEPARTURE", "", "", "", ""],
+      ["ROUTE", "CONFIG", "PAX", "LF", "CB", "ROUTE", "CONFIG", "PAX", "LF", "CB"],
+      [
+        arr.route, 
+        arr.config, 
+        arr.pax, 
+        (arrLF * 100).toFixed(0) + "%", 
+        arr.cb,
+        dep.route, 
+        dep.config, 
+        dep.pax, 
+        (depLF * 100).toFixed(0) + "%", 
+        dep.cb
+      ]
+    ];
+
+    const wsVJ = XLSX.utils.aoa_to_sheet(vjTableData);
+
+    // Merge các ô tiêu đề đúng định dạng
+    wsVJ['!merges'] = [
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }, // ARRIVAL (A2:E2)
+      { s: { r: 1, c: 5 }, e: { r: 1, c: 9 } }  // DEPARTURE (F2:J2)
+    ];
+
+    XLSX.utils.book_append_sheet(workbook, wsVJ, "VJ");
+
+    // Xuất file Excel
     XLSX.writeFile(workbook, `ChuyenDi_${fromDateVal}_den_${toDateVal}.xlsx`);
     
     if (loadingOverlay) loadingOverlay.style.display = "none";
     document.getElementById("exportModal").style.display = "none";
 
   } catch (error) {
-    console.error("Lỗi:", error);
+    console.error("Lỗi xuất file:", error);
     alert("Có lỗi xảy ra khi xuất file! ❌");
   } finally {
-    // 2. TẮT TRẠNG THÁI CHỜ
     confirmBtn.innerHTML = originalText;
     confirmBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
-    
-    if (loadingOverlay) {
-      loadingOverlay.style.display = "none";
-    }
+    if (loadingOverlay) loadingOverlay.style.display = "none";
   }
 }
 </script>
@@ -4599,7 +5321,8 @@ async function thongKePBB() {
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec"; 
 let immiSavedData = {}; 
 
-// --- LOGIC XỬ LÝ CHỨC NĂNG CHÍNH IMMI CARGO ---
+// --- LOGIC XỬ LÝ CHỨC NĂNG CHÍNH 
+ CARGO ---
 
 // 1. Hàm mở Popup Modal
 function openImmiCargoModal() {
