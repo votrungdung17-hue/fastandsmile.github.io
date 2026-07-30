@@ -5090,23 +5090,34 @@ async function processExportToACV() {
   confirmBtn.innerHTML = "⏳ Đang tải...";
   confirmBtn.disabled = true;
   if (cancelBtn) cancelBtn.disabled = true;
-  if (loadingOverlay) loadingOverlay.style.display = "flex";
+  
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "flex";
+  }
 
   const API_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
   
   const newHeaders = [
-    "Ngày", "Tháng", "Năm", "Hãng", "Sector", 
-    "Số hiệu chuyến bay", "Loại tàu bay", "STD (Local time)", 
-    "Cap", "Pax đi", "Pax đến", "LINKFLIGHTNO"
+    "Ngày", 
+    "Tháng", 
+    "Năm", 
+    "Hãng", 
+    "Sector", 
+    "Số hiệu chuyến bay", 
+    "Loại tàu bay", 
+    "STD (Local time)", 
+    "Cap", 
+    "Pax đi",
+    "Pax đến",
+    "LINKFLIGHTNO"
   ];
 
   try {
-    // Chỉ gọi 1 API duy nhất lấy toàn bộ dữ liệu ACV
     const response = await fetch(`${API_URL}?action=read&sheet=ACV&fromDate=${fromDateVal}&toDate=${toDateVal}`);
     if (!response.ok) throw new Error("Không thể kết nối đến máy chủ!");
     
     const exportRows = await response.json();
-
+    
     if (exportRows.error) {
       alert(`Lỗi hệ thống: ${exportRows.error} ❌`);
       return;
@@ -5117,90 +5128,21 @@ async function processExportToACV() {
       return;
     }
 
+    // --- TẠO WORKBOOK VÀ CÁC TAB ---
     const workbook = XLSX.utils.book_new();
 
-    // ==========================================
-    // TAB 1: Tất cả chuyến đi
-    // ==========================================
+    // Tab 1: Tất cả chuyến đi
     const wsAll = XLSX.utils.json_to_sheet(exportRows, { header: newHeaders });
     XLSX.utils.book_append_sheet(workbook, wsAll, "Chuyến đi");
 
-    // ==========================================
-    // TAB 2: Thống kê hãng 9G
-    // ==========================================
-    const rows9G = exportRows.filter(row => (row["Hãng"] || "").toString().trim().toUpperCase() === "9G");
+    // Tab 2: Thống kê hãng 9G
+    const rows9G = exportRows.filter(row => row["Hãng"] === "9G");
     const ws9G = XLSX.utils.json_to_sheet(rows9G.length > 0 ? rows9G : [{}], { header: newHeaders });
     XLSX.utils.book_append_sheet(workbook, ws9G, "9G");
 
-   // ==========================================
-// ==========================================
-    // TAB 3: THỐNG KÊ VJ TRỰC TIẾP TRÊN DỮ LIỆU
-    // ==========================================
-    let arr = { route: "HPH-PQC", config: 0, pax: 0, cb: 0 };
-    let dep = { route: "PQC-HPH", config: 0, pax: 0, cb: 0 };
-
-    exportRows.forEach(row => {
-      const hang = (row["Hãng"] || "").toString().trim().toUpperCase();
-      const flightNo = (row["Số hiệu chuyến bay"] || "").toString().trim().toUpperCase();
-
-      // Chỉ lọc các chuyến bay của Vietjet
-      if (hang === "VJ" || flightNo.startsWith("VJ")) {
-        const sector = (row["Sector"] || "").toString().replace(/\s+/g, "").toUpperCase();
-        const cap = Number(row["Cap"]) || 0;
-        
-        // Lấy linh hoạt lượng khách (ưu tiên Pax đến, nếu bằng 0 thì lấy Pax đi hoặc Pax tổng)
-        const paxDen = Number(row["Pax đến"]) || 0;
-        const paxDi = Number(row["Pax đi"]) || 0;
-        const paxTong = Number(row["Pax"]) || Number(row["Tổng pax"]) || 0;
-
-        // 1. CHUYẾN ĐẾN HPH-PQC
-        if (sector === "HPH-PQC" || sector === "HPHPQC") {
-          arr.cb += 1;
-          arr.config += cap;
-          // Lấy paxDen, nếu paxDen = 0 thì lấy paxDi hoặc paxTong của dòng đó
-          arr.pax += (paxDen || paxDi || paxTong);
-        }
-
-        // 2. CHUYẾN ĐI PQC-HPH
-        if (sector === "PQC-HPH" || sector === "PQCHPH") {
-          dep.cb += 1;
-          dep.config += cap;
-          // Lấy paxDi, nếu paxDi = 0 thì lấy paxDen hoặc paxTong của dòng đó
-          dep.pax += (paxDi || paxDen || paxTong);
-        }
-      }
-    });
-
-    // Tỷ lệ lấp đầy Load Factor
-    const arrLF = arr.config > 0 ? (arr.pax / arr.config) : 0;
-    const depLF = dep.config > 0 ? (dep.pax / dep.config) : 0;
-
-    const vjTableData = [
-      ["FROM", fromDateVal, "TO", toDateVal, "", "VIETJET AIR", "", "", "", ""],
-      ["ARRIVAL", "", "", "", "", "DEPARTURE", "", "", "", ""],
-      ["ROUTE", "CONFIG", "PAX", "LF", "CB", "ROUTE", "CONFIG", "PAX", "LF", "CB"],
-      [
-        arr.route, 
-        arr.config, 
-        arr.pax, 
-        (arrLF * 100).toFixed(0) + "%", 
-        arr.cb,
-        dep.route, 
-        dep.config, 
-        dep.pax, 
-        (depLF * 100).toFixed(0) + "%", 
-        dep.cb
-      ]
-    ];
-
-    const wsVJ = XLSX.utils.aoa_to_sheet(vjTableData);
-
-    // Merge các ô tiêu đề đúng định dạng
-    wsVJ['!merges'] = [
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }, // ARRIVAL (A2:E2)
-      { s: { r: 1, c: 5 }, e: { r: 1, c: 9 } }  // DEPARTURE (F2:J2)
-    ];
-
+    // Tab 3: Thống kê hãng VJ
+    const rowsVJ = exportRows.filter(row => row["Hãng"] === "VJ");
+    const wsVJ = XLSX.utils.json_to_sheet(rowsVJ.length > 0 ? rowsVJ : [{}], { header: newHeaders });
     XLSX.utils.book_append_sheet(workbook, wsVJ, "VJ");
 
     // Xuất file Excel
@@ -5210,13 +5152,17 @@ async function processExportToACV() {
     document.getElementById("exportModal").style.display = "none";
 
   } catch (error) {
-    console.error("Lỗi xuất file:", error);
+    console.error("Lỗi:", error);
     alert("Có lỗi xảy ra khi xuất file! ❌");
   } finally {
+    // 2. TẮT TRẠNG THÁI CHỜ
     confirmBtn.innerHTML = originalText;
     confirmBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
-    if (loadingOverlay) loadingOverlay.style.display = "none";
+    
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "none";
+    }
   }
 }
 </script>
