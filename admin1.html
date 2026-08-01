@@ -1757,9 +1757,11 @@ function upload() {
 </div>
 
 </div>
+<!-- ROSTER TAB -->
 <div id="rosterTab" class="tab-content">
   <div style="background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ccc; margin-top: 15px;">
     
+    <!-- Thanh công cụ chọn tháng -->
     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
       <span class="section-daidien" style="background: linear-gradient(90deg, #6f42c1, #a92fd8);">📅 LỊCH TRỰC ROSTER</span>
       
@@ -1780,15 +1782,21 @@ function upload() {
       </select>
     </div>
 
+    <!-- Bảng Lịch Trực Roster Chi Tiết -->
     <div style="overflow-x: auto; max-width: 100%;">
       <table id="rosterTable" style="margin-top: 0; min-width: 1200px;"></table>
     </div>
 
+    <!-- Nút Thao Tác -->
     <div style="margin-top: 15px; display: flex; gap: 10px;">
       <button id="saveRosterBtn" onclick="window.saveAllRoster()" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-        LƯU LỊCH TRỰC
+        💾 LƯU LỊCH TRỰC
       </button>
-      
+<!-- Nút Xuất Excel màu Cam Gradient có hiệu ứng Hover -->
+<button type="button" class="btn-export-excel ms-2" onclick="exportRosterToExcel()">
+  <span style="font-size: 1.1rem;">📊</span>
+  <span>Xuất Excel</span>
+</button>
       <button id="syncApiBtn" type="button" onclick="dongBoThongKeTuAPI()" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
         🔄 ĐỒNG BỘ DỮ LIỆU DATA
       </button>
@@ -1796,63 +1804,78 @@ function upload() {
 
     <hr style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0;">
 
-    <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #6f42c1;">📈 THỐNG KÊ PHÉP / BÙ / LỄ TRONG NĂM </div>
-    <div style="overflow-x: auto;">
-      <table class="roster-stat-table" style="width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 10px;">
-        <thead>
-          <tr style="background: linear-gradient(90deg, #6f42c1, #a92fd8); color: white;">
-            <th rowspan="2" style="border: 1px solid #aaa; padding: 8px;">Nhân Viên</th>
-            <th colspan="3" style="border: 1px solid #aaa; padding: 8px;">Đã Sử Dụng (Tích lũy năm)</th>
-            <th colspan="3" style="border: 1px solid #aaa; padding: 8px;">Chưa Sử Dụng / Còn Lại</th>
-          </tr>
-          <tr style="background: #f2f2f2; color: #333;">
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">P</th>
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">B</th>
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">L</th>
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">P</th>
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">B</th>
-            <th style="border: 1px solid #aaa; padding: 6px; width: 100px;">L</th>
-          </tr>
-        </thead>
-        <tbody id="rosterStatBody">
-          <tr data-name="Võ Trung Dũng" data-p="14" data-b="18" data-l="11">
-            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Võ Trung Dũng</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">14</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">18</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
-          </tr>
-          <tr data-name="Nguyễn Quốc Quang" data-p="14" data-b="19" data-l="11">
-            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Nguyễn Quốc Quang</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">14</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">19</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
-          </tr>
-          <tr data-name="Nguyễn Văn Quân" data-p="15" data-b="19" data-l="11">
-            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Nguyễn Văn Quân</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">15</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">19</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
-          </tr>
-          <tr data-name="Từ Đức Nguyên" data-p="12" data-b="0" data-l="11">
-            <td style="border: 1px solid #aaa; padding: 8px; font-weight: bold; background: #f8f9fa; text-align: left;">Từ Đức Nguyên</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="p-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="b-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #f8d7da; color: #721c24; font-weight: bold; text-align: center;" class="l-used">0</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="p-remain">12</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="b-remain">0</td>
-            <td style="border: 1px solid #aaa; background-color: #d4edda; color: #155724; font-weight: bold; text-align: center;" class="l-remain">11</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- KHUNG THỐNG KÊ KẾ BÊN NHAU (MONTH STATS & YEAR STATS) -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+      
+     <!-- BẢNG THỐNG KÊ TRONG THÁNG -->
+<div style="flex: 1; min-width: 500px;">
+  <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #007bff;">
+    📊 TỔNG HỢP NGÀY CÔNG THÁNG <span id="lblStatMonth">8</span>
+  </div>
+  <table class="roster-stat-table" style="width: 100%; border-collapse: collapse;">
+   <thead>
+  <tr style="background: linear-gradient(90deg, #6f42c1, #a92fd8); color: white;">
+    <th style="text-align: left; width: 180px;">Nhân Viên</th>
+    <th>N</th>
+    <th>T</th>
+    <th>H</th>
+    <th>B</th>
+    <th>P</th>
+    <th>R1</th>
+    <th>R2</th>
+    <th style="background: #17a2b8; color: white;">Đã quy đổi giờ</th>
+    <th style="background: #ff9800; color: white; width: 100px;">Công chuẩn</th>
+    <th style="background: #28a745; color: white; width: 100px;">Công thực tế</th>
+  </tr>
+</thead>
+    <tbody id="rosterMonthStatBody">
+      <!-- Dữ liệu tự động tính từ JS -->
+    </tbody>
+  </table>
+</div>
+
+      <!-- BẢNG 2: THỐNG KÊ TÍCH LŨY NĂM -->
+      <div style="flex: 1; min-width: 400px;">
+        <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #6f42c1;">
+          📈 THỐNG KÊ PHÉP / BÙ / LỄ TRONG NĂM
+        </div>
+        <table class="roster-stat-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: linear-gradient(90deg, #6f42c1, #a92fd8); color: white;">
+              <th rowspan="2">Nhân Viên</th>
+              <th colspan="3">Đã Sử Dụng (Năm)</th>
+              <th colspan="3">Còn Lại</th>
+            </tr>
+            <tr style="background: #f2f2f2; color: #333;">
+              <th>P</th><th>B</th><th>L</th>
+              <th>P</th><th>B</th><th>L</th>
+            </tr>
+          </thead>
+          <tbody id="rosterStatBody">
+            <tr data-name="Võ Trung Dũng" data-p="14" data-b="18" data-l="11">
+              <td>Võ Trung Dũng</td>
+              <td class="p-used">0</td><td class="b-used">0</td><td class="l-used">0</td>
+              <td class="p-remain">14</td><td class="b-remain">18</td><td class="l-remain">11</td>
+            </tr>
+            <tr data-name="Nguyễn Quốc Quang" data-p="14" data-b="19" data-l="11">
+              <td>Nguyễn Quốc Quang</td>
+              <td class="p-used">0</td><td class="b-used">0</td><td class="l-used">0</td>
+              <td class="p-remain">14</td><td class="b-remain">19</td><td class="l-remain">11</td>
+            </tr>
+            <tr data-name="Nguyễn Văn Quân" data-p="15" data-b="19" data-l="11">
+              <td>Nguyễn Văn Quân</td>
+              <td class="p-used">0</td><td class="b-used">0</td><td class="l-used">0</td>
+              <td class="p-remain">15</td><td class="b-remain">19</td><td class="l-remain">11</td>
+            </tr>
+            <tr data-name="Từ Đức Nguyên" data-p="12" data-b="0" data-l="11">
+              <td>Từ Đức Nguyên</td>
+              <td class="p-used">0</td><td class="b-used">0</td><td class="l-used">0</td>
+              <td class="p-remain">12</td><td class="b-remain">0</td><td class="l-remain">11</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
 
   </div>
@@ -3469,7 +3492,7 @@ window.showTab = function(tabId, event) {
     }, 50);
   }
 
-  // Tự động tải dữ liệu nếu mở tab Cargo (Giải quyết lỗi không tự load)
+  // Tự động tải dữ liệu nếu mở tab Cargo
   if (tabId === 'cargoTab') { 
     setTimeout(function() {
       if (typeof window.loadCargoFromSheet === 'function') {
@@ -3490,14 +3513,128 @@ const staffList = [
 ];
 
 // ==========================================
-// 3. HÀM VẼ LỊCH TRỰC VÀ TẢI DỮ LIỆU TỪ SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// 3. TÍNH TOÁN CÔNG CHUẨN & CÔNG THỰC TẾ (SỬA LỖI TRỆCH / TRỐNG CỘT)
+// ==========================================
+window.calculateMonthlyStats = function() {
+  const selectBox = document.getElementById("rosterMonthSelect");
+  if (!selectBox) return;
+  
+  const month = parseInt(selectBox.value, 10) || 7;
+  const year = 2026;
+
+  // 1. Cập nhật nhãn Tháng hiển thị
+  const lblStatMonth = document.getElementById("lblStatMonth");
+  if (lblStatMonth) lblStatMonth.innerText = month;
+
+  // 2. Tính TỔNG SỐ NGÀY trong tháng & TỔNG SỐ NGÀY T7, CN
+  const totalDaysInMonth = new Date(year, month, 0).getDate();
+  let weekendCount = 0;
+
+  for (let d = 1; d <= totalDaysInMonth; d++) {
+    const dayOfWeek = new Date(year, month - 1, d).getDay(); // 0: CN, 6: T7
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      weekendCount++;
+    }
+  }
+
+  // CÔNG CHUẨN (Tháng 7 = 31 - 8 = 23)
+  const congChuan = totalDaysInMonth - weekendCount;
+
+  // 3. Quét từng dòng nhân viên trong lịch Roster
+  const staffRows = document.querySelectorAll("#rosterTable tbody tr");
+  let rowsHtml = "";
+
+  staffRows.forEach(row => {
+    const nameTd = row.cells[0];
+    if (!nameTd) return;
+    const staffName = nameTd.innerText.trim();
+
+    // Khởi tạo bộ đếm các loại ca
+    const counts = { N: 0, T: 0, H: 0, B: 0, P: 0, R1: 0, R2: 0 };
+
+    const inputs = row.querySelectorAll("input.roster-input");
+    inputs.forEach(input => {
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+
+      // Phân loại đếm ca chính xác
+      if (val === "R1") {
+        counts.R1++;
+      } else if (val === "R2") {
+        counts.R2++;
+      } else if (val.includes("DH")) {
+        // Chuỗi có chứa "DH" (vd: 1400DH, 0600DH, DH,...) -> Tính vào ca R1
+        counts.R1++;
+      } else if (val.startsWith("N")) {
+        counts.N++;
+      } else if (val.startsWith("T")) {
+        counts.T++;
+      } else if (val.startsWith("P")) {
+        counts.P++;
+      } else if (val.startsWith("B")) {
+        counts.B++;
+      } else if (val === "HC" || val.startsWith("H")) {
+        counts.H++;
+      }
+    });
+
+    // CÔNG THỰC TẾ = N + T + H + B + P + R1 + R2 (Bao gồm cả các ca DH)
+    const congThucTe = counts.N + counts.T + counts.H + counts.B + counts.P + counts.R1 + counts.R2;
+
+    // Tạo đúng 10 cột dữ liệu chuẩn xác
+    rowsHtml += `
+      <tr>
+        <td style="padding: 6px; text-align: left; font-weight: bold; background: #f8f9fa; border: 1px solid #aaa;">${staffName}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; color: #0c5460; border: 1px solid #aaa;">${counts.N}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; color: #721c24; border: 1px solid #aaa;">${counts.T}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; color: #155724; border: 1px solid #aaa;">${counts.H}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; color: #856404; border: 1px solid #aaa;">${counts.B}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; color: #856404; background-color: #ffeeba; border: 1px solid #aaa;">${counts.P}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; border: 1px solid #aaa;">${counts.R1}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; border: 1px solid #aaa;">${counts.R2}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; background-color: #fff3cd; color: #856404; border: 1px solid #aaa;">${congChuan}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold; background-color: #d4edda; color: #155724; border: 1px solid #aaa;">${congThucTe}</td>
+      </tr>
+    `;
+  });
+
+  // 4. Ép buộc đồng bộ lại toàn bộ cấu trúc bảng (Tiêu đề 10 cột + Dữ liệu 10 cột)
+  const monthStatBody = document.getElementById("rosterMonthStatBody");
+  if (!monthStatBody) return;
+
+  const parentTable = monthStatBody.closest("table");
+  if (parentTable) {
+    parentTable.innerHTML = `
+      <thead>
+        <tr style="background: linear-gradient(90deg, #6f42c1, #a92fd8); color: white;">
+          <th style="padding: 8px; text-align: left; border: 1px solid #aaa;">Nhân Viên</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">N</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">T</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">H</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">B</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">P</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">R1</th>
+          <th style="padding: 8px; text-align: center; border: 1px solid #aaa;">R2</th>
+          <th style="padding: 8px; text-align: center; background: #ff9800; color: white; border: 1px solid #aaa;">Công chuẩn</th>
+          <th style="padding: 8px; text-align: center; background: #28a745; color: white; border: 1px solid #aaa;">Công thực tế</th>
+        </tr>
+      </thead>
+      <tbody id="rosterMonthStatBody">
+        ${rowsHtml}
+      </tbody>
+    `;
+  }
+};
+
+// ==========================================
+// 4. HÀM VẼ LỊCH TRỰC VÀ TẢI DỮ LIỆU TỪ SHEET
 // ==========================================
 window.renderRoster = function() {
   const selectBox = document.getElementById("rosterMonthSelect");
   const table = document.getElementById("rosterTable");
   if (!selectBox || !table) return;
   
-  const month = parseInt(selectBox.value) || 6;
+  const month = parseInt(selectBox.value) || 7;
   const year = 2026; 
   
   const totalDays = new Date(year, month, 0).getDate();
@@ -3542,7 +3679,12 @@ window.renderRoster = function() {
   
   table.innerHTML = `<thead>${headerRow1}${headerRow2}</thead><tbody>${bodyRows}</tbody>`;
 
-  // --- THAY THẾ ĐOẠN LOAD ROSTER THÀNH FETCH API (GET) ---
+  // Reset bảng thống kê ngày công khi vẽ bảng mới
+  if (typeof window.calculateMonthlyStats === "function") {
+    window.calculateMonthlyStats();
+  }
+
+  // Nạp dữ liệu từ Google Sheet qua API
   const sheetName = month.toString(); 
   
   fetch(`${API}?action=loadRoster&sheet=${sheetName}`)
@@ -3568,12 +3710,17 @@ window.renderRoster = function() {
           }
         }
       });
+
+      // Tính toán & Sync lại bảng thống kê công ngay sau khi nạp xong data
+      if (typeof window.calculateMonthlyStats === "function") {
+        window.calculateMonthlyStats();
+      }
     })
     .catch(error => console.error("Lỗi khi tải lịch trực từ API:", error));
 };
 
 // =========================================================================
-// 4. HÀM ĐỔI MÀU Ô TRỰC QUAN
+// 5. HÀM ĐỔI MÀU Ô TRỰC QUAN & CẬP NHẬT TỨC THÌ
 // =========================================================================
 window.updateShiftColor = function(input) {
   const val = input.value.toUpperCase();
@@ -3589,10 +3736,15 @@ window.updateShiftColor = function(input) {
   } else if (val.startsWith("T")) {
     td.classList.add("shift-t");
   }
+
+  // Tự động tính lại bảng tổng hợp công ngay khi sửa ký hiệu
+  if (typeof window.calculateMonthlyStats === "function") {
+    window.calculateMonthlyStats();
+  }
 };
 
 // =========================================================================
-// 5. HÀM LƯU TOÀN BỘ LỊCH TRỰC VÀO SHEET (ĐÃ THAY GOOGLE.SCRIPT.RUN)
+// 6. HÀM LƯU TOÀN BỘ LỊCH TRỰC VÀO SHEET
 // =========================================================================
 window.saveAllRoster = function() {
   const table = document.getElementById("rosterTable");
@@ -3618,7 +3770,6 @@ window.saveAllRoster = function() {
     saveBtn.innerText = "Đang lưu dữ liệu...";
   }
 
-  // --- THAY THẾ ĐOẠN SAVE ROSTER THÀNH FETCH API (POST) ---
   const payload = {
     action: "saveBulk",
     sheet: sheetName,
@@ -5260,6 +5411,153 @@ async function thongKePBB() {
   } finally {
     showLoading(false);
   }
+}
+</script>
+<script>
+// Hàm tính tổng ngày công trong tháng hiện tại từ bảng #rosterTable
+function calculateMonthlyStats() {
+  const selectBox = document.getElementById("rosterMonthSelect");
+  if (!selectBox) return;
+
+  const selectedMonth = parseInt(selectBox.value, 10) || 7;
+  const year = 2026;
+
+  // 1. Cập nhật nhãn Tháng
+  const lblStatMonth = document.getElementById("lblStatMonth");
+  if (lblStatMonth) lblStatMonth.innerText = selectedMonth;
+
+  // 2. Tính Công chuẩn của tháng (Tổng số ngày trong tháng - T7 & CN)
+  const totalDaysInMonth = new Date(year, selectedMonth, 0).getDate();
+  let weekendCount = 0;
+  for (let d = 1; d <= totalDaysInMonth; d++) {
+    const dayOfWeek = new Date(year, selectedMonth - 1, d).getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) weekendCount++;
+  }
+  const congChuan = totalDaysInMonth - weekendCount;
+
+  const monthStatBody = document.getElementById("rosterMonthStatBody");
+  if (!monthStatBody) return;
+  monthStatBody.innerHTML = "";
+
+  // 3. Duyệt từng nhân viên
+  const staffRows = document.querySelectorAll("#rosterTable tbody tr");
+
+  staffRows.forEach(row => {
+    const staffName = row.cells[0]?.innerText.trim();
+    if (!staffName) return;
+
+    // Bộ đếm các ký hiệu công & ca DH quy đổi
+    const counts = { N: 0, T: 0, H: 0, B: 0, P: 0, R1: 0, R2: 0, quyDoiGio: 0 };
+
+    const inputs = row.querySelectorAll("input.roster-input");
+    inputs.forEach(input => {
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+
+      // Phân loại ca
+      if (val.includes("DH")) {
+        counts.quyDoiGio++; // Tính riêng vào cột Đã quy đổi giờ
+      } else if (val === "R1") {
+        counts.R1++;
+      } else if (val === "R2") {
+        counts.R2++;
+      } else if (val.startsWith("N")) {
+        counts.N++;
+      } else if (val.startsWith("T")) {
+        counts.T++;
+      } else if (val.startsWith("P")) {
+        counts.P++;
+      } else if (val.startsWith("B")) {
+        counts.B++;
+      } else if (val === "HC" || val.startsWith("H")) {
+        counts.H++;
+      }
+    });
+
+    // 4. CÔNG THỰC TẾ = T + H + B + Đã quy đổi giờ
+    const congThucTe = counts.T + counts.H + counts.B + counts.quyDoiGio;
+
+    // 5. Render xuất đủ 11 cột
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="text-align: left; font-weight: bold; background: #f8f9fa;">${staffName}</td>
+      <td style="font-weight: bold; color: #0c5460;">${counts.N}</td>
+      <td style="font-weight: bold; color: #721c24;">${counts.T}</td>
+      <td style="font-weight: bold; color: #155724;">${counts.H}</td>
+      <td style="font-weight: bold; color: #856404;">${counts.B}</td>
+      <td style="font-weight: bold; color: #856404; background-color: #ffeeba;">${counts.P}</td>
+      <td style="font-weight: bold;">${counts.R1}</td>
+      <td style="font-weight: bold;">${counts.R2}</td>
+      <td style="font-weight: bold; background-color: #e0f7fa; color: #006064;">${counts.quyDoiGio}</td>
+      <td style="font-weight: bold; background-color: #fff3cd; color: #856404;">${congChuan}</td>
+      <td style="font-weight: bold; background-color: #d4edda; color: #155724;">${congThucTe}</td>
+    `;
+    monthStatBody.appendChild(tr);
+  });
+}
+
+// Lắng nghe sự kiện render Roster và thay đổi input
+const originalRenderRoster = window.renderRoster;
+window.renderRoster = function() {
+  if (typeof originalRenderRoster === "function") {
+    originalRenderRoster();
+  }
+  calculateMonthlyStats();
+};
+
+document.addEventListener("input", function(e) {
+  if (e.target && e.target.classList.contains("roster-input")) {
+    calculateMonthlyStats();
+  }
+});
+// Hàm xuất Bảng Lịch Trực Roster ra file Excel (.xlsx)
+function exportRosterToExcel() {
+  const table = document.getElementById("rosterTable");
+  if (!table) {
+    alert("Không tìm thấy bảng Lịch trực Roster!");
+    return;
+  }
+
+  // Lấy tháng và năm đang chọn để đặt tên file
+  const monthSelect = document.getElementById("rosterMonthSelect");
+  const selectedMonth = monthSelect ? monthSelect.value : "7";
+  const fileName = `Lich_Truc_Roster_Thang_${selectedMonth}_2026.xlsx`;
+
+  // Tạo Workbook từ Bảng HTML #rosterTable
+  const wb = XLSX.utils.book_new();
+  
+  // Chuyển dữ liệu từ bảng (bao gồm cả giá trị các ô Input) sang Sheet Excel
+  const wsData = [];
+  const rows = table.querySelectorAll("tr");
+
+  rows.forEach(row => {
+    const rowData = [];
+    const cells = row.querySelectorAll("th, td");
+    
+    cells.forEach(cell => {
+      // Nếu ô có chứa input (ô nhập ca trực) thì lấy value của input
+      const input = cell.querySelector("input.roster-input");
+      if (input) {
+        rowData.push(input.value.trim().toUpperCase());
+      } else {
+        // Nếu là ô chữ thông thường (Tên, Tiêu đề ngày,...)
+        rowData.push(cell.innerText.trim());
+      }
+    });
+
+    if (rowData.length > 0) {
+      wsData.push(rowData);
+    }
+  });
+
+  // Chuyển mảng dữ liệu thành Sheet
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Đưa Sheet vào Workbook
+  XLSX.utils.book_append_sheet(wb, ws, `Roster T${selectedMonth}`);
+
+  // Tải file Excel về máy
+  XLSX.writeFile(wb, fileName);
 }
 </script>
 <script>
