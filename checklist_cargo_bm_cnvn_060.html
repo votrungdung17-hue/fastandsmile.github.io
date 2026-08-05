@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA (BM-CNVN-060)</title>
+    <!-- html2pdf.js library for high-fidelity client-side PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #1f2937;
+            line-height: 1.4;
+            padding-bottom: 90px;
+        }
+
+        /* Top Bar Navigation */
+        .header-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-bar .doc-code {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        /* Paper Document Styles for PDF Export */
+        .document-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .doc-header {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .doc-header-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        .doc-title {
+            text-align: center;
+            color: #0056b3;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+
+        /* Metadata Inputs */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 2px rgba(0,86,179,0.15);
+        }
+
+        /* Section Banner */
+        .section-title {
+            background: #eef6ff;
+            color: #0056b3;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-left: 4px solid #0056b3;
+            margin: 16px 0 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Checklist Items - Mobile Friendly Cards */
+        .item-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .item-card.checked-true {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .item-card.checked-false {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .item-no {
+            background: #6b7280;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .item-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            flex-grow: 1;
+        }
+
+        .item-unit {
+            font-size: 11px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* Choice Radio Options */
+        .status-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+            color: #4b5563;
+        }
+
+        .opt-btn.pass-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .opt-btn.fail-btn.active {
+            background: #ef4444;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .note-input:focus {
+            border-color: #0056b3;
+        }
+
+        /* Signatures Section */
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .signature-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sig-box {
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .sig-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .sig-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sig-img {
+            max-width: 100%;
+            max-height: 100px;
+            display: none;
+            margin: 0 auto;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .btn-sm:active {
+            background: #d1d5db;
+        }
+
+        /* Fixed Bottom Action Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,86,179,0.3);
+        }
+
+        .btn-primary:active {
+            background: #004494;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Styles specifically applied for Printable / PDF Table Mode */
+        .print-only {
+            display: none;
+        }
+
+        /* PDF Layout Optimizations */
+        @media print {
+            body {
+                background: white;
+                padding-bottom: 0;
+            }
+            .header-bar, .bottom-bar, .sig-actions, .opt-btn {
+                display: none !important;
+            }
+            .print-only {
+                display: table-cell !important;
+            }
+            .document-card {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+
+        /* Export Table Style for PDF compilation */
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 10px;
+        }
+
+        .pdf-table th, .pdf-table td {
+            border: 1px solid #374151;
+            padding: 5px 6px;
+            vertical-align: middle;
+        }
+
+        .pdf-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pdf-table .col-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <div class="header-bar">
+        <h1>VNA CARGO CHECKLIST</h1>
+        <span class="doc-code">BM-CNVN-060</span>
+    </div>
+
+    <div class="container">
+        <!-- Interactive Form Card -->
+        <div class="document-card" id="export-content">
+            
+            <!-- Standard Header -->
+            <div class="doc-header">
+                <div class="doc-header-top">
+                    <span>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM - CTCP<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
+                    <span style="text-align: right;">Mã số: BM-CNVN-060<br>Lần ban hành: 2</span>
+                </div>
+                <div class="doc-title">CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA</div>
+            </div>
+
+            <!-- Metadata Form Fields -->
+            <div class="meta-grid">
+                <div class="form-group">
+                    <label>Chi nhánh:</label>
+                    <input type="text" id="cn-input" placeholder="Nhập tên chi nhánh...">
+                </div>
+                <div class="form-group">
+                    <label>Số hiệu chuyến bay:</label>
+                    <input type="text" id="flight-input" placeholder="VD: VN123">
+                </div>
+                <div class="form-group">
+                    <label>Ngày kiểm tra:</label>
+                    <input type="date" id="date-input">
+                </div>
+                <div class="form-group">
+                    <label>Người kiểm soát:</label>
+                    <input type="text" id="inspector-input" placeholder="Tên người kiểm soát">
+                </div>
+            </div>
+
+            <!-- CHECKLIST ITEMS CONTAINER -->
+            <div id="checklist-container">
+                <!-- Items inserted via JS -->
+            </div>
+
+            <!-- Signature Area -->
+            <div class="signature-section">
+                <div class="sig-box">
+                    <div class="sig-title">CÔNG TY PHỤC VỤ</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig1">
+                        <canvas id="canvas-sig1"></canvas>
+                        <img id="img-sig1" class="sig-img" alt="Ký tên">
+                    </div>
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
+                        <span id="sig1-status" style="font-size: 10px; color: #10b981;"></span>
+                    </div>
+                </div>
+
+                <div class="sig-box">
+                    <div class="sig-title">ĐẠI DIỆN VNA</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig2">
+                        <canvas id="canvas-sig2"></canvas>
+                        <img id="img-sig2" class="sig-img" alt="Ký tên">
+                    </div>
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature('sig2')">Xóa / Ký lại</button>
+                        <span id="sig2-status" style="font-size: 10px; color: #10b981;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bottom Action Controls -->
+    <div class="bottom-bar">
+        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
+        <button class="btn-primary" onclick="exportToPDF()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Xuất File PDF
+        </button>
+    </div>
+
+    <script>
+        // Data Structure corresponding to BM-CNVN-060
+        const rawData = [
+            { section: "A. Chỉ số chung" },
+            { id: 1, text: "Chuyến bay đi đúng giờ (chỉ tính nguyên nhân chậm giờ do lỗi của công ty phục vụ)", unit: "C/bay" },
+            
+            { section: "B. Phục vụ hàng hóa, bưu kiện xuất" },
+            { id: 2, text: "Hàng hoá được tiếp nhận theo đúng kế hoạch về thời gian nhận hàng (Chuẩn bị mâm thùng, nhân viên tiếp nhận, nhân viên hướng dẫn chất xếp và bốc xếp, nhân viên an ninh soi chiếu).", unit: "C/bay" },
+            { id: 3, text: "Kiểm tra bao bì, đóng gói, nhãn mác, số kiện, trọng lượng, kích thước, hành trình của hàng hóa để đảm bảo tuân thủ đúng quy định vận chuyển.", unit: "C/bay" },
+            { id: 4, text: "Hướng dẫn chất xếp vào ULD, lập “Bảng theo dõi chất xếp ULD” chính xác.", unit: "AWB" },
+            { id: 5, text: "Tiếp nhận, phục vụ hàng đặc biệt chính xác theo quy định VNA & IATA", unit: "AWB" },
+            { id: 6, text: "Hãng vận chuyển bàn giao tài liệu vận chuyển (Cargo Receipt và tài liệu đi kèm) đúng giờ cho CTPV.", unit: "C/bay" },
+            { id: 7, text: "Bàn giao các tài liệu hàng hóa đúng giờ, đúng chuyến cho Tổ bay tại máy bay.", unit: "C/bay" },
+            { id: 8, text: "Gửi các điện văn liên quan đến hàng hóa Xuất chính xác.", unit: "AWB" },
+            { id: 9, text: "Gửi các điện văn liên quan đến hàng hóa Xuất kịp thời (Theo QT thỏa thuận PVHH giữa VNA và Cảng HK)", unit: "AWB" },
+            { id: 10, text: "Kế hoạch chất xếp được gửi đúng thời gian cam kết (10’ sau khi nhận được bảng Theo dõi chất xếp ULD)", unit: "C/bay" },
+            { id: 11, text: "Số trường hợp bất thường xảy ra đối với hàng hoá Xuất do lỗi của CTPV: Rách, vỡ, hư hỏng / Mất, thất lạc / Sai danh sách / Khác", unit: "AWB" },
+            { id: 12, text: "Lập biên bản bất thường đối với hàng hoá Xuất", unit: "AWB" },
+
+            { section: "C. Phục vụ hàng hóa, bưu kiện nhập" },
+            { id: 13, text: "Thông báo hàng đến cho người nhận hàng trên AWB (Theo QT thỏa thuận PVHH giữa VNA và Cảng HK)", unit: "AWB" },
+            { id: 14, text: "Thời gian tài liệu sẵn sàng để giao cho người nhận hàng tính từ thời gian hạ cánh thực tế (sau ATA)", unit: "AWB" },
+            { id: 15, text: "Thời gian hàng hoá sẵn sàng để giao cho người nhận hàng tính từ thời gian hạ cánh thực tế (sau ATA)", unit: "AWB" },
+            { id: 16, text: "Lập biên bản bất thường đối với hàng hoá", unit: "AWB" },
+            { id: 17, text: "Hàng hoá không phát được phải được thông báo cho Sân bay đi và/hoặc Nhà vận chuyển theo quy định.", unit: "AWB" },
+            { id: 18, text: "Số trường hợp bất thường xảy ra do lỗi CTPV: Mất tài liệu / Mất hàng hoá / Rách, vỡ, hư hỏng / Khác", unit: "AWB" },
+            { id: 19, text: "Gửi các điện văn liên quan đến hàng hóa nhập chính xác.", unit: "AWB" },
+            { id: 20, text: "Gửi các điện văn liên quan đến hàng hóa nhập kịp thời (Theo QT thỏa thuận PVHH giữa VNA và Cảng HK)", unit: "AWB" },
+
+            { section: "D. Chỉ tiêu khác" },
+            { id: 21, text: "Tuân thủ các quy định về an toàn, an ninh", unit: "C/bay" }
+        ];
+
+        // Default Date to Today
+        document.getElementById('date-input').valueAsDate = new Date();
+
+        // Render Checklist UI
+        const container = document.getElementById('checklist-container');
+        rawData.forEach(item => {
+            if (item.section) {
+                const secEl = document.createElement('div');
+                secEl.className = 'section-title';
+                secEl.innerText = item.section;
+                container.appendChild(secEl);
+            } else {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.id = `item-card-${item.id}`;
+                card.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-no">${String(item.id).padStart(2, '0')}</span>
+                        <div class="item-text">${item.text}</div>
+                        <span class="item-unit">${item.unit}</span>
+                    </div>
+                    <div class="status-options">
+                        <button type="button" class="opt-btn pass-btn" onclick="setStatus(${item.id}, true)">
+                            ✓ Đúng T/Chuẩn
+                        </button>
+                        <button type="button" class="opt-btn fail-btn" onclick="setStatus(${item.id}, false)">
+                            ✗ Không Đúng
+                        </button>
+                    </div>
+                    <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú thêm...">
+                `;
+                container.appendChild(card);
+            }
+        });
+
+        // State Management
+        const state = {};
+
+        function setStatus(id, isPass) {
+            state[id] = isPass;
+            const card = document.getElementById(`item-card-${id}`);
+            const passBtn = card.querySelector('.pass-btn');
+            const failBtn = card.querySelector('.fail-btn');
+
+            card.classList.remove('checked-true', 'checked-false');
+
+            if (isPass) {
+                card.classList.add('checked-true');
+                passBtn.classList.add('active');
+                failBtn.classList.remove('active');
+            } else {
+                card.classList.add('checked-false');
+                failBtn.classList.add('active');
+                passBtn.classList.remove('active');
+            }
+        }
+
+        /* --- Touch & Mouse Canvas Signature Setup --- */
+        function initSignatureCanvas(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const wrap = document.getElementById(`wrap-${id}`);
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            function resize() {
+                const rect = wrap.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#002b66';
+            }
+
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 200);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function start(e) {
+                isDrawing = true;
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+            }
+
+            function move(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            }
+
+            function stop() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    document.getElementById(`${id}-status`).innerText = "Đã ký";
+                }
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+        }
+
+        initSignatureCanvas('sig1');
+        initSignatureCanvas('sig2');
+
+        function clearSignature(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById(`${id}-status`).innerText = "";
+        }
+
+        function resetForm() {
+            if (confirm("Bạn có chắc chắn muốn làm mới toàn bộ bảng kiểm tra?")) {
+                location.reload();
+            }
+        }
+
+        /* --- PDF Generation logic --- */
+        function exportToPDF() {
+            const flight = document.getElementById('flight-input').value || 'Flight';
+            const dateStr = document.getElementById('date-input').value || 'Date';
+            const filename = `BM-CNVN-060_${flight}_${dateStr}.pdf`;
+
+            // Convert Signatures to Static Images for seamless PDF rendering
+            ['sig1', 'sig2'].forEach(id => {
+                const canvas = document.getElementById(`canvas-${id}`);
+                const img = document.getElementById(`img-${id}`);
+                img.src = canvas.toDataURL('image/png');
+                img.style.display = 'block';
+                canvas.style.display = 'none';
+            });
+
+            // Build formal print table view temporarily
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.padding = '15px';
+            pdfContainer.style.fontFamily = 'Arial, sans-serif';
+
+            const cnVal = document.getElementById('cn-input').value || '.................';
+            const flightVal = document.getElementById('flight-input').value || '.................';
+            const dateVal = document.getElementById('date-input').value || '.................';
+            const inspectorVal = document.getElementById('inspector-input').value || '........................................';
+
+            let tableRowsHTML = '';
+            rawData.forEach(item => {
+                if (item.section) {
+                    tableRowsHTML += `
+                        <tr style="background-color: #f3f4f6; font-weight: bold;">
+                            <td colspan="6" style="padding: 6px; font-size: 11px;">${item.section}</td>
+                        </tr>
+                    `;
+                } else {
+                    const status = state[item.id];
+                    const isPass = status === true ? '<b>X</b>' : '';
+                    const isFail = status === false ? '<b>X</b>' : '';
+                    const noteVal = document.getElementById(`note-${item.id}`).value || '';
+
+                    tableRowsHTML += `
+                        <tr>
+                            <td style="text-align: center; width: 30px;">${String(item.id).padStart(2, '0')}</td>
+                            <td>${item.text}</td>
+                            <td style="text-align: center; width: 60px;">${item.unit}</td>
+                            <td style="text-align: center; width: 50px;">${isPass}</td>
+                            <td style="text-align: center; width: 50px;">${isFail}</td>
+                            <td style="width: 100px;">${noteVal}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const sig1ImgSrc = document.getElementById('canvas-sig1').toDataURL('image/png');
+            const sig2ImgSrc = document.getElementById('canvas-sig2').toDataURL('image/png');
+
+            pdfContainer.innerHTML = `
+                <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; border-bottom: 2px solid #0056b3; padding-bottom: 5px;">
+                    <div>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM - CTCP<br>CHI NHÁNH KHU VỰC VIỆT NAM</div>
+                    <div style="text-align: right;">Mã số: BM-CNVN-060<br>Lần ban hành: 2</div>
+                </div>
+                <div style="text-align: center; color: #0056b3; font-weight: bold; font-size: 15px; margin: 12px 0;">
+                    CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA
+                </div>
+                <div style="font-size: 11px; margin-bottom: 10px; line-height: 1.6;">
+                    Chi nhánh: <b>${cnVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Số hiệu chuyến bay: <b>${flightVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Ngày: <b>${dateVal}</b><br>
+                    Người kiểm soát: <b>${inspectorVal}</b>
+                </div>
+
+                <table class="pdf-table" style="width: 100%; border-collapse: collapse; font-size: 10px;" border="1" cellPadding="4">
+                    <thead>
+                        <tr style="background-color: #f3f4f6;">
+                            <th style="width: 30px;">STT</th>
+                            <th>Tiêu chuẩn</th>
+                            <th style="width: 50px;">Đơn vị</th>
+                            <th style="width: 50px;">Đúng T/C</th>
+                            <th style="width: 50px;">Không đúng</th>
+                            <th style="width: 100px;">Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRowsHTML}
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 20px; display: flex; justify-content: space-between; text-align: center; font-size: 11px; font-weight: bold;">
+                    <div style="width: 45%;">
+                        CÔNG TY PHỤC VỤ<br><br>
+                        <img src="${sig1ImgSrc}" style="max-height: 60px; max-width: 100%;"><br>
+                    </div>
+                    <div style="width: 45%;">
+                        ĐẠI DIỆN VNA<br><br>
+                        <img src="${sig2ImgSrc}" style="max-height: 60px; max-width: 100%;"><br>
+                    </div>
+                </div>
+            `;
+
+            // Render PDF using html2pdf.js
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                // Restore Signatures on Mobile View
+                ['sig1', 'sig2'].forEach(id => {
+                    const canvas = document.getElementById(`canvas-${id}`);
+                    const img = document.getElementById(`img-${id}`);
+                    img.style.display = 'none';
+                    canvas.style.display = 'block';
+                });
+            });
+        }
+    </script>
+</body>
+</html>
