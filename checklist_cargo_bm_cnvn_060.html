@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA (BM-CNVN-060)</title>
-    <!-- html2pdf.js library for high-fidelity client-side PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -18,11 +16,10 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f9;
             color: #1f2937;
-            line-height: 1.4;
+            line-height: 1.3;
             padding-bottom: 90px;
         }
 
-        /* Top Bar Navigation */
         .header-bar {
             background-color: #0056b3;
             color: #ffffff;
@@ -39,7 +36,6 @@
         .header-bar h1 {
             font-size: 16px;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
         .header-bar .doc-code {
@@ -55,7 +51,6 @@
             padding: 12px;
         }
 
-        /* Paper Document Styles for PDF Export */
         .document-card {
             background: #ffffff;
             border-radius: 8px;
@@ -88,7 +83,6 @@
             margin: 10px 0;
         }
 
-        /* Metadata Inputs */
         .meta-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -120,15 +114,8 @@
             border-radius: 6px;
             font-size: 14px;
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        .form-group input:focus {
-            border-color: #0056b3;
-            box-shadow: 0 0 0 2px rgba(0,86,179,0.15);
-        }
-
-        /* Section Banner */
         .section-title {
             background: #eef6ff;
             color: #0056b3;
@@ -140,14 +127,12 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* Checklist Items - Mobile Friendly Cards */
         .item-card {
             background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 10px;
-            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .item-card.checked-true {
@@ -158,6 +143,11 @@
         .item-card.checked-false {
             border-left: 4px solid #ef4444;
             background-color: #fef2f2;
+        }
+
+        .item-card.checked-na {
+            border-left: 4px solid #6b7280;
+            background-color: #f3f4f6;
         }
 
         .item-header {
@@ -192,14 +182,12 @@
             background: #f3f4f6;
             padding: 2px 6px;
             border-radius: 4px;
-            white-space: nowrap;
         }
 
-        /* Choice Radio Options */
         .status-options {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
             margin-bottom: 8px;
         }
 
@@ -207,29 +195,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 8px;
+            padding: 8px 4px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            user-select: none;
             background: white;
             color: #4b5563;
         }
 
-        .opt-btn.pass-btn.active {
-            background: #10b981;
-            color: white;
-            border-color: #059669;
-        }
-
-        .opt-btn.fail-btn.active {
-            background: #ef4444;
-            color: white;
-            border-color: #dc2626;
-        }
+        .opt-btn.pass-btn.active { background: #10b981; color: white; border-color: #059669; }
+        .opt-btn.fail-btn.active { background: #ef4444; color: white; border-color: #dc2626; }
+        .opt-btn.na-btn.active { background: #6b7280; color: white; border-color: #4b5563; }
 
         .note-input {
             width: 100%;
@@ -237,25 +215,13 @@
             font-size: 12px;
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            outline: none;
         }
 
-        .note-input:focus {
-            border-color: #0056b3;
-        }
-
-        /* Signatures Section */
         .signature-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 20px;
-        }
-
-        @media (max-width: 480px) {
-            .signature-section {
-                grid-template-columns: 1fr;
-            }
         }
 
         .sig-box {
@@ -271,13 +237,12 @@
             font-weight: 700;
             color: #374151;
             margin-bottom: 8px;
-            text-transform: uppercase;
         }
 
         .sig-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 120px;
+            height: 100px;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
@@ -291,18 +256,10 @@
             display: block;
         }
 
-        .sig-img {
-            max-width: 100%;
-            max-height: 100px;
-            display: none;
-            margin: 0 auto;
-        }
-
         .sig-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 6px;
         }
 
         .btn-sm {
@@ -313,14 +270,8 @@
             cursor: pointer;
             background: #e5e7eb;
             color: #374151;
-            font-weight: 600;
         }
 
-        .btn-sm:active {
-            background: #d1d5db;
-        }
-
-        /* Fixed Bottom Action Bar */
         .bottom-bar {
             position: fixed;
             bottom: 0;
@@ -329,7 +280,6 @@
             background: white;
             border-top: 1px solid #e5e7eb;
             padding: 10px 16px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
             display: flex;
             gap: 10px;
             z-index: 100;
@@ -344,16 +294,7 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 700;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,86,179,0.3);
-        }
-
-        .btn-primary:active {
-            background: #004494;
         }
 
         .btn-secondary {
@@ -363,71 +304,50 @@
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 14px;
-            font-weight: 600;
             cursor: pointer;
         }
 
-        /* Styles specifically applied for Printable / PDF Table Mode */
-        .print-only {
+        #print-area {
             display: none;
         }
 
-        /* PDF Layout Optimizations */
+        /* STRICT PERFECT FIT SINGLE-PAGE A4 PRINT CSS */
         @media print {
             body {
-                background: white;
-                padding-bottom: 0;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
-            .header-bar, .bottom-bar, .sig-actions, .opt-btn {
+            
+            .header-bar, .container, .bottom-bar {
                 display: none !important;
             }
-            .print-only {
-                display: table-cell !important;
+
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
             }
-            .document-card {
-                box-shadow: none;
-                padding: 0;
+
+            @page {
+                size: A4 portrait;
+                margin: 6mm 8mm 6mm 8mm;
             }
-        }
-
-        /* Export Table Style for PDF compilation */
-        .pdf-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-            font-size: 10px;
-        }
-
-        .pdf-table th, .pdf-table td {
-            border: 1px solid #374151;
-            padding: 5px 6px;
-            vertical-align: middle;
-        }
-
-        .pdf-table th {
-            background-color: #f3f4f6;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .pdf-table .col-center {
-            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
     <div class="header-bar">
         <h1>VNA CARGO CHECKLIST</h1>
         <span class="doc-code">BM-CNVN-060</span>
     </div>
 
     <div class="container">
-        <!-- Interactive Form Card -->
-        <div class="document-card" id="export-content">
+        <div class="document-card">
             
-            <!-- Standard Header -->
             <div class="doc-header">
                 <div class="doc-header-top">
                     <span>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM - CTCP<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
@@ -436,7 +356,6 @@
                 <div class="doc-title">CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA</div>
             </div>
 
-            <!-- Metadata Form Fields -->
             <div class="meta-grid">
                 <div class="form-group">
                     <label>Chi nhánh:</label>
@@ -456,18 +375,13 @@
                 </div>
             </div>
 
-            <!-- CHECKLIST ITEMS CONTAINER -->
-            <div id="checklist-container">
-                <!-- Items inserted via JS -->
-            </div>
+            <div id="checklist-container"></div>
 
-            <!-- Signature Area -->
             <div class="signature-section">
                 <div class="sig-box">
                     <div class="sig-title">CÔNG TY PHỤC VỤ</div>
                     <div class="sig-canvas-wrap" id="wrap-sig1">
                         <canvas id="canvas-sig1"></canvas>
-                        <img id="img-sig1" class="sig-img" alt="Ký tên">
                     </div>
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
@@ -479,7 +393,6 @@
                     <div class="sig-title">ĐẠI DIỆN VNA</div>
                     <div class="sig-canvas-wrap" id="wrap-sig2">
                         <canvas id="canvas-sig2"></canvas>
-                        <img id="img-sig2" class="sig-img" alt="Ký tên">
                     </div>
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig2')">Xóa / Ký lại</button>
@@ -491,19 +404,14 @@
         </div>
     </div>
 
-    <!-- Bottom Action Controls -->
     <div class="bottom-bar">
         <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
-        <button class="btn-primary" onclick="exportToPDF()">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Xuất File PDF
-        </button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF (Vừa khít 1 Trang A4)</button>
     </div>
 
+    <div id="print-area"></div>
+
     <script>
-        // Data Structure corresponding to BM-CNVN-060
         const rawData = [
             { section: "A. Chỉ số chung" },
             { id: 1, text: "Chuyến bay đi đúng giờ (chỉ tính nguyên nhân chậm giờ do lỗi của công ty phục vụ)", unit: "C/bay" },
@@ -535,10 +443,11 @@
             { id: 21, text: "Tuân thủ các quy định về an toàn, an ninh", unit: "C/bay" }
         ];
 
-        // Default Date to Today
+        const state = {};
+        const sigDrawn = { sig1: false, sig2: false };
+
         document.getElementById('date-input').valueAsDate = new Date();
 
-        // Render Checklist UI
         const container = document.getElementById('checklist-container');
         rawData.forEach(item => {
             if (item.section) {
@@ -557,11 +466,14 @@
                         <span class="item-unit">${item.unit}</span>
                     </div>
                     <div class="status-options">
-                        <button type="button" class="opt-btn pass-btn" onclick="setStatus(${item.id}, true)">
-                            ✓ Đúng T/Chuẩn
+                        <button type="button" class="opt-btn pass-btn" onclick="setStatus(${item.id}, 'pass')">
+                            ✓ Đúng T/C
                         </button>
-                        <button type="button" class="opt-btn fail-btn" onclick="setStatus(${item.id}, false)">
+                        <button type="button" class="opt-btn fail-btn" onclick="setStatus(${item.id}, 'fail')">
                             ✗ Không Đúng
+                        </button>
+                        <button type="button" class="opt-btn na-btn" onclick="setStatus(${item.id}, 'na')">
+                            — K.Áp Dụng
                         </button>
                     </div>
                     <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú thêm...">
@@ -570,29 +482,30 @@
             }
         });
 
-        // State Management
-        const state = {};
-
-        function setStatus(id, isPass) {
-            state[id] = isPass;
+        function setStatus(id, val) {
+            state[id] = val;
             const card = document.getElementById(`item-card-${id}`);
             const passBtn = card.querySelector('.pass-btn');
             const failBtn = card.querySelector('.fail-btn');
+            const naBtn = card.querySelector('.na-btn');
 
-            card.classList.remove('checked-true', 'checked-false');
+            card.classList.remove('checked-true', 'checked-false', 'checked-na');
+            passBtn.classList.remove('active');
+            failBtn.classList.remove('active');
+            naBtn.classList.remove('active');
 
-            if (isPass) {
+            if (val === 'pass') {
                 card.classList.add('checked-true');
                 passBtn.classList.add('active');
-                failBtn.classList.remove('active');
-            } else {
+            } else if (val === 'fail') {
                 card.classList.add('checked-false');
                 failBtn.classList.add('active');
-                passBtn.classList.remove('active');
+            } else if (val === 'na') {
+                card.classList.add('checked-na');
+                naBtn.classList.add('active');
             }
         }
 
-        /* --- Touch & Mouse Canvas Signature Setup --- */
         function initSignatureCanvas(id) {
             const canvas = document.getElementById(`canvas-${id}`);
             const wrap = document.getElementById(`wrap-${id}`);
@@ -601,9 +514,9 @@
 
             function resize() {
                 const rect = wrap.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                ctx.lineWidth = 2.5;
+                canvas.width = rect.width || 300;
+                canvas.height = rect.height || 100;
+                ctx.lineWidth = 2;
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '#002b66';
             }
@@ -615,14 +528,12 @@
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
+                return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
             function start(e) {
                 isDrawing = true;
+                sigDrawn[id] = true;
                 const p = getPos(e);
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
@@ -659,131 +570,104 @@
             const canvas = document.getElementById(`canvas-${id}`);
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sigDrawn[id] = false;
             document.getElementById(`${id}-status`).innerText = "";
         }
 
         function resetForm() {
-            if (confirm("Bạn có chắc chắn muốn làm mới toàn bộ bảng kiểm tra?")) {
-                location.reload();
-            }
+            if (confirm("Làm mới bảng kiểm tra?")) location.reload();
         }
 
-        /* --- PDF Generation logic --- */
         function exportToPDF() {
-            const flight = document.getElementById('flight-input').value || 'Flight';
-            const dateStr = document.getElementById('date-input').value || 'Date';
-            const filename = `BM-CNVN-060_${flight}_${dateStr}.pdf`;
-
-            // Convert Signatures to Static Images for seamless PDF rendering
-            ['sig1', 'sig2'].forEach(id => {
-                const canvas = document.getElementById(`canvas-${id}`);
-                const img = document.getElementById(`img-${id}`);
-                img.src = canvas.toDataURL('image/png');
-                img.style.display = 'block';
-                canvas.style.display = 'none';
-            });
-
-            // Build formal print table view temporarily
-            const pdfContainer = document.createElement('div');
-            pdfContainer.style.padding = '15px';
-            pdfContainer.style.fontFamily = 'Arial, sans-serif';
-
             const cnVal = document.getElementById('cn-input').value || '.................';
             const flightVal = document.getElementById('flight-input').value || '.................';
             const dateVal = document.getElementById('date-input').value || '.................';
             const inspectorVal = document.getElementById('inspector-input').value || '........................................';
+
+            let sig1ImgSrc = sigDrawn.sig1 ? document.getElementById('canvas-sig1').toDataURL('image/png') : '';
+            let sig2ImgSrc = sigDrawn.sig2 ? document.getElementById('canvas-sig2').toDataURL('image/png') : '';
 
             let tableRowsHTML = '';
             rawData.forEach(item => {
                 if (item.section) {
                     tableRowsHTML += `
                         <tr style="background-color: #f3f4f6; font-weight: bold;">
-                            <td colspan="6" style="padding: 6px; font-size: 11px;">${item.section}</td>
+                            <td colspan="7" style="padding: 3.5px 6px; font-size: 9.5pt; color: #000; text-align: left;">${item.section}</td>
                         </tr>
                     `;
                 } else {
                     const status = state[item.id];
-                    const isPass = status === true ? '<b>X</b>' : '';
-                    const isFail = status === false ? '<b>X</b>' : '';
+                    const isPass = status === 'pass' ? '<b>X</b>' : '';
+                    const isFail = status === 'fail' ? '<b>X</b>' : '';
+                    const isNA = status === 'na' ? '<b>X</b>' : '';
                     const noteVal = document.getElementById(`note-${item.id}`).value || '';
 
                     tableRowsHTML += `
                         <tr>
-                            <td style="text-align: center; width: 30px;">${String(item.id).padStart(2, '0')}</td>
-                            <td>${item.text}</td>
-                            <td style="text-align: center; width: 60px;">${item.unit}</td>
-                            <td style="text-align: center; width: 50px;">${isPass}</td>
-                            <td style="text-align: center; width: 50px;">${isFail}</td>
-                            <td style="width: 100px;">${noteVal}</td>
+                            <td style="text-align: center; font-size: 9.5pt; padding: 3px 2px;">${String(item.id).padStart(2, '0')}</td>
+                            <td style="font-size: 9.5pt; padding: 3px 5px; line-height: 1.2;">${item.text}</td>
+                            <td style="text-align: center; font-size: 9pt; padding: 3px 2px;">${item.unit}</td>
+                            <td style="text-align: center; font-size: 10pt; padding: 3px 2px;">${isPass}</td>
+                            <td style="text-align: center; font-size: 10pt; padding: 3px 2px;">${isFail}</td>
+                            <td style="text-align: center; font-size: 10pt; padding: 3px 2px;">${isNA}</td>
+                            <td style="font-size: 9pt; padding: 3px 4px;">${noteVal}</td>
                         </tr>
                     `;
                 }
             });
 
-            const sig1ImgSrc = document.getElementById('canvas-sig1').toDataURL('image/png');
-            const sig2ImgSrc = document.getElementById('canvas-sig2').toDataURL('image/png');
-
-            pdfContainer.innerHTML = `
-                <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; border-bottom: 2px solid #0056b3; padding-bottom: 5px;">
-                    <div>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM - CTCP<br>CHI NHÁNH KHU VỰC VIỆT NAM</div>
-                    <div style="text-align: right;">Mã số: BM-CNVN-060<br>Lần ban hành: 2</div>
-                </div>
-                <div style="text-align: center; color: #0056b3; font-weight: bold; font-size: 15px; margin: 12px 0;">
-                    CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA
-                </div>
-                <div style="font-size: 11px; margin-bottom: 10px; line-height: 1.6;">
-                    Chi nhánh: <b>${cnVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    Số hiệu chuyến bay: <b>${flightVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    Ngày: <b>${dateVal}</b><br>
-                    Người kiểm soát: <b>${inspectorVal}</b>
-                </div>
-
-                <table class="pdf-table" style="width: 100%; border-collapse: collapse; font-size: 10px;" border="1" cellPadding="4">
-                    <thead>
-                        <tr style="background-color: #f3f4f6;">
-                            <th style="width: 30px;">STT</th>
-                            <th>Tiêu chuẩn</th>
-                            <th style="width: 50px;">Đơn vị</th>
-                            <th style="width: 50px;">Đúng T/C</th>
-                            <th style="width: 50px;">Không đúng</th>
-                            <th style="width: 100px;">Ghi chú</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRowsHTML}
-                    </tbody>
-                </table>
-
-                <div style="margin-top: 20px; display: flex; justify-content: space-between; text-align: center; font-size: 11px; font-weight: bold;">
-                    <div style="width: 45%;">
-                        CÔNG TY PHỤC VỤ<br><br>
-                        <img src="${sig1ImgSrc}" style="max-height: 60px; max-width: 100%;"><br>
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: Arial, sans-serif; color: #000; width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; font-size: 9.5pt; font-weight: bold; line-height: 1.25;">
+                        <div>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM - CTCP<br>CHI NHÁNH KHU VỰC VIỆT NAM</div>
+                        <div style="text-align: right;">Mã số: BM-CNVN-060<br>Lần ban hành: 2</div>
                     </div>
-                    <div style="width: 45%;">
-                        ĐẠI DIỆN VNA<br><br>
-                        <img src="${sig2ImgSrc}" style="max-height: 60px; max-width: 100%;"><br>
+
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin: 8px 0 6px 0;">
+                        CHECK-LIST KIỂM SOÁT CHẤT LƯỢNG DỊCH VỤ HÀNG HÓA
+                    </div>
+
+                    <div style="font-size: 9.5pt; margin-bottom: 6px; line-height: 1.35;">
+                        Chi nhánh: <b>${cnVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        Số hiệu chuyến bay: <b>${flightVal}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        Ngày: <b>${dateVal}</b><br>
+                        Người kiểm soát: <b>${inspectorVal}</b>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                        <thead>
+                            <tr style="background-color: #fff; font-size: 9.5pt;">
+                                <th style="width: 28px; padding: 4px 2px;">STT</th>
+                                <th style="padding: 4px 5px; text-align: center;">Tiêu chuẩn</th>
+                                <th style="width: 40px; padding: 4px 2px;">Đơn vị</th>
+                                <th style="width: 40px; padding: 4px 2px;">Đúng T/C</th>
+                                <th style="width: 45px; padding: 4px 2px;">Không đúng</th>
+                                <th style="width: 40px; padding: 4px 2px;">K.Áp dụng</th>
+                                <th style="width: 95px; padding: 4px 4px;">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 10px; display: flex; justify-content: space-between; text-align: center; font-size: 10pt; font-weight: bold;">
+                        <div style="width: 45%;">
+                            CÔNG TY PHỤC VỤ<br>
+                            ${sig1ImgSrc ? `<img src="${sig1ImgSrc}" style="max-height: 48px; max-width: 100%; margin-top: 4px;">` : '<div style="height:48px;"></div>'}
+                        </div>
+                        <div style="width: 45%;">
+                            ĐẠI DIỆN VNA<br>
+                            ${sig2ImgSrc ? `<img src="${sig2ImgSrc}" style="max-height: 48px; max-width: 100%; margin-top: 4px;">` : '<div style="height:48px;"></div>'}
+                        </div>
                     </div>
                 </div>
             `;
 
-            // Render PDF using html2pdf.js
-            const opt = {
-                margin:       [10, 10, 10, 10],
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(pdfContainer).save().then(() => {
-                // Restore Signatures on Mobile View
-                ['sig1', 'sig2'].forEach(id => {
-                    const canvas = document.getElementById(`canvas-${id}`);
-                    const img = document.getElementById(`img-${id}`);
-                    img.style.display = 'none';
-                    canvas.style.display = 'block';
-                });
-            });
+            setTimeout(() => {
+                window.print();
+            }, 250);
         }
     </script>
 </body>
