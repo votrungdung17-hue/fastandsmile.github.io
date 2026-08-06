@@ -217,7 +217,6 @@
             border-radius: 4px;
         }
 
-        /* KHU VỰC CHỮ KÝ: RESPONSIVE DỌC TRÊN ĐIỆN THOẠI, NGANG TRÊN MÁY TÍNH */
         .signature-section {
             display: flex;
             flex-direction: column;
@@ -252,7 +251,7 @@
         .sig-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 160px; /* Tăng kích thước ô ký tay rộng rãi trên điện thoại */
+            height: 160px;
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -328,7 +327,6 @@
             display: none;
         }
 
-        /* IN TRANG A4 VẪN ĐẢM BẢO KHÍT 1 TRANG */
         @media print {
             body {
                 background: white !important;
@@ -423,7 +421,7 @@
 
     <div class="bottom-bar">
         <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
-        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF (Vừa khít 1 Trang A4)</button>
     </div>
 
     <div id="print-area"></div>
@@ -682,9 +680,8 @@
                 </div>
             `;
 
-            setTimeout(() => {
-                window.print();
-            }, 250);
+            // Gọi lệnh in trực tiếp trong luồng click của người dùng để tránh bị điện thoại chặn
+            window.print();
         }
     </script>
 </body>
