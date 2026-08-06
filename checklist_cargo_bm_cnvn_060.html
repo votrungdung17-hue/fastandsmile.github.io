@@ -709,7 +709,15 @@
                 </div>
             `;
 
-            window.print();
+            // Tránh lỗi trình duyệt chặn window.print() bằng delay ngắn & bắt exception
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (e) {
+                    console.error("Lỗi khi mở giao diện in:", e);
+                    alert("Trình duyệt đã chặn tự động bật cửa sổ in. Vui lòng bấm tổ hợp phím Ctrl + P (hoặc Cmd + P trên Mac) để in/xuất PDF.");
+                }
+            }, 150);
         }
     </script>
 </body>
