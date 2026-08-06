@@ -241,17 +241,54 @@
             width: 100%;
         }
 
+        .sig-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
         .sig-title {
             font-size: 13px;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 10px;
+        }
+
+        .mic-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .mic-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mic-btn.recording {
+            background: #10b981;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .sig-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 160px;
+            height: 140px;
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -261,7 +298,7 @@
 
         @media (min-width: 640px) {
             .sig-canvas-wrap {
-                height: 130px;
+                height: 120px;
             }
         }
 
@@ -269,6 +306,17 @@
             width: 100%;
             height: 100%;
             display: block;
+        }
+
+        .sig-name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
         }
 
         .sig-actions {
@@ -394,10 +442,19 @@
 
             <div class="signature-section">
                 <div class="sig-box">
-                    <div class="sig-title">CÔNG TY PHỤC VỤ (KÝ TAY DƯỚI ĐÂY)</div>
+                    <div class="sig-header">
+                        <div class="sig-title">CÔNG TY PHỤC VỤ</div>
+                        <button class="mic-btn" id="mic-btn-sig1" onclick="startVoiceRecord('sig1')" title="Đọc tên để ghi nhận">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="sig-canvas-wrap" id="wrap-sig1">
                         <canvas id="canvas-sig1"></canvas>
                     </div>
+                    <input type="text" class="sig-name-input" id="name-sig1" placeholder="Họ và tên người ký...">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
                         <span id="sig1-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -405,10 +462,19 @@
                 </div>
 
                 <div class="sig-box">
-                    <div class="sig-title">ĐẠI DIỆN VNA (KÝ TAY DƯỚI ĐÂY)</div>
+                    <div class="sig-header">
+                        <div class="sig-title">ĐẠI DIỆN VNA</div>
+                        <button class="mic-btn" id="mic-btn-sig2" onclick="startVoiceRecord('sig2')" title="Đọc tên để ghi nhận">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="sig-canvas-wrap" id="wrap-sig2">
                         <canvas id="canvas-sig2"></canvas>
                     </div>
+                    <input type="text" class="sig-name-input" id="name-sig2" placeholder="Họ và tên người ký...">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig2')">Xóa / Ký lại</button>
                         <span id="sig2-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -421,7 +487,7 @@
 
     <div class="bottom-bar">
         <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
-        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF (Vừa khít 1 Trang A4)</button>
     </div>
 
     <div id="print-area"></div>
@@ -581,10 +647,77 @@
         initSignatureCanvas('sig1');
         initSignatureCanvas('sig2');
 
+        function generateAutoSignature(id, nameText) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#002b66';
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Vẽ chữ ký nghệ thuật tự động
+            ctx.beginPath();
+            ctx.moveTo(w * 0.2, h * 0.6);
+            ctx.quadraticCurveTo(w * 0.3, h * 0.1, w * 0.45, h * 0.5);
+            ctx.quadraticCurveTo(w * 0.6, h * 0.9, w * 0.75, h * 0.3);
+            ctx.bezierCurveTo(w * 0.8, h * 0.2, w * 0.85, h * 0.7, w * 0.9, h * 0.5);
+            
+            // Dấu gạch chân cách điệu
+            ctx.moveTo(w * 0.15, h * 0.75);
+            ctx.quadraticCurveTo(w * 0.5, h * 0.85, w * 0.85, h * 0.7);
+            ctx.stroke();
+
+            sigDrawn[id] = true;
+            document.getElementById(`${id}-status`).innerText = "✓ Đã ký bằng giọng nói";
+        }
+
+        function startVoiceRecord(id) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng thử Chrome hoặc Safari.");
+                return;
+            }
+
+            const micBtn = document.getElementById(`mic-btn-${id}`);
+            const nameInput = document.getElementById(`name-${id}`);
+            const recognition = new SpeechRecognition();
+
+            recognition.lang = 'vi-VN';
+            recognition.interimResults = false;
+
+            micBtn.classList.add('recording');
+
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                // Chuẩn hóa viết hoa chữ cái đầu từng từ
+                const formattedName = text.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                nameInput.value = formattedName;
+                
+                // Tự động ký chữ ký khi đã nhận diện giọng nói thành công
+                generateAutoSignature(id, formattedName);
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Lỗi ghi âm:", event.error);
+                alert("Không nhận diện được giọng nói, vui lòng thử lại.");
+            };
+
+            recognition.onend = function() {
+                micBtn.classList.remove('recording');
+            };
+
+            recognition.start();
+        }
+
         function clearSignature(id) {
             const canvas = document.getElementById(`canvas-${id}`);
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById(`name-${id}`).value = '';
             sigDrawn[id] = false;
             document.getElementById(`${id}-status`).innerText = "";
         }
@@ -598,6 +731,9 @@
             const flightVal = document.getElementById('flight-input').value || '.................';
             const dateVal = document.getElementById('date-input').value || '.................';
             const inspectorVal = document.getElementById('inspector-input').value || '........................................';
+
+            const nameSig1 = document.getElementById('name-sig1').value || '';
+            const nameSig2 = document.getElementById('name-sig2').value || '';
 
             let sig1ImgSrc = sigDrawn.sig1 ? document.getElementById('canvas-sig1').toDataURL('image/png') : '';
             let sig2ImgSrc = sigDrawn.sig2 ? document.getElementById('canvas-sig2').toDataURL('image/png') : '';
@@ -670,17 +806,18 @@
                     <div style="margin-top: 10px; display: flex; justify-content: space-between; text-align: center; font-size: 10pt; font-weight: bold;">
                         <div style="width: 45%;">
                             CÔNG TY PHỤC VỤ<br>
-                            ${sig1ImgSrc ? `<img src="${sig1ImgSrc}" style="max-height: 48px; max-width: 100%; margin-top: 4px;">` : '<div style="height:48px;"></div>'}
+                            ${sig1ImgSrc ? `<img src="${sig1ImgSrc}" style="max-height: 40px; max-width: 100%; margin-top: 4px;"><br>` : '<div style="height:40px;"></div>'}
+                            <span style="font-size: 9.5pt; font-weight: normal; font-style: italic;">${nameSig1}</span>
                         </div>
                         <div style="width: 45%;">
                             ĐẠI DIỆN VNA<br>
-                            ${sig2ImgSrc ? `<img src="${sig2ImgSrc}" style="max-height: 48px; max-width: 100%; margin-top: 4px;">` : '<div style="height:48px;"></div>'}
+                            ${sig2ImgSrc ? `<img src="${sig2ImgSrc}" style="max-height: 40px; max-width: 100%; margin-top: 4px;"><br>` : '<div style="height:40px;"></div>'}
+                            <span style="font-size: 9.5pt; font-weight: normal; font-style: italic;">${nameSig2}</span>
                         </div>
                     </div>
                 </div>
             `;
 
-            // Gọi lệnh in trực tiếp trong luồng click của người dùng để tránh bị điện thoại chặn
             window.print();
         }
     </script>
