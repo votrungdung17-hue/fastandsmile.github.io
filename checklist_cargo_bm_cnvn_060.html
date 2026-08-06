@@ -217,37 +217,53 @@
             border-radius: 4px;
         }
 
+        /* KHU VỰC CHỮ KÝ: RESPONSIVE DỌC TRÊN ĐIỆN THOẠI, NGANG TRÊN MÁY TÍNH */
         .signature-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
             margin-top: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .signature-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
         }
 
         .sig-box {
             border: 1px dashed #9ca3af;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             background: #fafafa;
+            width: 100%;
         }
 
         .sig-title {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .sig-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 100px;
+            height: 160px; /* Tăng kích thước ô ký tay rộng rãi trên điện thoại */
             background: white;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #d1d5db;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             touch-action: none;
+        }
+
+        @media (min-width: 640px) {
+            .sig-canvas-wrap {
+                height: 130px;
+            }
         }
 
         canvas {
@@ -263,13 +279,14 @@
         }
 
         .btn-sm {
-            padding: 4px 8px;
-            font-size: 11px;
+            padding: 6px 12px;
+            font-size: 12px;
             border-radius: 4px;
-            border: none;
+            border: 1px solid #d1d5db;
             cursor: pointer;
-            background: #e5e7eb;
+            background: #ffffff;
             color: #374151;
+            font-weight: 600;
         }
 
         .bottom-bar {
@@ -311,7 +328,7 @@
             display: none;
         }
 
-        /* STRICT PERFECT FIT SINGLE-PAGE A4 PRINT CSS */
+        /* IN TRANG A4 VẪN ĐẢM BẢO KHÍT 1 TRANG */
         @media print {
             body {
                 background: white !important;
@@ -379,24 +396,24 @@
 
             <div class="signature-section">
                 <div class="sig-box">
-                    <div class="sig-title">CÔNG TY PHỤC VỤ</div>
+                    <div class="sig-title">CÔNG TY PHỤC VỤ (KÝ TAY DƯỚI ĐÂY)</div>
                     <div class="sig-canvas-wrap" id="wrap-sig1">
                         <canvas id="canvas-sig1"></canvas>
                     </div>
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
-                        <span id="sig1-status" style="font-size: 10px; color: #10b981;"></span>
+                        <span id="sig1-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
                     </div>
                 </div>
 
                 <div class="sig-box">
-                    <div class="sig-title">ĐẠI DIỆN VNA</div>
+                    <div class="sig-title">ĐẠI DIỆN VNA (KÝ TAY DƯỚI ĐÂY)</div>
                     <div class="sig-canvas-wrap" id="wrap-sig2">
                         <canvas id="canvas-sig2"></canvas>
                     </div>
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig2')">Xóa / Ký lại</button>
-                        <span id="sig2-status" style="font-size: 10px; color: #10b981;"></span>
+                        <span id="sig2-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
                     </div>
                 </div>
             </div>
@@ -514,9 +531,9 @@
 
             function resize() {
                 const rect = wrap.getBoundingClientRect();
-                canvas.width = rect.width || 300;
-                canvas.height = rect.height || 100;
-                ctx.lineWidth = 2;
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '#002b66';
             }
@@ -550,7 +567,7 @@
             function stop() {
                 if (isDrawing) {
                     isDrawing = false;
-                    document.getElementById(`${id}-status`).innerText = "Đã ký";
+                    document.getElementById(`${id}-status`).innerText = "✓ Đã có chữ ký";
                 }
             }
 
@@ -575,7 +592,7 @@
         }
 
         function resetForm() {
-            if (confirm("Làm mới bảng kiểm tra?")) location.reload();
+            if (confirm("Làm mới toàn bộ bảng kiểm tra?")) location.reload();
         }
 
         function exportToPDF() {
