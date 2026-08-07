@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHECKLIST GIÁM SÁT SÂN ĐỖ VÀ DỊCH VỤ TRÊN KHÔNG (BM-CNVN-064B)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #1f2937;
+            line-height: 1.35;
+            padding-bottom: 90px;
+        }
+
+        .header-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h1 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-bar .doc-code {
+            font-size: 11px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        /* TAB SYSTEM */
+        .tabs-header {
+            display: flex;
+            background: #e5e7eb;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 12px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4b5563;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #0056b3;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .document-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .doc-header {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .doc-header-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        .doc-title {
+            text-align: center;
+            color: #0056b3;
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0;
+            line-height: 1.3;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .note-box {
+            background-color: #fffbe3;
+            border: 1px solid #fde047;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #854d0e;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            background: #eef6ff;
+            color: #0056b3;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            border-left: 4px solid #0056b3;
+            margin: 16px 0 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-card.checked-pass {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .item-card.checked-fail {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .item-card.checked-na {
+            border-left: 4px solid #6b7280;
+            background-color: #f3f4f6;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .item-no {
+            background: #0056b3;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .item-ref {
+            font-size: 11px;
+            color: #0369a1;
+            background: #e0f2fe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .status-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #4b5563;
+            transition: all 0.15s ease;
+        }
+
+        .opt-btn.pass-btn.active { background: #10b981; color: white; border-color: #059669; }
+        .opt-btn.fail-btn.active { background: #ef4444; color: white; border-color: #dc2626; }
+        .opt-btn.na-btn.active { background: #6b7280; color: white; border-color: #4b5563; }
+
+        .signature-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .sig-box {
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            background: #fafafa;
+            width: 100%;
+        }
+
+        .sig-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .sig-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sig-name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            background: #ffffff;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .header-bar, .container, .bottom-bar {
+                display: none !important;
+            }
+
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 8mm 8mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>VNA CHECKLIST SÂN ĐỖ & DỊCH VỤ TRÊN KHÔNG</h1>
+        <span class="doc-code">BM-CNVN-064B</span>
+    </div>
+
+    <div class="container">
+        <!-- TABS BUTTONS -->
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab(1)" id="tab-btn-1">Chuyến 1</button>
+            <button class="tab-btn" onclick="switchTab(2)" id="tab-btn-2">Chuyến 2</button>
+            <button class="tab-btn" onclick="switchTab(3)" id="tab-btn-3">Chuyến 3</button>
+        </div>
+
+        <div class="document-card">
+            <div class="doc-header">
+                <div class="doc-header-top">
+                    <span>TCT HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
+                    <span style="text-align: right;">Mã số: BM-CNVN-064B<br>Lần ban hành: 03</span>
+                </div>
+                <div class="doc-title">CHECKLIST GIÁM SÁT SÂN ĐỖ VÀ DỊCH VỤ TRÊN KHÔNG</div>
+            </div>
+
+            <!-- GLOBAL COMMON META INFO -->
+            <div class="meta-grid" style="border-bottom: 1px dashed #d1d5db; padding-bottom: 12px; margin-bottom: 12px;">
+                <div class="form-group">
+                    <label>Đơn vị chung:</label>
+                    <input type="text" id="donvi-input" placeholder="VD: Chi nhánh VN...">
+                </div>
+                <div class="form-group">
+                    <label>Vị trí công việc chung:</label>
+                    <input type="text" id="position-input" placeholder="VD: Giám sát sân đỗ">
+                </div>
+            </div>
+
+            <div class="note-box">
+                GHI CHÚ: TÍCH Y (YES); N (NO) HOẶC NA (NOT APPLY)
+            </div>
+
+            <!-- TAB 1 CONTENT -->
+            <div id="tab-content-1" class="tab-content active">
+                <div class="meta-grid">
+                    <div class="form-group">
+                        <label>Số hiệu Chuyến bay 1 (*):</label>
+                        <input type="text" id="flight-input-1" placeholder="VD: VN123" oninput="updateTabLabel(1)">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời gian Chuyến 1:</label>
+                        <input type="text" id="time-input-1" placeholder="VD: 08:30 - 20/10/2026">
+                    </div>
+                </div>
+                <div id="checklist-container-1"></div>
+            </div>
+
+            <!-- TAB 2 CONTENT -->
+            <div id="tab-content-2" class="tab-content">
+                <div class="meta-grid">
+                    <div class="form-group">
+                        <label>Số hiệu Chuyến bay 2:</label>
+                        <input type="text" id="flight-input-2" placeholder="VD: VN456" oninput="updateTabLabel(2)">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời gian Chuyến 2:</label>
+                        <input type="text" id="time-input-2" placeholder="VD: 12:15 - 20/10/2026">
+                    </div>
+                </div>
+                <div id="checklist-container-2"></div>
+            </div>
+
+            <!-- TAB 3 CONTENT -->
+            <div id="tab-content-3" class="tab-content">
+                <div class="meta-grid">
+                    <div class="form-group">
+                        <label>Số hiệu Chuyến bay 3:</label>
+                        <input type="text" id="flight-input-3" placeholder="VD: VN789" oninput="updateTabLabel(3)">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời gian Chuyến 3:</label>
+                        <input type="text" id="time-input-3" placeholder="VD: 16:40 - 20/10/2026">
+                    </div>
+                </div>
+                <div id="checklist-container-3"></div>
+            </div>
+
+            <!-- SIGNATURE -->
+            <div class="signature-section">
+                <div class="sig-box">
+                    <div class="sig-title">NGƯỜI THỰC HIỆN</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig1">
+                        <canvas id="canvas-sig1"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig1" placeholder="Nhập họ và tên người thực hiện...">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
+                        <span id="sig1-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF / In (Mẫu Excel)</button>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        const rawData = [
+            { section: "1. CHUẨN BỊ TRƯỚC CHUYẾN BAY" },
+            { id: "1.1", title: "Thu thập điện văn và xử lý thông tin trước chuyến bay (số lượng khách/hành lý đến có nối chuyến, khách đến có dịch vụ đặc biệt cần trợ giúp, các vấn đề bất thường…)", ref: "" },
+            { id: "1.2", title: "Phối hợp với các bộ phận liên quan, tiến hành kiểm tra và bảo đảm các trang thiết bị phục vụ mặt đất phục vụ tàu bay đến phải trong tình trạng hoạt động tốt tại sân đỗ", ref: "GOM 7,9,1,2" },
+            { id: "1.3", title: "Kiểm soát sự có mặt đúng giờ của các bộ phận đơn vị liên quan", ref: "GOM 3,2" },
+            { id: "1.4", title: "Thông tin liên quan khác: Vị trí đỗ tàu bay, Xe kéo đẩy, xe dẫn dắt máy bay, các dịch vụ an ninh sân đỗ khác…", ref: "PHM 3,2,2" },
+            { id: "1.5", title: "Briefing với cán bộ trực Công ty PVMĐ, ANHK phối hợp kiểm tra bề mặt sân đỗ trước khi tàu bay hạ cánh 25 phút để chắc chắn không có vật ngoại lai, phương tiện không liên quan đến chuyến bay trên sân đỗ", ref: "GOM 7,9,1,1" },
+            { id: "1.6", title: "Chuẩn bị phương tiện liên lạc,check-list, tài liệu, điện thoại di động, bộ đàm, các biểu mẫu,…", ref: "" },
+
+            { section: "2. PHỤC VỤ CHUYẾN BAY TẠI SÂN ĐỖ" },
+            { id: "2.1", title: "Nhân viên phục vụ sân đỗ, tàu bay phải được trang bị BHLĐ, áo phản quang, đảm bảo quy tắc an toàn sân đỗ…", ref: "GOM 7,1,1" },
+            { id: "2.2", title: "Giám sát người và phương tiện, tiếp cận và lên tàu bay thực hiện nhiệm vụ", ref: "" },
+            { id: "2.3", title: "Giám sát qúa trình giám sát chất/ dỡ tải lên/ xuống tàu bay, quá trình nhận hành lý đối với hành khách đảm bảo hành lý của khách ưu tiên phải được nhanh chóng đưa vào băng chuyền đúng thứ tự và thời gian", ref: "PHM 9" },
+            { id: "2.4", title: "Kiểm tra, giám sát nhân viên phục vụ chất xếp và thiết bị phục vụ đảm bảo an toàn đối với nhân viên và thiết bị phục vụ trong quá trình di chuyển trên sân đỗ trong quá trình phục vụ tàu bay", ref: "GOM 4,3" },
+            { id: "2.5", title: "Giám sát quá trình phục vụ khi hành khách lên xuống.", ref: "" },
+            { id: "2.6", title: "Kết hợp với nhân viên ANHK, nhân viên PVMĐ giám sát chặt chẽ quá trình hành khách xuống tàu bay, nếu hành khách di chuyển trên sân đỗ cần phải quan sát, hướng dẫn việc di chuyển phù hợp, an toàn cho hành khách, không đi cắt ngang khu vực nguy hiểm trên sân đỗ", ref: "" },
+            { id: "2.7", title: "Giám sát quá trình tiếp cận xe thang , xe nâng, xe đầu kéo, băng tải về tốc độ bằng tốc độ người đi bộ ( 5km/h), chuyển động lùi phải có người xinhan, cảnh giới để tránh va chạm với tàu bay. Đánh giá tình trạng trang thiết bị mặt đất.", ref: "GOM 7,1,4,3 / GOM 3,3,4" },
+            { id: "2.8", title: "Giám sát hoạt động tra nạp nhiên liệu, vị trí đỗ của xe xăng dầu cho tàu bay phải tuân thủ quy trình quy định về dừng đỗ, đóng chèn, quy định về an toàn trong quá trình tra nạp", ref: "GOM 7,3,2" },
+
+            { section: "3. KIỂM SOÁT DỊCH VỤ TRÊN KHÔNG" },
+            { id: "3.1", title: "Giám sát đảm bảo thực hiện cung cấp đầy đủ thông tin đặc biệt cho tổ bay, tiếp viên theo quy định", ref: "" },
+            { id: "3.2", title: "Giám sát kiểm soát hành lý xách tay của hành khách.", ref: "" },
+            { id: "3.3", title: "Đảm bảo tiêu chuẩn vị trí chỗ ngồi cho khách hàng trên khoang hành khách. Bố trí chỗ ngồi cho khách tại hàng ghế cạnh cửa thoát hiểm.", ref: "" },
+            { id: "3.4", title: "Kiểm tra hành khách đặc biệt", ref: "" },
+            { id: "3.5", title: "Giám sát đảm bảo tiêu chuẩn phục vụ khách hàng thông qua các tiêu chí chuyên nghiệp hiệu quả, chu đáo thân thiện, chủ động nhận biết, thể hiện bản sắc hình ảnh VNA.", ref: "PHM, Tiêu chuẩn dịch vụ khách hàng…, HD-CNVN-001" },
+            { id: "3.6", title: "Kiểm tra đảm bảo trang thiết bị nội thất tàu bay", ref: "QĐ về đảm bảo trang thiết bị nội thất tàu bay" },
+            { id: "3.7", title: "Giám sát danh sách hành khách, số lượng hành khách thực tế trên máy bay phải được kiểm tra đối chiếu với danh sách hành khách.", ref: "" },
+            { id: "3.8", title: "Báo cáo người phụ trách khai thác, đội phó các sự việc phát sinh vượt quá thẩm quyến giải quyết.", ref: "" },
+            { id: "3.9", title: "Kiểm tra đảm bảo tiêu chuẩn vệ sinh tàu bay tuân thủ theo các qui định Hướng dẫn khai thác mặt đất (GOM) và Cam kết chất lượng dịch vụ (SLA).", ref: "QĐ về tiêu chuẩn vệ sinh tàu bay" },
+
+            { section: "4. KẾT THÚC CHUYẾN BAY" },
+            { id: "4.1", title: "Báo cáo đầy đủ thông tin chuyến bay với cán bộ trực, đồng thời đánh giá công tác phục vụ chuyến bay, đưa ra các kiến nghị, khuyến cáo ( nếu có).", ref: "GOM 8,2,2,3" },
+            { id: "4.2", title: "Bàn giao đầy đủ biểu mẫu, biên bản liên qua đến chuyến bay cho bộ phận trực VNA để hoàn thiện hồ sơ chuyến bay", ref: "" },
+            { id: "4.3", title: "Ghi chép đầy đủ vào nhật ký khai thác trực các đặc điểm chính, các bất thường trong quá trình phục vụ, cũng như các ý kiến đề xuất", ref: "" },
+            { id: "4.4", title: "Hoàn thiện thời gian phục vụ chuyến bay trên chương trinh Lotus airport", ref: "" },
+            { id: "4.5", title: "Hoàn tất và lưu trữ hồ sơ chuyến bay", ref: "" }
+        ];
+
+        // Status state: state[tabIdx][itemId]
+        const state = { 1: {}, 2: {}, 3: {} };
+        const sigDrawn = { sig1: false };
+
+        function renderTabChecklist(tabIdx) {
+            const container = document.getElementById(`checklist-container-${tabIdx}`);
+            container.innerHTML = '';
+
+            rawData.forEach(item => {
+                if (item.section) {
+                    const secEl = document.createElement('div');
+                    secEl.className = 'section-title';
+                    secEl.innerText = item.section;
+                    container.appendChild(secEl);
+                } else {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.id = `item-card-t${tabIdx}-${item.id}`;
+                    
+                    const refTag = item.ref ? `<div class="item-ref"><strong>Tham chiếu:</strong> ${item.ref}</div>` : '';
+                    
+                    card.innerHTML = `
+                        <div class="item-header">
+                            <span class="item-no">${item.id}</span>
+                            <div class="item-title">${item.title}</div>
+                        </div>
+                        ${refTag}
+                        <div class="status-options">
+                            <button type="button" class="opt-btn pass-btn" onclick="setStatus(${tabIdx}, '${item.id}', 'pass')">
+                                Y (Đạt)
+                            </button>
+                            <button type="button" class="opt-btn fail-btn" onclick="setStatus(${tabIdx}, '${item.id}', 'fail')">
+                                N (K.Đạt)
+                            </button>
+                            <button type="button" class="opt-btn na-btn" onclick="setStatus(${tabIdx}, '${item.id}', 'na')">
+                                NA (K.Áp dụng)
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        // Render for all 3 tabs
+        [1, 2, 3].forEach(renderTabChecklist);
+
+        function switchTab(tabIdx) {
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`tab-btn-${i}`).classList.remove('active');
+                document.getElementById(`tab-content-${i}`).classList.remove('active');
+            }
+            document.getElementById(`tab-btn-${tabIdx}`).classList.add('active');
+            document.getElementById(`tab-content-${tabIdx}`).classList.add('active');
+        }
+
+        function updateTabLabel(tabIdx) {
+            const val = document.getElementById(`flight-input-${tabIdx}`).value.trim();
+            const btn = document.getElementById(`tab-btn-${tabIdx}`);
+            btn.innerText = val ? val : `Chuyến ${tabIdx}`;
+        }
+
+        function setStatus(tabIdx, id, val) {
+            state[tabIdx][id] = val;
+            const card = document.getElementById(`item-card-t${tabIdx}-${id}`);
+            const passBtn = card.querySelector('.pass-btn');
+            const failBtn = card.querySelector('.fail-btn');
+            const naBtn = card.querySelector('.na-btn');
+
+            card.classList.remove('checked-pass', 'checked-fail', 'checked-na');
+            passBtn.classList.remove('active');
+            failBtn.classList.remove('active');
+            naBtn.classList.remove('active');
+
+            if (val === 'pass') {
+                card.classList.add('checked-pass');
+                passBtn.classList.add('active');
+            } else if (val === 'fail') {
+                card.classList.add('checked-fail');
+                failBtn.classList.add('active');
+            } else if (val === 'na') {
+                card.classList.add('checked-na');
+                naBtn.classList.add('active');
+            }
+        }
+
+        function initSignatureCanvas(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const wrap = document.getElementById(`wrap-${id}`);
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            function resize() {
+                const rect = wrap.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#002b66';
+            }
+
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 200);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                isDrawing = true;
+                sigDrawn[id] = true;
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+            }
+
+            function move(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            }
+
+            function stop() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    document.getElementById(`${id}-status`).innerText = "✓ Đã ký";
+                }
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+        }
+
+        initSignatureCanvas('sig1');
+
+        function clearSignature(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById(`name-${id}`).value = '';
+            sigDrawn[id] = false;
+            document.getElementById(`${id}-status`).innerText = "";
+        }
+
+        function resetForm() {
+            if (confirm("Làm mới toàn bộ dữ liệu 3 chuyến bay?")) location.reload();
+        }
+
+        function exportToPDF() {
+            const donvi = document.getElementById('donvi-input').value || '...................................';
+            const positionVal = document.getElementById('position-input').value || '...................................';
+
+            const f1 = document.getElementById('flight-input-1').value || 'VN...';
+            const f2 = document.getElementById('flight-input-2').value || 'VN...';
+            const f3 = document.getElementById('flight-input-3').value || 'VN...';
+
+            const t1 = document.getElementById('time-input-1').value || '';
+            const t2 = document.getElementById('time-input-2').value || '';
+            const t3 = document.getElementById('time-input-3').value || '';
+
+            // Aggregate times for header
+            const timeList = [t1, t2, t3].filter(x => x.trim() !== '').join(' | ');
+            const timeDisplay = timeList || '...................................';
+
+            const nameSig1 = document.getElementById('name-sig1').value || '';
+            let sig1ImgSrc = sigDrawn.sig1 ? document.getElementById('canvas-sig1').toDataURL('image/png') : '';
+
+            let tableRowsHTML = '';
+            rawData.forEach(item => {
+                if (item.section) {
+                    const secNum = item.section.split('.')[0];
+                    const secText = item.section.substring(item.section.indexOf('.') + 1).trim();
+                    tableRowsHTML += `
+                        <tr style="background-color: #f3f4f6; font-weight: bold;">
+                            <td class="text-center">${secNum}</td>
+                            <td colspan="2">${secText}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                        </tr>
+                    `;
+                } else {
+                    const getMark = (tabIdx) => {
+                        const val = state[tabIdx][item.id];
+                        if (val === 'pass') return '<b>Y</b>';
+                        if (val === 'fail') return '<b>N</b>';
+                        if (val === 'na') return '<b>NA</b>';
+                        return '';
+                    };
+
+                    tableRowsHTML += `
+                        <tr>
+                            <td class="text-center" style="font-size: 8.5pt;">${item.id}</td>
+                            <td style="font-size: 8.5pt;">${item.title}</td>
+                            <td style="font-size: 8pt; text-align: center;">${item.ref || ''}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(1)}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(2)}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(3)}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 9pt; line-height: 1.2;">
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 9pt; font-weight: bold; line-height: 1.2; margin-bottom: 8px;">
+                        <div>TCT HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</div>
+                        <div style="text-align: right;">Mã số: BM-CNVN-064B<br>Lần ban hành: 03</div>
+                    </div>
+
+                    <div style="text-align: center; font-weight: bold; font-size: 11pt; margin: 6px 0; color: #000;">
+                        CHECKLIST GIÁM SÁT SÂN ĐỖ VÀ DỊCH VỤ TRÊN KHÔNG
+                    </div>
+
+                    <div style="margin-bottom: 6px; font-size: 8.5pt; line-height: 1.3;">
+                        <table style="width: 100%; border: none;">
+                            <tr>
+                                <td style="width: 50%;"><strong>ĐƠN VỊ:</strong> ${donvi}</td>
+                                <td style="width: 50%;"><strong>Thời gian:</strong> ${timeDisplay}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><strong>Vị trí công việc:</strong> ${positionVal}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="font-size: 8pt; font-weight: bold; font-style: italic; margin-bottom: 6px;">
+                        GHI CHÚ: TÍCH Y (YES); N (NO) HOẶC NA (NOT APPLY)
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                        <thead>
+                            <tr style="background-color: #e5e7eb; font-size: 8.5pt; text-align: center;">
+                                <th rowspan="2" style="width: 30px; padding: 4px 2px;">Stt</th>
+                                <th rowspan="2" style="padding: 4px 4px;">Danh mục công việc</th>
+                                <th rowspan="2" style="width: 110px; padding: 4px 2px;">Tham chiếu tới quy định TCT</th>
+                                <th colspan="3" style="padding: 2px 2px;">CHUYẾN BAY</th>
+                            </tr>
+                            <tr style="background-color: #f3f4f6; font-size: 8pt; text-align: center;">
+                                <th style="width: 45px; padding: 2px;">${f1}</th>
+                                <th style="width: 45px; padding: 2px;">${f2}</th>
+                                <th style="width: 45px; padding: 2px;">${f3}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 10px; display: flex; justify-content: flex-end; text-align: center; font-size: 9.5pt; font-weight: bold; page-break-inside: avoid;">
+                        <div style="width: 40%;">
+                            NGƯỜI THỰC HIỆN<br>
+                            <span style="font-size: 8pt; font-weight: normal; font-style: italic;">(Ký và ghi rõ họ tên)</span><br>
+                            ${sig1ImgSrc ? `<img src="${sig1ImgSrc}" style="max-height: 40px; max-width: 100%; margin-top: 2px;"><br>` : '<div style="height:40px;"></div>'}
+                            <span style="font-size: 9pt; font-weight: normal; font-style: italic;">${nameSig1}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (e) {
+                    console.error("Lỗi khi in:", e);
+                    alert("Trình duyệt đã chặn cửa sổ in. Vui lòng nhấn Ctrl + P để xuất PDF.");
+                }
+            }, 150);
+        }
+    </script>
+</body>
+</html>
