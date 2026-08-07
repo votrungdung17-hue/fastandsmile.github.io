@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHECK LIST KIỂM SOÁT DỊCH VỤ PHÒNG CHỜ BSV TẠI CẢNG HÀNG KHÔNG (BM-CNVN-053)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #1f2937;
+            line-height: 1.35;
+            padding-bottom: 90px;
+        }
+
+        .header-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h1 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .header-bar .doc-code {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        .document-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .doc-header {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .doc-header-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        .doc-title {
+            text-align: center;
+            color: #0056b3;
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0;
+            line-height: 1.3;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .section-title {
+            background: #eef6ff;
+            color: #0056b3;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-left: 4px solid #0056b3;
+            margin: 16px 0 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-card.checked-pass {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .item-card.checked-fail {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .item-card.checked-na {
+            border-left: 4px solid #6b7280;
+            background-color: #f3f4f6;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .item-no {
+            background: #0056b3;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+            flex-grow: 1;
+        }
+
+        .item-standard {
+            font-size: 12px;
+            color: #4b5563;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            padding: 6px 8px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 10px;
+        }
+
+        .status-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #4b5563;
+            transition: all 0.15s ease;
+        }
+
+        .opt-btn.pass-btn.active { background: #10b981; color: white; border-color: #059669; }
+        .opt-btn.fail-btn.active { background: #ef4444; color: white; border-color: #dc2626; }
+        .opt-btn.na-btn.active { background: #6b7280; color: white; border-color: #4b5563; }
+
+        .note-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .signature-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .signature-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+        }
+
+        .sig-box {
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            background: #fafafa;
+            width: 100%;
+        }
+
+        .sig-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .sig-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .sig-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sig-name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            background: #ffffff;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .header-bar, .container, .bottom-bar {
+                display: none !important;
+            }
+
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>VNA PKTG CHECKLIST</h1>
+        <span class="doc-code">BM-CNVN-053</span>
+    </div>
+
+    <div class="container">
+        <div class="document-card">
+            
+            <div class="doc-header">
+                <div class="doc-header-top">
+                    <span>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
+                    <span style="text-align: right;">Mã số: BM-CNVN-053<br>Lần ban hành: 04</span>
+                </div>
+                <div class="doc-title">CHECK LIST KIỂM SOÁT DỊCH VỤ PHÒNG CHỜ BSV TẠI CẢNG HÀNG KHÔNG</div>
+            </div>
+
+            <div class="meta-grid">
+                <div class="form-group">
+                    <label>Thời điểm thực hiện đánh giá:</label>
+                    <input type="text" id="time-input" placeholder="VD: 09:30 - 20/10/2026">
+                </div>
+            </div>
+
+            <div id="checklist-container"></div>
+
+            <div class="signature-section">
+                <div class="sig-box">
+                    <div class="sig-header">
+                        <div class="sig-title">ĐẠI DIỆN HKVN</div>
+                    </div>
+                    <div class="sig-canvas-wrap" id="wrap-sig1">
+                        <canvas id="canvas-sig1"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig1" placeholder="Họ và tên người ký...">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
+                        <span id="sig1-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+
+                <div class="sig-box">
+                    <div class="sig-header">
+                        <div class="sig-title">ĐẠI DIỆN PKTG</div>
+                    </div>
+                    <div class="sig-canvas-wrap" id="wrap-sig2">
+                        <canvas id="canvas-sig2"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig2" placeholder="Họ và tên người ký...">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature('sig2')">Xóa / Ký lại</button>
+                        <span id="sig2-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF / In</button>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        const rawData = [
+            { section: "I. TIỆN NGHI" },
+            { id: 1, category: "Tiện nghi", title: "Mật độ ghế", standard: "Bố trí ghế đảm bảo thuận lợi cho việc di chuyển của hành khách trong phòng khách (kỳ vọng 3 m²/ghế)" },
+            { id: 2, category: "Tiện nghi", title: "Nhà vệ sinh", standard: "Đảm bảo sạch sẽ, khô ráo, không mùi, đầy đủ vật dụng cần thiết như nước rửa tay, khăn giấy..." },
+            { id: 3, category: "Tiện nghi", title: "Wifi", standard: "Đảm bảo tốc độ đường truyền, hoạt động ổn định và không bị gián đoạn, chập chờn." },
+            { id: 4, category: "Tiện nghi", title: "Bảng thông tin chuyến bay", standard: "Thông tin chuyến bay được cập đúng tình trạng chuyến bay" },
+            { id: 5, category: "Tiện nghi", title: "Tivi", standard: "Có" },
+            { id: 6, category: "Tiện nghi", title: "Phòng hút thuốc", standard: "Khuyến khích" },
+            { id: 7, category: "Tiện nghi", title: "Khu vực để hành lý", standard: "Khuyến khích" },
+            { id: 8, category: "Tiện nghi", title: "Khu vực sạc", standard: "Khuyến khích" },
+            { id: 9, category: "Tiện nghi", title: "Máy in", standard: "Khuyến khích" },
+            { id: 10, category: "Tiện nghi", title: "Trang trí theo chủ đề", standard: "Xác định chủ đề trang trí phù hợp với văn hóa địa phương tạo không gian thư giãn. Có trang trí theo chủ đề Lễ, Tết" },
+            { id: 11, category: "Tiện nghi", title: "Khu vực yên tĩnh, thư giãn", standard: "Khuyến khích" },
+
+            { section: "II. SUẤT ĂN" },
+            { id: 12, category: "Suất ăn", title: "Món ăn nhẹ", standard: "3-4 lựa chọn" },
+            { id: 13, category: "Suất ăn", title: "Bánh mì và bánh ngọt", standard: "3-4 lựa chọn" },
+            { id: 14, category: "Suất ăn", title: "Lựa chọn ăn uống có lợi cho sức khỏe", standard: "Khuyến khích" },
+            { id: 15, category: "Suất ăn", title: "Tráng miệng", standard: "Khuyến khích" },
+            { id: 16, category: "Suất ăn", title: "Các món phục vụ trong khung giờ bữa chính", standard: "Món nóng: 1 lựa chọn mì hoặc phở ăn liền với nước dùng hầm xương có thêm thịt, trứng hoặc cá và buffet tùy từng phòng C" },
+            { id: 17, category: "Suất ăn", title: "Các loại gia vị", standard: "Có" },
+            { id: 18, category: "Suất ăn", title: "Tiêu chuẩn thực đơn đồ uống & đặc sản", standard: "Chú trọng các thực đơn đồ uống theo hướng nhấn vào đồ uống địa phương, các chủng loại café, đồ uống có lợi cho sức khỏe. Phục vụ kèm theo các đồ ăn nhẹ, ưu tiên các sản vật địa phương được phục vụ phù hợp với tiêu chuẩn khách hạng Thương gia và đảm bảo sự tươi mới chất lượng" },
+
+            { section: "III. ĐỒ UỐNG" },
+            { id: 19, category: "Đồ uống", title: "Trà", standard: "2 lựa chọn" },
+            { id: 20, category: "Đồ uống", title: "Café", standard: "3 lựa chọn" },
+            { id: 21, category: "Đồ uống", title: "Nước ngọt", standard: "2 lựa chọn" },
+            { id: 22, category: "Đồ uống", title: "Nước tinh khiết", standard: "1-2 lựa chọn" },
+            { id: 23, category: "Đồ uống", title: "Nước trái cây", standard: "2 lựa chọn" },
+
+            { section: "IV. GIẢI TRÍ & HÌNH ẢNH, NHÂN SỰ" },
+            { id: 24, category: "Giải trí", title: "Báo và tạp chí", standard: "Khuyến khích báo tạp chí địa phương" },
+            { id: 25, category: "Hình ảnh VNA", title: "Dummy Girl trước cửa PKTG, mô hình máy bay, tạp chí Heritage, Fashion", standard: "Đảm bảo hình ảnh và nhận diện thương hiệu VNA" },
+            { id: 26, category: "TC nhân viên", title: "Tiêu chuẩn ngoại ngữ, kỹ năng phục vụ, kỹ năng quan hệ khách hàng", standard: "Đạt tiêu chuẩn theo HĐPV PKTG" }
+        ];
+
+        const state = {};
+        const sigDrawn = { sig1: false, sig2: false };
+
+        const container = document.getElementById('checklist-container');
+        rawData.forEach(item => {
+            if (item.section) {
+                const secEl = document.createElement('div');
+                secEl.className = 'section-title';
+                secEl.innerText = item.section;
+                container.appendChild(secEl);
+            } else {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.id = `item-card-${item.id}`;
+                
+                const catTag = item.category ? `<span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${item.category}</span>` : '';
+                
+                card.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-no">${String(item.id).padStart(2, '0')}</span>
+                        <div class="item-title">${item.title}</div>
+                        ${catTag}
+                    </div>
+                    <div class="item-standard"><strong>Tiêu chuẩn:</strong> ${item.standard.replace(/\n/g, '<br>')}</div>
+                    <div class="status-options">
+                        <button type="button" class="opt-btn pass-btn" onclick="setStatus(${item.id}, 'pass')">
+                            ✓ Đạt
+                        </button>
+                        <button type="button" class="opt-btn fail-btn" onclick="setStatus(${item.id}, 'fail')">
+                            ✗ Không Đạt
+                        </button>
+                        <button type="button" class="opt-btn na-btn" onclick="setStatus(${item.id}, 'na')">
+                            — K.Áp Dụng
+                        </button>
+                    </div>
+                    <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú thêm...">
+                `;
+                container.appendChild(card);
+            }
+        });
+
+        function setStatus(id, val) {
+            state[id] = val;
+            const card = document.getElementById(`item-card-${id}`);
+            const passBtn = card.querySelector('.pass-btn');
+            const failBtn = card.querySelector('.fail-btn');
+            const naBtn = card.querySelector('.na-btn');
+
+            card.classList.remove('checked-pass', 'checked-fail', 'checked-na');
+            passBtn.classList.remove('active');
+            failBtn.classList.remove('active');
+            naBtn.classList.remove('active');
+
+            if (val === 'pass') {
+                card.classList.add('checked-pass');
+                passBtn.classList.add('active');
+            } else if (val === 'fail') {
+                card.classList.add('checked-fail');
+                failBtn.classList.add('active');
+            } else if (val === 'na') {
+                card.classList.add('checked-na');
+                naBtn.classList.add('active');
+            }
+        }
+
+        function initSignatureCanvas(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const wrap = document.getElementById(`wrap-${id}`);
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            function resize() {
+                const rect = wrap.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#002b66';
+            }
+
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 200);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                isDrawing = true;
+                sigDrawn[id] = true;
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+            }
+
+            function move(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            }
+
+            function stop() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    document.getElementById(`${id}-status`).innerText = "✓ Đã ký";
+                }
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+        }
+
+        initSignatureCanvas('sig1');
+        initSignatureCanvas('sig2');
+
+        function clearSignature(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById(`name-${id}`).value = '';
+            sigDrawn[id] = false;
+            document.getElementById(`${id}-status`).innerText = "";
+        }
+
+        function resetForm() {
+            if (confirm("Làm mới toàn bộ bảng kiểm tra?")) location.reload();
+        }
+
+        function exportToPDF() {
+            const timeVal = document.getElementById('time-input').value || '.........................';
+
+            const nameSig1 = document.getElementById('name-sig1').value || '';
+            const nameSig2 = document.getElementById('name-sig2').value || '';
+
+            let sig1ImgSrc = sigDrawn.sig1 ? document.getElementById('canvas-sig1').toDataURL('image/png') : '';
+            let sig2ImgSrc = sigDrawn.sig2 ? document.getElementById('canvas-sig2').toDataURL('image/png') : '';
+
+            let tableRowsHTML = `
+                <tr>
+                    <td class="text-center">1</td>
+                    <td rowspan="11" style="text-align: center; font-weight: bold;">Tiện nghi</td>
+                    <td>Mật độ ghế</td>
+                    <td>Bố trí ghế đảm bảo thuận lợi cho việc di chuyển của hành khách trong phòng khách (kỳ vọng 3 m²/ghế)</td>
+                    <td class="text-center">${state[1] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[1] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[1] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">2</td>
+                    <td>Nhà vệ sinh</td>
+                    <td>Đảm bảo sạch sẽ, khô ráo, không mùi, đầy đủ vật dụng cần thiết như nước rửa tay, khăn giấy...</td>
+                    <td class="text-center">${state[2] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[2] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[2] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">3</td>
+                    <td>Wifi</td>
+                    <td>Đảm bảo tốc độ đường truyền, hoạt động ổn định và không bị gián đoạn, chập chờn.</td>
+                    <td class="text-center">${state[3] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[3] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[3] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">4</td>
+                    <td>Bảng thông tin chuyến bay</td>
+                    <td>Thông tin chuyến bay được cập đúng tình trạng chuyến bay</td>
+                    <td class="text-center">${state[4] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[4] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[4] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">5</td>
+                    <td>Tivi</td>
+                    <td>Có</td>
+                    <td class="text-center">${state[5] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[5] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[5] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">6</td>
+                    <td>Phòng hút thuốc</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[6] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[6] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[6] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">7</td>
+                    <td>Khu vực để hành lý</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[7] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[7] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[7] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">8</td>
+                    <td>Khu vực sạc</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[8] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[8] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[8] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">9</td>
+                    <td>Máy in</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[9] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[9] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[9] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">10</td>
+                    <td>Trang trí theo chủ đề</td>
+                    <td>Xác định chủ đề trang trí phù hợp với văn hóa địa phương tạo không gian thư giãn. Có trang trí theo chủ đề Lễ, Tết</td>
+                    <td class="text-center">${state[10] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[10] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[10] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">11</td>
+                    <td>Khu vực yên tĩnh, thư giãn</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[11] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[11] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[11] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">12</td>
+                    <td rowspan="7" style="text-align: center; font-weight: bold;">Suất ăn</td>
+                    <td>Món ăn nhẹ</td>
+                    <td>3-4 lựa chọn</td>
+                    <td class="text-center">${state[12] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[12] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[12] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">13</td>
+                    <td>Bánh mì và bánh ngọt</td>
+                    <td>3-4 lựa chọn</td>
+                    <td class="text-center">${state[13] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[13] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[13] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">14</td>
+                    <td>Lựa chọn ăn uống có lợi cho sức khỏe</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[14] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[14] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[14] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">15</td>
+                    <td>Tráng miệng</td>
+                    <td>Khuyến khích</td>
+                    <td class="text-center">${state[15] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[15] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[15] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">16</td>
+                    <td>Các món phục vụ trong khung giờ bữa chính</td>
+                    <td>Món nóng: 1 lựa chọn mì hoặc phở ăn liền với nước dùng hầm xương có thêm thịt, trứng hoặc cá và buffet tùy từng phòng C</td>
+                    <td class="text-center">${state[16] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[16] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[16] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">17</td>
+                    <td>Các loại gia vị</td>
+                    <td>Có</td>
+                    <td class="text-center">${state[17] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[17] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[17] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">18</td>
+                    <td colspan="2">Chú trọng các thực đơn đồ uống theo hướng nhấn vào đồ uống địa phương, các chủng loại café, đồ uống có lợi cho sức khỏe. Phục vụ kèm theo các đồ ăn nhẹ, ưu tiên các sản vật địa phương được phục vụ phù hợp với tiêu chuẩn khách hạng Thương gia và đảm bảo sự tươi mới chất lượng</td>
+                    <td class="text-center">${state[18] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[18] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[18] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">19</td>
+                    <td rowspan="5" style="text-align: center; font-weight: bold;">Đồ uống</td>
+                    <td>Trà</td>
+                    <td>2 lựa chọn</td>
+                    <td class="text-center">${state[19] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[19] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[19] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">20</td>
+                    <td>Café</td>
+                    <td>3 lựa chọn</td>
+                    <td class="text-center">${state[20] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[20] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[20] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">21</td>
+                    <td>Nước ngọt</td>
+                    <td>2 lựa chọn</td>
+                    <td class="text-center">${state[21] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[21] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[21] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">22</td>
+                    <td>Nước tinh khiết</td>
+                    <td>1-2 lựa chọn</td>
+                    <td class="text-center">${state[22] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[22] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[22] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">23</td>
+                    <td>Nước trái cây</td>
+                    <td>2 lựa chọn</td>
+                    <td class="text-center">${state[23] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[23] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[23] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">24</td>
+                    <td style="text-align: center; font-weight: bold;">Giải trí</td>
+                    <td>Báo và tạp chí</td>
+                    <td>Khuyến khích báo tạp chí địa phương</td>
+                    <td class="text-center">${state[24] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[24] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[24] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">25</td>
+                    <td style="text-align: center; font-weight: bold;">Hình ảnh VNA</td>
+                    <td>Dummy Girl trước cửa PKTG, mô hình máy bay, tạp chí Heritage, Fashion</td>
+                    <td>Đảm bảo hình ảnh và nhận diện thương hiệu VNA</td>
+                    <td class="text-center">${state[25] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[25] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[25] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">26</td>
+                    <td style="text-align: center; font-weight: bold;">TC nhân viên</td>
+                    <td>Tiêu chuẩn ngoại ngữ, kỹ năng phục vụ, kỹ năng quan hệ khách hàng</td>
+                    <td>Đạt tiêu chuẩn theo HĐPV PKTG</td>
+                    <td class="text-center">${state[26] === 'pass' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[26] === 'fail' ? '<b>X</b>' : ''}</td>
+                    <td class="text-center">${state[26] === 'na' ? '<b>X</b>' : ''}</td>
+                </tr>
+            `;
+
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 9.5pt;">
+                    <div style="font-size: 9.5pt; font-weight: bold; margin-bottom: 4px;">
+                        Thời điểm thực hiện đánh giá: <span style="font-weight: normal;">${timeVal}</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 9.5pt; font-weight: bold; line-height: 1.25;">
+                        <div>TỔNG CÔNG TY HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</div>
+                        <div style="text-align: right;">Mã số: BM-CNVN-053<br>Lần ban hành: 04</div>
+                    </div>
+
+                    <div style="text-align: center; font-weight: bold; font-size: 12pt; margin: 8px 0; color: #000;">
+                        CHECK LIST KIỂM SOÁT DỊCH VỤ PHÒNG CHỜ BSV TẠI CẢNG HÀNG KHÔNG
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                        <thead>
+                            <tr style="background-color: #f2f2f2; font-size: 9pt;">
+                                <th style="width: 25px; padding: 4px 2px;">TT</th>
+                                <th style="width: 80px; padding: 4px 2px;">Tiện ích</th>
+                                <th style="width: 130px; padding: 4px 4px;">Tiêu chí</th>
+                                <th style="padding: 4px 4px;">Tiêu chuẩn</th>
+                                <th style="width: 35px; padding: 4px 2px;">Đạt</th>
+                                <th style="width: 40px; padding: 4px 2px;">Không đạt</th>
+                                <th style="width: 65px; padding: 4px 2px;">Không áp dụng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 15px; display: flex; justify-content: space-between; text-align: center; font-size: 10pt; font-weight: bold; page-break-inside: avoid;">
+                        <div style="width: 45%;">
+                            ĐẠI DIỆN HKVN<br>
+                            ${sig1ImgSrc ? `<img src="${sig1ImgSrc}" style="max-height: 45px; max-width: 100%; margin-top: 5px;"><br>` : '<div style="height:45px;"></div>'}
+                            <span style="font-size: 9.5pt; font-weight: normal; font-style: italic;">${nameSig1}</span>
+                        </div>
+                        <div style="width: 45%;">
+                            ĐẠI DIỆN PKTG<br>
+                            ${sig2ImgSrc ? `<img src="${sig2ImgSrc}" style="max-height: 45px; max-width: 100%; margin-top: 5px;"><br>` : '<div style="height:45px;"></div>'}
+                            <span style="font-size: 9.5pt; font-weight: normal; font-style: italic;">${nameSig2}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (e) {
+                    console.error("Lỗi khi in:", e);
+                    alert("Trình duyệt đã chặn cửa sổ in. Vui lòng nhấn Ctrl + P để xuất PDF.");
+                }
+            }, 150);
+        }
+    </script>
+</body>
+</html>
