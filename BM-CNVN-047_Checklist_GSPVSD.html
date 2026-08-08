@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ</title>
+    
+    <!-- Icon / Favicon -->
+    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/GSSD047.png">
+    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/GSSD047.png">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #1f2937;
+            line-height: 1.35;
+            padding-bottom: 90px;
+        }
+
+        .header-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h1 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        .document-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .doc-title {
+            text-align: center;
+            color: #0056b3;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0 16px 0;
+            line-height: 1.3;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .section-title {
+            background: #eef6ff;
+            color: #0056b3;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-left: 4px solid #0056b3;
+            margin: 16px 0 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-card.checked-yes {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .item-card.checked-no {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .item-no {
+            background: #0056b3;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #111827;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .status-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #4b5563;
+            transition: all 0.15s ease;
+        }
+
+        .opt-btn.yes-btn.active { background: #10b981; color: white; border-color: #059669; }
+        .opt-btn.no-btn.active { background: #ef4444; color: white; border-color: #dc2626; }
+
+        .note-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .evaluation-box {
+            margin-top: 16px;
+        }
+
+        .evaluation-box label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0056b3;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .evaluation-box textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .signature-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .sig-box {
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            background: #fafafa;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .sig-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .sig-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sig-name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            background: #ffffff;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .header-bar, .container, .bottom-bar {
+                display: none !important;
+            }
+
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>GIÁM SÁT PHỤC VỤ SÂN ĐỖ</h1>
+    </div>
+
+    <div class="container">
+        <div class="document-card">
+            
+            <div class="doc-title">BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ</div>
+
+            <div class="meta-grid">
+                <div class="form-group">
+                    <label>Chuyến bay:</label>
+                    <input type="text" id="flight-input" placeholder="VD: VN123">
+                </div>
+                <div class="form-group">
+                    <label>Hành trình:</label>
+                    <input type="text" id="route-input" placeholder="VD: HAN-SGN">
+                </div>
+                <div class="form-group">
+                    <label>A/C (Tàu bay):</label>
+                    <input type="text" id="ac-input" placeholder="VD: A321 / VN-A888">
+                </div>
+                <div class="form-group">
+                    <label>Ngày:</label>
+                    <input type="date" id="date-input">
+                </div>
+            </div>
+
+            <div id="checklist-container"></div>
+
+            <div class="evaluation-box">
+                <label>ĐÁNH GIÁ:</label>
+                <textarea id="eval-input" placeholder="Nhập đánh giá chung..."></textarea>
+            </div>
+
+            <div class="signature-section">
+                <div class="sig-box">
+                    <div class="sig-title">NGƯỜI THỰC HIỆN</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig">
+                        <canvas id="canvas-sig"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig" placeholder="Họ và tên người ký...">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature()">Xóa / Ký lại</button>
+                        <span id="sig-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF / In</button>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        const rawData = [
+            { section: "QUY ĐỊNH CHUNG" },
+            { id: 1, title: "Kiểm tra tình trạng ULD trước khi sử dụng để chất xếp hành lý, hàng hóa. Kiểm tra, ghi nhận tình trạng ULD trước khi chất và dỡ ra khỏi hầm hàng tàu bay" },
+            { id: 2, title: "Các TTBMĐ được vệ sinh công nghiệp sạch sẽ; các chức năng, bộ phận ở tình trạng hoạt động tốt; được trang bị các dụng cụ phòng chống cháy nổ thích hợp." },
+            { id: 3, title: "Tốc độ tiếp cận và rời khỏi tàu bay của TTBMĐ không quá 5 km/h (tương đương tốc độ người đi bộ)" },
+            { id: 4, title: "Quá trình TTBMĐ tiếp cận và rời khỏi tàu bay phải có nhân viên cảnh giới hỗ trợ." },
+            { id: 5, title: "Các TTB tiếp cận hoặc kết nối trực tiếp với tàu bay phải được chèn bánh (không bắt buộc với xe nâng), hạ chân chống nếu có sau khi tiếp cận." },
+            { id: 6, title: "Các thiết bị không được đỗ hay di chuyển dưới cánh tàu bay." },
+            { id: 7, title: "Tất cả các phương tiện dừng kiểm tra phanh trước khi tiếp cận tàu bay theo quy định" },
+            { id: 8, title: "Khu vực xung quanh của khoang hành khách và cửa hầm hàng được kiểm tra tổn hại bằng mắt (vết xước, vết lõm…) trước khi TTB tiếp cận" },
+            { id: 9, title: "Kiểm tra thực tế việc kiểm tra, kiểm soát FOD của công ty PVMĐ tại sân đỗ" },
+
+            { section: "CẦU ỐNG LỒNG" },
+            { id: 10, title: "Tàu bay đến cần đảm bảo:<br>• Phải ở vị trí thu vào hết hoặc chờ sẵn ở vị trí phục vụ nhưng không gây cản trở lối vào của tàu bay<br>• Đảm bảo không có phương tiện nào cản trở chuyển động của ống lồng<br>• Điều khiển ống lồng tiếp cận từ từ đặc biệt cẩn thận với các ăng ten và các đầu dò được đặt ngay sát cạnh cửa tàu bay<br>• Cửa tàu bay đóng cho đến khi cầu ống lồng hoàn thiện tiếp cận, mái vòm đã áp sát với thân tàu bay, bộ thăng bằng tự động đã được đặt<br>• Đối với các loại tàu bay có cửa mở ra phía ngoài Sàn cầu ống lồng thấp hơn ngưỡng cửa tàu bay 10-20cm và phải được kiểm soát trong suốt quá trình phục vụ hoặc ống lồng phải được lắp bộ cân bằng tự động và đảm bảo hệ thống hoạt động<br>• Nhân viên vận hành cầu phải có mặt tại buồng điều khiển cho đến khi hành khách đã xuống hết" },
+            { id: 11, title: "Tàu bay đi cần đảm bảo:<br>• Trước khi di chuyển ống lồng, cửa máy bay phải được đóng kín, cáp cấp điện và ống cấp khí lạnh phải được thu hồi hoàn toàn, mái vòm cầu ống lồng và bộ thăng bằng tự động đã thu, hướng di chuyển của các bánh xe chính xác, không có phương tiện hoặc vật thể nào cản trở chuyển động của cầu.<br>• Trước khi tàu bay rời khỏi vị trí đỗ, cầu ống lồng phải: hoặc lùi thẳng ra cách xa thân tàu bay trên 1,5m trước khi tiến hành đẩy tàu bay. Nhân viên vận hành có mặt tại vị trí để sẵn sàng tiếp cận lại khi cần thiết; hoặc thu vào hết, hoặc tới vị trí cách thân tàu bay tối thiểu 8m để cho phép cầu trượt thoát hiểm có thể triển khai." },
+
+            { section: "XE THANG" },
+            { id: 12, title: "Trước khi tiếp cận hoặc lùi khỏi tàu bay, phải đảm bảo:<br>• Bề mặt các bậc và sàn thang đảm bảo an toàn.<br>• Cửa tàu bay đóng<br>• Các thanh chắn bảo vệ 2 bên sàn thang, mũi sàn tiếp cận di động, và phần mái che cơ động thu vào hết.<br>• Không một bộ phận nào của xe thang gây trở ngại cho việc mở cửa tàu bay." },
+            { id: 13, title: "Trong quá trình di chuyển không để người trên bậc và sàn thang" },
+            { id: 14, title: "Trong quá trình phục vụ, đảm bảo:<br>• Các thanh chắn bảo vệ 2 bên sàn thang, mái che cơ động kéo sát về phía tàu bay và đảm bảo có khe hở cần thiết để đề phòng va chạm.<br>• Mép sàn song song với cửa tàu bay.<br>• Với xe thang có sàn ngoài không có khả năng tự điều chỉnh (ra/vào), bộ phận cao su bảo vệ tại mép sàn không được tỳ vào thân tàu bay, phải để một khoảng hở tối đa không quá 5cm.<br>• Các chân chống của xe phải hạ ở trạng thái an toàn<br>• Sàn thang phải thấp hơn gờ bậc cửa 10-20cm." },
+            { id: 15, title: "Xe thang không tự hành phải tháo khỏi xe kéo ngoài phạm vi 3m xung quanh tàu bay, tiếp cận thủ công vào tàu bay và khóa hãm." },
+
+            { section: "MỞ CỬA KHOANG HÀNH KHÁCH – HẦM HÀNG" },
+            { id: 16, title: "Nhân viên đóng mở cửa khoang hành khách, hầm hàng đã được đào tạo và được chấp nhận" },
+            { id: 17, title: "Nếu có tiếp viên bên trong tàu bay, cửa khoang hành khách do nhân viên mặt đất vận hành từ bên ngoài.<br>Nếu không có tiếp viên bên trong tàu bay, cửa khoang hành khách do nhân viên mặt đất vận hành từ bên trong hoặc bên ngoài.<br>Cửa chỉ được mở khi có thiết bị ra vào khoang hành khách phù hợp đặt tại cửa tàu bay" },
+            { id: 18, title: "Tuyệt đối không thực hiện thao tác mở cửa trong các trường hợp sau:<br>1. Đèn báo “Cabin-Pressure” nhấp nháy;<br>2. Có người, vật cản trên đường di chuyển của cửa khoang hành khách;<br>3. Gió to (theo khuyến cáo của nhà sản xuất tàu bay).<br>4. Chưa nhận được tín hiệu an toàn từ tiếp viên/nhân viên mặt đất ở trong tàu bay." },
+            { id: 19, title: "Đảm bảo rằng cửa khoang hành khách được đóng ngay sau khi hoàn thành công tác phục vụ và nhận được xác nhận từ tổ bay rằng cửa khoang hành khách có thể đóng để tàu bay khởi hành.<br>Đảm bảo dị vật xung quanh khu vực cửa bị loại bỏ, chốt được tháo.<br>Trước khi rút thiết bị lên xuống tàu bay, phải thông báo cho tổ bay hoặc nhân viên vận hành trên tàu bay. Không rút thiết bị lên xuống ra khỏi tàu bay cho đến khi cửa tàu bay được đóng hoàn toàn và chốt khóa.<br>Đảm bảo rằng cửa khoang hành khách và khung, nắp cửa xung quanh không có dấu hiệu hư hại." },
+            { id: 20, title: "Trong trường hợp mở lại cửa khoang hành khách, phải theo yêu cầu của tổ bay hoặc thông báo cho tổ bay" },
+            { id: 21, title: "Kiểm tra cửa hầm hàng trước khi mở đảm bảo không có dấu hiệu bất thường" },
+            { id: 22, title: "Đảm bảo quá trình đóng, mở cửa hầm hàng được thực hiện đúng quy trình." },
+            { id: 23, title: "Đảm bảo rằng cửa hầm hàng và khung, nắp cửa xung quanh không có dấu hiệu hư hại" },
+
+            { section: "XE NÂNG" },
+            { id: 24, title: "Khi tiếp cận tàu bay phải di chuyển với tốc độ thấp, sàn cầu ở vị trí thấp hơn cửa hầm hàng, lối tiếp cận không bị cản trở. Không được để xe nâng hàng tiếp xúc với tàu bay. Cao su giảm chấn tại lưỡi tiếp cận sàn trước của xe nâng phải song song và cách mép của sàn hầm hàng 5-15cm." },
+            { id: 25, title: "Sàn trước của xe nâng hàng không được nâng hoặc hạ khi có người đang sử dụng thang của xe nâng" },
+            { id: 26, title: "Khi điều khiển ULD, luôn kiểm tra hành trình di chuyển của ULD không bị cản trở bởi các chốt/khóa/thanh dẫn." },
+            { id: 27, title: "Các thanh ray an toàn trên xe nâng hàng được hạ xuống khi tiếp cận tàu bay." },
+
+            { section: "XE BĂNG CHUYỀN" },
+            { id: 28, title: "Tiếp cận tàu bay thật chậm và băng tải ở trạng thái hạ" },
+            { id: 29, title: "Tránh mọi tiếp xúc giữa băng tải với vỏ tàu bay, bậc cửa hầm hàng" },
+            { id: 30, title: "Nhân viên ra/vào hầm hàng có thể sử dụng băng tải với các tay vịn dựng lên và băng tải ở trạng thái dừng" },
+            { id: 31, title: "Khi có thể, sàn xe băng tải ở vị trí hạ hết mức với tay vịn được bố trí khi tiếp cận tàu bay" },
+            { id: 32, title: "Nhân viên không đi, ngồi, đứng trên băng tải đang chuyển động" },
+
+            { section: "XE ĐẦU KÉO" },
+            { id: 33, title: "Di chuyển gần động cơ tàu bay phải thận trọng và chính xác" },
+            { id: 34, title: "Không được kéo quá 04 dolly" },
+            { id: 35, title: "Tốc độ kéo phù hợp với số lượng dolly, không chuyển hướng đột ngột." },
+            { id: 36, title: "Không chở hành lý, hàng hóa, bưu kiện trên cabin xe." }
+        ];
+
+        const state = {};
+        let sigDrawn = false;
+
+        // Set ngày hiện tại mặc định
+        document.getElementById('date-input').valueAsDate = new Date();
+
+        const container = document.getElementById('checklist-container');
+        let currentSectionCount = 0;
+
+        rawData.forEach(item => {
+            if (item.section) {
+                currentSectionCount = 0;
+                const secEl = document.createElement('div');
+                secEl.className = 'section-title';
+                secEl.innerText = item.section;
+                container.appendChild(secEl);
+            } else {
+                currentSectionCount++;
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.id = `item-card-${item.id}`;
+                
+                card.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-no">${currentSectionCount}</span>
+                        <div class="item-title">${item.title}</div>
+                    </div>
+                    <div class="status-options">
+                        <button type="button" class="opt-btn yes-btn" onclick="setStatus(${item.id}, 'yes')">
+                            ✓ Có
+                        </button>
+                        <button type="button" class="opt-btn no-btn" onclick="setStatus(${item.id}, 'no')">
+                            ✗ Không
+                        </button>
+                    </div>
+                    <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú...">
+                `;
+                container.appendChild(card);
+            }
+        });
+
+        function setStatus(id, val) {
+            state[id] = val;
+            const card = document.getElementById(`item-card-${id}`);
+            const yesBtn = card.querySelector('.yes-btn');
+            const noBtn = card.querySelector('.no-btn');
+
+            card.classList.remove('checked-yes', 'checked-no');
+            yesBtn.classList.remove('active');
+            noBtn.classList.remove('active');
+
+            if (val === 'yes') {
+                card.classList.add('checked-yes');
+                yesBtn.classList.add('active');
+            } else if (val === 'no') {
+                card.classList.add('checked-no');
+                noBtn.classList.add('active');
+            }
+        }
+
+        function initSignatureCanvas() {
+            const canvas = document.getElementById('canvas-sig');
+            const wrap = document.getElementById('wrap-sig');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            function resize() {
+                const rect = wrap.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#002b66';
+            }
+
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 200);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                isDrawing = true;
+                sigDrawn = true;
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+            }
+
+            function move(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            }
+
+            function stop() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    document.getElementById('sig-status').innerText = "✓ Đã ký";
+                }
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+        }
+
+        initSignatureCanvas();
+
+        function clearSignature() {
+            const canvas = document.getElementById('canvas-sig');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('name-sig').value = '';
+            sigDrawn = false;
+            document.getElementById('sig-status').innerText = "";
+        }
+
+        function resetForm() {
+            if (confirm("Làm mới toàn bộ bảng giám sát?")) location.reload();
+        }
+
+        function formatDate(dateStr) {
+            if(!dateStr) return '……/……/20…';
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function exportToPDF() {
+            const flight = document.getElementById('flight-input').value || '………';
+            const route = document.getElementById('route-input').value || '……………';
+            const ac = document.getElementById('ac-input').value || '……';
+            const date = formatDate(document.getElementById('date-input').value);
+            const evalText = document.getElementById('eval-input').value || '';
+            const nameSig = document.getElementById('name-sig').value || '';
+
+            let sigImgSrc = sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : '';
+
+            let rowsHTML = '';
+            
+            rawData.forEach(item => {
+                if (item.section) {
+                    rowsHTML += `
+                        <tr style="background-color: #f2f2f2; font-weight: bold;">
+                            <td colspan="5" style="padding: 4px 6px;">${item.section}</td>
+                        </tr>
+                    `;
+                } else {
+                    const noteVal = document.getElementById(`note-${item.id}`).value || '';
+                    rowsHTML += `
+                        <tr>
+                            <td style="text-align: center; vertical-align: top;">${item.id}</td>
+                            <td style="vertical-align: top;">${item.title}</td>
+                            <td style="text-align: center; vertical-align: top; width: 35px;">${state[item.id] === 'yes' ? '<b>X</b>' : ''}</td>
+                            <td style="text-align: center; vertical-align: top; width: 45px;">${state[item.id] === 'no' ? '<b>X</b>' : ''}</td>
+                            <td style="vertical-align: top;">${noteVal}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 9.5pt; line-height: 1.25;">
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 8px;">
+                        BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ
+                    </div>
+
+                    <div style="margin-bottom: 8px; font-size: 10pt; display: flex; justify-content: space-between;">
+                        <span>Chuyến bay: <b>${flight}</b></span>
+                        <span>Hành trình: <b>${route}</b></span>
+                        <span>A/C: <b>${ac}</b></span>
+                        <span>Ngày: <b>${date}</b></span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                        <thead>
+                            <tr style="background-color: #e6e6e6; text-align: center; font-weight: bold;">
+                                <th style="width: 30px; padding: 4px;">TT</th>
+                                <th style="padding: 4px;">NỘI DUNG</th>
+                                <th style="width: 35px; padding: 4px;">Có</th>
+                                <th style="width: 45px; padding: 4px;">Không</th>
+                                <th style="width: 120px; padding: 4px;">GHI CHÚ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 10px; font-size: 10pt;">
+                        <b>ĐÁNH GIÁ :</b>
+                        <div style="min-height: 40px; border-bottom: 1px dotted #000; padding-top: 2px;">
+                            ${evalText.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 12px; display: flex; justify-content: flex-end; text-align: center; font-size: 10pt; page-break-inside: avoid;">
+                        <div style="width: 220px;">
+                            <b>Người thực hiện</b><br>
+                            ${sigImgSrc ? `<img src="${sigImgSrc}" style="max-height: 50px; max-width: 100%; margin-top: 5px;"><br>` : '<div style="height:50px;"></div>'}
+                            <span style="font-size: 9.5pt; font-style: italic;">${nameSig}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (e) {
+                    console.error("Lỗi khi in:", e);
+                    alert("Trình duyệt đã chặn cửa sổ in. Vui lòng nhấn Ctrl + P để xuất PDF.");
+                }
+            }, 150);
+        }
+    </script>
+</body>
+</html>
