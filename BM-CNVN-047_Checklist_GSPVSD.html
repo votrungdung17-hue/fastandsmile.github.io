@@ -65,6 +65,34 @@
             margin-bottom: 16px;
         }
 
+        /* Styling cho Header cơ quan trong web */
+        .org-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 12px;
+            color: #374151;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e5e7eb;
+            margin-bottom: 12px;
+        }
+
+        .org-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .org-meta {
+            text-align: right;
+            font-style: italic;
+        }
+
+        .org-meta span.version {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
         .doc-title {
             text-align: center;
             color: #0056b3;
@@ -362,6 +390,18 @@
     <div class="container">
         <div class="document-card">
             
+            <!-- Thêm phần header tên công ty & mã số biểu mẫu -->
+            <div class="org-header">
+                <div class="org-name">
+                    TCT HÀNG KHÔNG VIỆT NAM<br>
+                    CHI NHÁNH KHU VỰC VIỆT NAM
+                </div>
+                <div class="org-meta">
+                    Mã số: BM-CNVN-047<br>
+                    Lần ban hành: <span class="version">02</span>
+                </div>
+            </div>
+
             <div class="doc-title">BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ</div>
 
             <div class="meta-grid">
@@ -706,92 +746,112 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
-function exportToPDF() {
-    const flight = document.getElementById('flight-input').value || '………';
-    const route = document.getElementById('route-input').value || '……………';
-    const ac = document.getElementById('ac-input').value || '……';
-    const date = formatDate(document.getElementById('date-input').value);
-    const evalText = document.getElementById('eval-input').value || '';
-    const nameSig = document.getElementById('name-sig').value || '';
+        function exportToPDF() {
+            const flight = document.getElementById('flight-input').value || '………';
+            const route = document.getElementById('route-input').value || '……………';
+            const ac = document.getElementById('ac-input').value || '……';
+            const date = formatDate(document.getElementById('date-input').value);
+            const evalText = document.getElementById('eval-input').value || '';
+            const nameSig = document.getElementById('name-sig').value || '';
 
-    let sigImgSrc = sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : '';
+            let sigImgSrc = sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : '';
 
-    let rowsHTML = '';
-    
-    rawData.forEach(item => {
-        if (item.section) {
-            rowsHTML += `
-                <tr style="background-color: #f2f2f2; font-weight: bold;">
-                    <td colspan="5" style="padding: 4px 6px;">${item.section}</td>
-                </tr>
+            let rowsHTML = '';
+            let currentItemNo = 0;
+            
+            rawData.forEach(item => {
+                if (item.section) {
+                    currentItemNo = 0;
+                    rowsHTML += `
+                        <tr style="background-color: #f2f2f2; font-weight: bold;">
+                            <td colspan="5" style="padding: 4px 6px; text-transform: uppercase;">${item.section}</td>
+                        </tr>
+                    `;
+                } else {
+                    currentItemNo++;
+                    const noteVal = document.getElementById(`note-${item.id}`).value || '';
+                    rowsHTML += `
+                        <tr>
+                            <td style="text-align: center; vertical-align: top;">${currentItemNo}</td>
+                            <td style="vertical-align: top; padding: 4px;">${item.title}</td>
+                            <td style="text-align: center; vertical-align: top; width: 35px;">${state[item.id] === 'yes' ? '<b>X</b>' : ''}</td>
+                            <td style="text-align: center; vertical-align: top; width: 45px;">${state[item.id] === 'no' ? '<b>X</b>' : ''}</td>
+                            <td style="vertical-align: top; padding: 4px;">${noteVal}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 9.5pt; line-height: 1.25;">
+                    
+                    <!-- Header cơ quan & Mã số chuẩn Word khi in/xuất PDF -->
+                    <table style="width: 100%; border: none; margin-bottom: 12px;">
+                        <tr>
+                            <td style="width: 60%; vertical-align: top; font-weight: bold; font-size: 10pt; line-height: 1.3;">
+                                TCT HÀNG KHÔNG VIỆT NAM<br>
+                                CHI NHÁNH KHU VỰC VIỆT NAM
+                            </td>
+                            <td style="width: 40%; vertical-align: top; text-align: right; font-size: 10pt; line-height: 1.3;">
+                                Mã số: <i>BM-CNVN-047</i><br>
+                                Lần ban hành: <span style="color: red; font-style: italic;">02</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 12px;">
+                        BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ
+                    </div>
+
+                    <div style="margin-bottom: 8px; font-size: 10pt; display: flex; justify-content: space-between;">
+                        <span>Chuyến bay: <b>${flight}</b></span>
+                        <span>Hành trình: <b>${route}</b></span>
+                        <span>A/C: <b>${ac}</b></span>
+                        <span>Ngày: <b>${date}</b></span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                        <thead>
+                            <tr style="background-color: #e6e6e6; text-align: center; font-weight: bold;">
+                                <th rowspan="2" style="width: 30px; padding: 4px;">TT</th>
+                                <th rowspan="2" style="padding: 4px;">NỘI DUNG</th>
+                                <th colspan="2" style="padding: 4px;">KIỂM TRA VÀ XÁC NHẬN</th>
+                                <th rowspan="2" style="width: 120px; padding: 4px;">GHI CHÚ</th>
+                            </tr>
+                            <tr style="background-color: #e6e6e6; text-align: center; font-weight: bold;">
+                                <th style="width: 35px; padding: 4px;">Có</th>
+                                <th style="width: 45px; padding: 4px;">Không</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 10px; font-size: 10pt;">
+                        <b>ĐÁNH GIÁ :</b>
+                        <div style="min-height: 40px; border-bottom: 1px dotted #000; padding-top: 2px;">
+                            ${evalText.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 12px; display: flex; justify-content: flex-end; text-align: center; font-size: 10pt; page-break-inside: avoid;">
+                        <div style="width: 220px;">
+                            <b>Người thực hiện</b><br>
+                            ${sigImgSrc ? `<img src="${sigImgSrc}" style="max-height: 50px; max-width: 100%; margin-top: 5px;"><br>` : '<div style="height:50px;"></div>'}
+                            <span style="font-size: 9.5pt; font-style: italic;">${nameSig}</span>
+                        </div>
+                    </div>
+                </div>
             `;
-        } else {
-            const noteVal = document.getElementById(`note-${item.id}`).value || '';
-            rowsHTML += `
-                <tr>
-                    <td style="text-align: center; vertical-align: top;">${item.id}</td>
-                    <td style="vertical-align: top;">${item.title}</td>
-                    <td style="text-align: center; vertical-align: top; width: 35px;">${state[item.id] === 'yes' ? '<b>X</b>' : ''}</td>
-                    <td style="text-align: center; vertical-align: top; width: 45px;">${state[item.id] === 'no' ? '<b>X</b>' : ''}</td>
-                    <td style="vertical-align: top;">${noteVal}</td>
-                </tr>
-            `;
+
+            try {
+                window.print();
+            } catch (e) {
+                alert("Trình duyệt không cho phép tự động mở hộp thoại in. Bạn vui lòng nhấn tổ hợp phím Ctrl + P (hoặc Cmd + P trên Mac) để in/xuất PDF.");
+            }
         }
-    });
-
-    const printContainer = document.getElementById('print-area');
-    printContainer.innerHTML = `
-        <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 9.5pt; line-height: 1.25;">
-            <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 8px;">
-                BIỂU MẪU GIÁM SÁT PHỤC VỤ SÂN ĐỖ
-            </div>
-
-            <div style="margin-bottom: 8px; font-size: 10pt; display: flex; justify-content: space-between;">
-                <span>Chuyến bay: <b>${flight}</b></span>
-                <span>Hành trình: <b>${route}</b></span>
-                <span>A/C: <b>${ac}</b></span>
-                <span>Ngày: <b>${date}</b></span>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
-                <thead>
-                    <tr style="background-color: #e6e6e6; text-align: center; font-weight: bold;">
-                        <th style="width: 30px; padding: 4px;">TT</th>
-                        <th style="padding: 4px;">NỘI DUNG</th>
-                        <th style="width: 35px; padding: 4px;">Có</th>
-                        <th style="width: 45px; padding: 4px;">Không</th>
-                        <th style="width: 120px; padding: 4px;">GHI CHÚ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHTML}
-                </tbody>
-            </table>
-
-            <div style="margin-top: 10px; font-size: 10pt;">
-                <b>ĐÁNH GIÁ :</b>
-                <div style="min-height: 40px; border-bottom: 1px dotted #000; padding-top: 2px;">
-                    ${evalText.replace(/\n/g, '<br>')}
-                </div>
-            </div>
-
-            <div style="margin-top: 12px; display: flex; justify-content: flex-end; text-align: center; font-size: 10pt; page-break-inside: avoid;">
-                <div style="width: 220px;">
-                    <b>Người thực hiện</b><br>
-                    ${sigImgSrc ? `<img src="${sigImgSrc}" style="max-height: 50px; max-width: 100%; margin-top: 5px;"><br>` : '<div style="height:50px;"></div>'}
-                    <span style="font-size: 9.5pt; font-style: italic;">${nameSig}</span>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Gọi lệnh in trực tiếp không qua setTimeout để tránh bị trình duyệt chặn
-    try {
-        window.print();
-    } catch (e) {
-        alert("Trình duyệt không cho phép tự động mở hộp thoại in. Bạn vui lòng nhấn tổ hợp phím Ctrl + P (hoặc Cmd + P trên Mac) để in/xuất PDF.");
-    }
-}
 
         // Tự động khôi phục dữ liệu khi vừa vào trang
         window.onload = function() {
