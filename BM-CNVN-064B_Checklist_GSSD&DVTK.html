@@ -6,9 +6,9 @@
     <title>CHECKLIST GIÁM SÁT SÂN ĐỖ VÀ DỊCH VỤ TRÊN KHÔNG (BM-CNVN-064B)</title>
 
     <!-- ICON MÀN HÌNH CHÍNH (IOS / ANDROID / PC) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/gssd&dvtk.png">
-    <link rel="icon" type="image/png" sizes="180x180" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/gssd&dvtk.png">
-    <link rel="shortcut icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/gssd&dvtk.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/GSSD&DVTK.png">
+    <link rel="icon" type="image/png" sizes="180x180" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/GSSD&DVTK.png">
+    <link rel="shortcut icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/GSSD&DVTK.png">
 
     <style>
         * {
@@ -42,6 +42,20 @@
         .header-bar h1 {
             font-size: 14px;
             font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-status {
+            font-size: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
         }
 
         .header-bar .doc-code {
@@ -405,7 +419,10 @@
 
     <div class="header-bar">
         <h1>VNA CHECKLIST SÂN ĐỖ & DỊCH VỤ TRÊN KHÔNG</h1>
-        <span class="doc-code">BM-CNVN-064B</span>
+        <div class="header-right">
+            <span class="save-status" id="save-status">✓ Đã lưu</span>
+            <span class="doc-code">BM-CNVN-064B</span>
+        </div>
     </div>
 
     <div class="container">
@@ -429,11 +446,11 @@
             <div class="meta-grid" style="border-bottom: 1px dashed #d1d5db; padding-bottom: 12px; margin-bottom: 12px;">
                 <div class="form-group">
                     <label>Đơn vị chung:</label>
-                    <input type="text" id="donvi-input" placeholder="VD: Chi nhánh VN...">
+                    <input type="text" id="donvi-input" placeholder="VD: Chi nhánh VN..." oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>Vị trí công việc chung:</label>
-                    <input type="text" id="position-input" placeholder="VD: Giám sát sân đỗ">
+                    <input type="text" id="position-input" placeholder="VD: Giám sát sân đỗ" oninput="saveData()">
                 </div>
             </div>
 
@@ -446,11 +463,11 @@
                 <div class="meta-grid">
                     <div class="form-group">
                         <label>Số hiệu Chuyến bay 1 (*):</label>
-                        <input type="text" id="flight-input-1" placeholder="VD: VN123" oninput="updateTabLabel(1)">
+                        <input type="text" id="flight-input-1" placeholder="VD: VN123" oninput="updateTabLabel(1); saveData()">
                     </div>
                     <div class="form-group">
                         <label>Thời gian Chuyến 1:</label>
-                        <input type="text" id="time-input-1" placeholder="VD: 08:30 - 20/10/2026">
+                        <input type="text" id="time-input-1" placeholder="VD: 08:30 - 20/10/2026" oninput="saveData()">
                     </div>
                 </div>
                 <div id="checklist-container-1"></div>
@@ -461,11 +478,11 @@
                 <div class="meta-grid">
                     <div class="form-group">
                         <label>Số hiệu Chuyến bay 2:</label>
-                        <input type="text" id="flight-input-2" placeholder="VD: VN456" oninput="updateTabLabel(2)">
+                        <input type="text" id="flight-input-2" placeholder="VD: VN456" oninput="updateTabLabel(2); saveData()">
                     </div>
                     <div class="form-group">
                         <label>Thời gian Chuyến 2:</label>
-                        <input type="text" id="time-input-2" placeholder="VD: 12:15 - 20/10/2026">
+                        <input type="text" id="time-input-2" placeholder="VD: 12:15 - 20/10/2026" oninput="saveData()">
                     </div>
                 </div>
                 <div id="checklist-container-2"></div>
@@ -476,11 +493,11 @@
                 <div class="meta-grid">
                     <div class="form-group">
                         <label>Số hiệu Chuyến bay 3:</label>
-                        <input type="text" id="flight-input-3" placeholder="VD: VN789" oninput="updateTabLabel(3)">
+                        <input type="text" id="flight-input-3" placeholder="VD: VN789" oninput="updateTabLabel(3); saveData()">
                     </div>
                     <div class="form-group">
                         <label>Thời gian Chuyến 3:</label>
-                        <input type="text" id="time-input-3" placeholder="VD: 16:40 - 20/10/2026">
+                        <input type="text" id="time-input-3" placeholder="VD: 16:40 - 20/10/2026" oninput="saveData()">
                     </div>
                 </div>
                 <div id="checklist-container-3"></div>
@@ -493,7 +510,7 @@
                     <div class="sig-canvas-wrap" id="wrap-sig1">
                         <canvas id="canvas-sig1"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig1" placeholder="Nhập họ và tên người thực hiện...">
+                    <input type="text" class="sig-name-input" id="name-sig1" placeholder="Nhập họ và tên người thực hiện..." oninput="saveData()">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature('sig1')">Xóa / Ký lại</button>
                         <span id="sig1-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -512,6 +529,8 @@
     <div id="print-area"></div>
 
     <script>
+        const STORAGE_KEY = 'vna_064b_autosave_data_v1';
+
         const rawData = [
             { section: "1. CHUẨN BỊ TRƯỚC CHUYẾN BAY" },
             { id: "1.1", title: "Thu thập điện văn và xử lý thông tin trước chuyến bay (số lượng khách/hành lý đến có nối chuyến, khách đến có dịch vụ đặc biệt cần trợ giúp, các vấn đề bất thường…)", ref: "" },
@@ -551,8 +570,9 @@
         ];
 
         // Status state: state[tabIdx][itemId]
-        const state = { 1: {}, 2: {}, 3: {} };
-        const sigDrawn = { sig1: false };
+        let state = { 1: {}, 2: {}, 3: {} };
+        let sigDrawn = { sig1: false };
+        let sigDataUrl = { sig1: '' };
 
         function renderTabChecklist(tabIdx) {
             const container = document.getElementById(`checklist-container-${tabIdx}`);
@@ -613,11 +633,22 @@
         }
 
         function setStatus(tabIdx, id, val) {
-            state[tabIdx][id] = val;
+            if (state[tabIdx][id] === val) {
+                delete state[tabIdx][id];
+            } else {
+                state[tabIdx][id] = val;
+            }
+            updateItemUI(tabIdx, id);
+            saveData();
+        }
+
+        function updateItemUI(tabIdx, id) {
             const card = document.getElementById(`item-card-t${tabIdx}-${id}`);
+            if (!card) return;
             const passBtn = card.querySelector('.pass-btn');
             const failBtn = card.querySelector('.fail-btn');
             const naBtn = card.querySelector('.na-btn');
+            const val = state[tabIdx][id];
 
             card.classList.remove('checked-pass', 'checked-fail', 'checked-na');
             passBtn.classList.remove('active');
@@ -636,6 +667,93 @@
             }
         }
 
+        // TỰ ĐỘNG LƯU DỮ LIỆU VÀO LOCALSTORAGE
+        function saveData() {
+            const dataToSave = {
+                donvi: document.getElementById('donvi-input').value,
+                position: document.getElementById('position-input').value,
+                flights: {
+                    1: document.getElementById('flight-input-1').value,
+                    2: document.getElementById('flight-input-2').value,
+                    3: document.getElementById('flight-input-3').value
+                },
+                times: {
+                    1: document.getElementById('time-input-1').value,
+                    2: document.getElementById('time-input-2').value,
+                    3: document.getElementById('time-input-3').value
+                },
+                state: state,
+                nameSig1: document.getElementById('name-sig1').value,
+                sig1Img: sigDrawn.sig1 ? document.getElementById('canvas-sig1').toDataURL('image/png') : ''
+            };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = "✓ Đã lưu";
+            statusEl.style.opacity = "1";
+        }
+
+        // KHÔI PHỤC DỮ LIỆU TỪ LOCALSTORAGE
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.donvi !== undefined) document.getElementById('donvi-input').value = parsed.donvi;
+                if (parsed.position !== undefined) document.getElementById('position-input').value = parsed.position;
+
+                if (parsed.flights) {
+                    for (let i = 1; i <= 3; i++) {
+                        if (parsed.flights[i] !== undefined) {
+                            document.getElementById(`flight-input-${i}`).value = parsed.flights[i];
+                            updateTabLabel(i);
+                        }
+                    }
+                }
+
+                if (parsed.times) {
+                    for (let i = 1; i <= 3; i++) {
+                        if (parsed.times[i] !== undefined) {
+                            document.getElementById(`time-input-${i}`).value = parsed.times[i];
+                        }
+                    }
+                }
+
+                if (parsed.state) {
+                    state = parsed.state;
+                    [1, 2, 3].forEach(t => {
+                        if (state[t]) {
+                            Object.keys(state[t]).forEach(id => updateItemUI(t, id));
+                        }
+                    });
+                }
+
+                if (parsed.nameSig1 !== undefined) document.getElementById('name-sig1').value = parsed.nameSig1;
+
+                if (parsed.sig1Img) {
+                    sigDataUrl.sig1 = parsed.sig1Img;
+                    sigDrawn.sig1 = true;
+                    loadSignatureToCanvas('sig1', parsed.sig1Img);
+                }
+            } catch (e) {
+                console.error("Lỗi khi khôi phục dữ liệu:", e);
+            }
+        }
+
+        function loadSignatureToCanvas(id, dataUrl) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                document.getElementById(`${id}-status`).innerText = "✓ Đã ký";
+            };
+            img.src = dataUrl;
+        }
+
         function initSignatureCanvas(id) {
             const canvas = document.getElementById(`canvas-${id}`);
             const wrap = document.getElementById(`wrap-${id}`);
@@ -649,6 +767,10 @@
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '#002b66';
+
+                if (sigDataUrl[id]) {
+                    loadSignatureToCanvas(id, sigDataUrl[id]);
+                }
             }
 
             window.addEventListener('resize', resize);
@@ -680,7 +802,9 @@
             function stop() {
                 if (isDrawing) {
                     isDrawing = false;
+                    sigDataUrl[id] = canvas.toDataURL('image/png');
                     document.getElementById(`${id}-status`).innerText = "✓ Đã ký";
+                    saveData();
                 }
             }
 
@@ -701,11 +825,16 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById(`name-${id}`).value = '';
             sigDrawn[id] = false;
+            sigDataUrl[id] = '';
             document.getElementById(`${id}-status`).innerText = "";
+            saveData();
         }
 
         function resetForm() {
-            if (confirm("Làm mới toàn bộ dữ liệu 3 chuyến bay?")) location.reload();
+            if (confirm("Làm mới sẽ XÓA HẾT toàn bộ dữ liệu 3 chuyến bay đã lưu. Bạn có chắc chắn không?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
         }
 
         function exportToPDF() {
@@ -743,7 +872,7 @@
                     `;
                 } else {
                     const getMark = (tabIdx) => {
-                        const val = state[tabIdx][item.id];
+                        const val = state[tabIdx] ? state[tabIdx][item.id] : undefined;
                         if (val === 'pass') return '<b>Y</b>';
                         if (val === 'fail') return '<b>N</b>';
                         if (val === 'na') return '<b>NA</b>';
@@ -752,12 +881,12 @@
 
                     tableRowsHTML += `
                         <tr>
-                            <td class="text-center" style="font-size: 8.5pt;">${item.id}</td>
+                            <td class="text-center" style="font-size: 8.5pt; text-align: center;">${item.id}</td>
                             <td style="font-size: 8.5pt;">${item.title}</td>
                             <td style="font-size: 8pt; text-align: center;">${item.ref || ''}</td>
-                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(1)}</td>
-                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(2)}</td>
-                            <td class="text-center" style="font-size: 8.5pt; width: 45px;">${getMark(3)}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px; text-align: center;">${getMark(1)}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px; text-align: center;">${getMark(2)}</td>
+                            <td class="text-center" style="font-size: 8.5pt; width: 45px; text-align: center;">${getMark(3)}</td>
                         </tr>
                     `;
                 }
@@ -831,6 +960,11 @@
                 }
             }, 150);
         }
+
+        // Tự động khôi phục dữ liệu khi vừa vào trang
+        window.onload = function() {
+            loadData();
+        };
     </script>
 </body>
 </html>
