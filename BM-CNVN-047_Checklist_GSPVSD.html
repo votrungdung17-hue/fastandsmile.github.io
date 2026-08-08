@@ -43,6 +43,14 @@
             font-weight: 700;
         }
 
+        .save-status {
+            font-size: 11px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
         .container {
             max-width: 850px;
             margin: 0 auto;
@@ -348,6 +356,7 @@
 
     <div class="header-bar">
         <h1>GIÁM SÁT PHỤC VỤ SÂN ĐỖ</h1>
+        <span class="save-status" id="save-status">✓ Đã tự động lưu</span>
     </div>
 
     <div class="container">
@@ -358,19 +367,19 @@
             <div class="meta-grid">
                 <div class="form-group">
                     <label>Chuyến bay:</label>
-                    <input type="text" id="flight-input" placeholder="VD: VN123">
+                    <input type="text" id="flight-input" placeholder="VD: VN123" oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>Hành trình:</label>
-                    <input type="text" id="route-input" placeholder="VD: HAN-SGN">
+                    <input type="text" id="route-input" placeholder="VD: HAN-SGN" oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>A/C (Tàu bay):</label>
-                    <input type="text" id="ac-input" placeholder="VD: A321 / VN-A888">
+                    <input type="text" id="ac-input" placeholder="VD: A321 / VN-A888" oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>Ngày:</label>
-                    <input type="date" id="date-input">
+                    <input type="date" id="date-input" oninput="saveData()">
                 </div>
             </div>
 
@@ -378,7 +387,7 @@
 
             <div class="evaluation-box">
                 <label>ĐÁNH GIÁ:</label>
-                <textarea id="eval-input" placeholder="Nhập đánh giá chung..."></textarea>
+                <textarea id="eval-input" placeholder="Nhập đánh giá chung..." oninput="saveData()"></textarea>
             </div>
 
             <div class="signature-section">
@@ -387,7 +396,7 @@
                     <div class="sig-canvas-wrap" id="wrap-sig">
                         <canvas id="canvas-sig"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig" placeholder="Họ và tên người ký...">
+                    <input type="text" class="sig-name-input" id="name-sig" placeholder="Họ và tên người ký..." oninput="saveData()">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature()">Xóa / Ký lại</button>
                         <span id="sig-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -406,6 +415,8 @@
     <div id="print-area"></div>
 
     <script>
+        const STORAGE_KEY = 'san_do_checklist_data_v1';
+
         const rawData = [
             { section: "QUY ĐỊNH CHUNG" },
             { id: 1, title: "Kiểm tra tình trạng ULD trước khi sử dụng để chất xếp hành lý, hàng hóa. Kiểm tra, ghi nhận tình trạng ULD trước khi chất và dỡ ra khỏi hầm hàng tàu bay" },
@@ -458,12 +469,12 @@
             { id: 36, title: "Không chở hành lý, hàng hóa, bưu kiện trên cabin xe." }
         ];
 
-        const state = {};
+        let state = {};
+        let notes = {};
         let sigDrawn = false;
+        let sigDataUrl = '';
 
-        // Set ngày hiện tại mặc định
-        document.getElementById('date-input').valueAsDate = new Date();
-
+        // Khởi tạo giao diện danh sách
         const container = document.getElementById('checklist-container');
         let currentSectionCount = 0;
 
@@ -493,17 +504,30 @@
                             ✗ Không
                         </button>
                     </div>
-                    <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú...">
+                    <input type="text" class="note-input" id="note-${item.id}" placeholder="Ghi chú..." oninput="onNoteInput(${item.id})">
                 `;
                 container.appendChild(card);
             }
         });
 
+        // Set ngày hiện tại mặc định
+        document.getElementById('date-input').valueAsDate = new Date();
+
         function setStatus(id, val) {
-            state[id] = val;
+            if (state[id] === val) {
+                delete state[id];
+            } else {
+                state[id] = val;
+            }
+            updateItemUI(id);
+            saveData();
+        }
+
+        function updateItemUI(id) {
             const card = document.getElementById(`item-card-${id}`);
             const yesBtn = card.querySelector('.yes-btn');
             const noBtn = card.querySelector('.no-btn');
+            const val = state[id];
 
             card.classList.remove('checked-yes', 'checked-no');
             yesBtn.classList.remove('active');
@@ -516,6 +540,81 @@
                 card.classList.add('checked-no');
                 noBtn.classList.add('active');
             }
+        }
+
+        function onNoteInput(id) {
+            notes[id] = document.getElementById(`note-${id}`).value;
+            saveData();
+        }
+
+        // TỰ ĐỘNG LƯU DỮ LIỆU
+        function saveData() {
+            const dataToSave = {
+                flight: document.getElementById('flight-input').value,
+                route: document.getElementById('route-input').value,
+                ac: document.getElementById('ac-input').value,
+                date: document.getElementById('date-input').value,
+                evalText: document.getElementById('eval-input').value,
+                nameSig: document.getElementById('name-sig').value,
+                state: state,
+                notes: notes,
+                sigDataUrl: sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : ''
+            };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = "✓ Đã tự động lưu";
+            statusEl.style.opacity = "1";
+        }
+
+        // KHÔI PHỤC DỮ LIỆU TỪ LOCALSTORAGE
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.flight !== undefined) document.getElementById('flight-input').value = parsed.flight;
+                if (parsed.route !== undefined) document.getElementById('route-input').value = parsed.route;
+                if (parsed.ac !== undefined) document.getElementById('ac-input').value = parsed.ac;
+                if (parsed.date !== undefined && parsed.date !== '') document.getElementById('date-input').value = parsed.date;
+                if (parsed.evalText !== undefined) document.getElementById('eval-input').value = parsed.evalText;
+                if (parsed.nameSig !== undefined) document.getElementById('name-sig').value = parsed.nameSig;
+
+                if (parsed.state) {
+                    state = parsed.state;
+                    Object.keys(state).forEach(id => updateItemUI(id));
+                }
+
+                if (parsed.notes) {
+                    notes = parsed.notes;
+                    Object.keys(notes).forEach(id => {
+                        const input = document.getElementById(`note-${id}`);
+                        if (input) input.value = notes[id];
+                    });
+                }
+
+                if (parsed.sigDataUrl) {
+                    sigDataUrl = parsed.sigDataUrl;
+                    sigDrawn = true;
+                    loadSignatureToCanvas(parsed.sigDataUrl);
+                }
+            } catch (e) {
+                console.error("Lỗi khôi phục dữ liệu:", e);
+            }
+        }
+
+        function loadSignatureToCanvas(dataUrl) {
+            const canvas = document.getElementById('canvas-sig');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                document.getElementById('sig-status').innerText = "✓ Đã ký";
+            };
+            img.src = dataUrl;
         }
 
         function initSignatureCanvas() {
@@ -531,6 +630,10 @@
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '#002b66';
+
+                if (sigDataUrl) {
+                    loadSignatureToCanvas(sigDataUrl);
+                }
             }
 
             window.addEventListener('resize', resize);
@@ -562,7 +665,9 @@
             function stop() {
                 if (isDrawing) {
                     isDrawing = false;
+                    sigDataUrl = canvas.toDataURL('image/png');
                     document.getElementById('sig-status').innerText = "✓ Đã ký";
+                    saveData();
                 }
             }
 
@@ -583,11 +688,16 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById('name-sig').value = '';
             sigDrawn = false;
+            sigDataUrl = '';
             document.getElementById('sig-status').innerText = "";
+            saveData();
         }
 
         function resetForm() {
-            if (confirm("Làm mới toàn bộ bảng giám sát?")) location.reload();
+            if (confirm("Làm mới sẽ XÓA HẾT toàn bộ dữ liệu đã lưu. Bạn có chắc chắn không?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
         }
 
         function formatDate(dateStr) {
@@ -684,6 +794,11 @@
                 }
             }, 150);
         }
+
+        // Tự động khôi phục dữ liệu khi vừa vào trang
+        window.onload = function() {
+            loadData();
+        };
     </script>
 </body>
 </html>
