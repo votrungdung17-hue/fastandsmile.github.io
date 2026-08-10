@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHECKLIST KIỂM SOÁT ĐỐI TƯỢNG TIẾP CẬN VÀ LÊN TÀU BAY</title>
+
+    <!-- Icon / Favicon -->
+    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/LTB.png">
+    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/LTB.png">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #1f2937;
+            line-height: 1.35;
+            padding-bottom: 90px;
+        }
+
+        .header-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h1 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .save-status {
+            font-size: 11px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        .document-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        /* Header logo/tên công ty */
+        .org-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 12px;
+            color: #374151;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e5e7eb;
+            margin-bottom: 12px;
+        }
+
+        .org-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.3;
+            color: #0054a6;
+        }
+
+        .doc-title {
+            text-align: center;
+            color: #0056b3;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0 16px 0;
+            line-height: 1.3;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-card.checked-yes {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .item-card.checked-no {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .item-no {
+            background: #0056b3;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #111827;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .status-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #4b5563;
+            transition: all 0.15s ease;
+        }
+
+        .opt-btn.yes-btn.active { background: #10b981; color: white; border-color: #059669; }
+        .opt-btn.no-btn.active { background: #ef4444; color: white; border-color: #dc2626; }
+
+        .name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+	    text-transform: uppercase;
+        }
+
+        .note-box {
+            margin-top: 16px;
+            background: #fffbe3;
+            border: 1px solid #f2e394;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .note-box label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #856404;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .note-box textarea {
+            width: 100%;
+            height: 70px;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12.5px;
+            resize: vertical;
+        }
+
+        .signature-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .sig-box {
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            background: #fafafa;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .sig-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .sig-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sig-name-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            background: #ffffff;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .header-bar, .container, .bottom-bar {
+                display: none !important;
+            }
+
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>KIỂM SOÁT ĐỐI TƯỢNG TIẾP CẬN</h1>
+        <span class="save-status" id="save-status">✓ Đã tự động lưu</span>
+    </div>
+
+    <div class="container">
+        <div class="document-card">
+            
+            <div class="org-header">
+                <div class="org-name">
+                    TCT HÀNG KHÔNG VIỆT NAM<br>
+		    CHI NHÁNH KHU VỰC VIỆT NAM
+                </div>
+            </div>
+
+            <div class="doc-title">CHECKLIST KIỂM SOÁT ĐỐI TƯỢNG TIẾP CẬN VÀ LÊN TÀU BAY</div>
+
+            <div class="meta-grid">
+                <div class="form-group">
+                    <label>Số hiệu chuyến bay:</label>
+                    <input type="text" id="flight-input" placeholder="VD: VN123" oninput="saveData()">
+                </div>
+                <div class="form-group">
+                    <label>Ngày bay:</label>
+                    <input type="date" id="date-input" oninput="saveData()">
+                </div>
+            </div>
+
+            <div id="checklist-container"></div>
+
+            <div class="note-box">
+                <label>Ghi chú / Giải trình (Nếu có):</label>
+                <textarea id="explanation-input" placeholder="Những đối tượng KHÔNG tham gia thực hiện nhiệm vụ nhưng CÓ TÊN trong checklist, người kiểm soát vui lòng giải trình bên dưới hoặc lập biên bản đính kèm..." oninput="saveData()"></textarea>
+            </div>
+
+            <div class="signature-section">
+                <div class="sig-box">
+                    <div class="sig-title">NGƯỜI KIỂM SOÁT</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig">
+                        <canvas id="canvas-sig"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig" placeholder="Họ và tên người ký..." oninput="saveData()">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature()">Xóa / Ký lại</button>
+                        <span id="sig-status" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
+        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF / In</button>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        const STORAGE_KEY = 'checklist_tiep_can_data_v1';
+
+        const rawData = [
+            { id: 1, title: "Nhân viên kỹ thuật" },
+            { id: 2, title: "Nhân viên cung ứng, giao nhận suất ăn" },
+            { id: 3, title: "Nhân viên tài liệu, chất xếp, nhân viên điều phối" },
+            { id: 4, title: "Nhân viên cấp phát thu hồi đồ vật phục vụ trên tàu bay và nhân viên vệ sinh tàu bay" },
+            { id: 5, title: "Nhân viên chất xếp hàng hóa (chỉ được phép lên buồng hàng)" },
+            { id: 6, title: "Nhân viên phục vụ hành khách (lên tàu bay xử lý trường hợp bất thường khi có sự đồng ý và chịu sự giám sát của tổ bay)" },
+            { id: 7, title: "Đối tượng Khác" }
+        ];
+
+        let state = {};
+        let nameSubjects = {};
+        let sigDrawn = false;
+        let sigDataUrl = '';
+
+        const container = document.getElementById('checklist-container');
+
+        rawData.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.id = `item-card-${item.id}`;
+            
+            card.innerHTML = `
+                <div class="item-header">
+                    <span class="item-no">${item.id}</span>
+                    <div class="item-title">${item.title}</div>
+                </div>
+                <div class="status-options">
+                    <button type="button" class="opt-btn yes-btn" onclick="setStatus(${item.id}, 'yes')">
+                        ✓ Có
+                    </button>
+                    <button type="button" class="opt-btn no-btn" onclick="setStatus(${item.id}, 'no')">
+                        ✗ Không
+                    </button>
+                </div>
+                <input type="text" class="name-input" id="name-sub-${item.id}" placeholder="Tên đối tượng..." oninput="onNameInput(${item.id})">
+            `;
+            container.appendChild(card);
+        });
+
+        document.getElementById('date-input').valueAsDate = new Date();
+
+        function setStatus(id, val) {
+            if (state[id] === val) {
+                delete state[id];
+            } else {
+                state[id] = val;
+            }
+            updateItemUI(id);
+            saveData();
+        }
+
+        function updateItemUI(id) {
+            const card = document.getElementById(`item-card-${id}`);
+            const yesBtn = card.querySelector('.yes-btn');
+            const noBtn = card.querySelector('.no-btn');
+            const val = state[id];
+
+            card.classList.remove('checked-yes', 'checked-no');
+            yesBtn.classList.remove('active');
+            noBtn.classList.remove('active');
+
+            if (val === 'yes') {
+                card.classList.add('checked-yes');
+                yesBtn.classList.add('active');
+            } else if (val === 'no') {
+                card.classList.add('checked-no');
+                noBtn.classList.add('active');
+            }
+        }
+
+function onNameInput(id) {
+    const inputEl = document.getElementById(`name-sub-${id}`);
+    inputEl.value = inputEl.value.toUpperCase(); // Ép giá trị ô nhập thành chữ HOA
+    nameSubjects[id] = inputEl.value;
+    saveData();
+}
+
+        function saveData() {
+            const dataToSave = {
+                flight: document.getElementById('flight-input').value,
+                date: document.getElementById('date-input').value,
+                explanation: document.getElementById('explanation-input').value,
+                nameSig: document.getElementById('name-sig').value,
+                state: state,
+                nameSubjects: nameSubjects,
+                sigDataUrl: sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : ''
+            };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = "✓ Đã tự động lưu";
+            statusEl.style.opacity = "1";
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.flight !== undefined) document.getElementById('flight-input').value = parsed.flight;
+                if (parsed.date !== undefined && parsed.date !== '') document.getElementById('date-input').value = parsed.date;
+                if (parsed.explanation !== undefined) document.getElementById('explanation-input').value = parsed.explanation;
+                if (parsed.nameSig !== undefined) document.getElementById('name-sig').value = parsed.nameSig;
+
+                if (parsed.state) {
+                    state = parsed.state;
+                    Object.keys(state).forEach(id => updateItemUI(id));
+                }
+
+                if (parsed.nameSubjects) {
+                    nameSubjects = parsed.nameSubjects;
+                    Object.keys(nameSubjects).forEach(id => {
+                        const input = document.getElementById(`name-sub-${id}`);
+                        if (input) input.value = nameSubjects[id];
+                    });
+                }
+
+                if (parsed.sigDataUrl) {
+                    sigDataUrl = parsed.sigDataUrl;
+                    sigDrawn = true;
+                    loadSignatureToCanvas(parsed.sigDataUrl);
+                }
+            } catch (e) {
+                console.error("Lỗi khôi phục dữ liệu:", e);
+            }
+        }
+
+        function loadSignatureToCanvas(dataUrl) {
+            const canvas = document.getElementById('canvas-sig');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                document.getElementById('sig-status').innerText = "✓ Đã ký";
+            };
+            img.src = dataUrl;
+        }
+
+        function initSignatureCanvas() {
+            const canvas = document.getElementById('canvas-sig');
+            const wrap = document.getElementById('wrap-sig');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            function resize() {
+                const rect = wrap.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#002b66';
+
+                if (sigDataUrl) {
+                    loadSignatureToCanvas(sigDataUrl);
+                }
+            }
+
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 200);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                isDrawing = true;
+                sigDrawn = true;
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+            }
+
+            function move(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            }
+
+            function stop() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    sigDataUrl = canvas.toDataURL('image/png');
+                    document.getElementById('sig-status').innerText = "✓ Đã ký";
+                    saveData();
+                }
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+        }
+
+        initSignatureCanvas();
+
+        function clearSignature() {
+            const canvas = document.getElementById('canvas-sig');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('name-sig').value = '';
+            sigDrawn = false;
+            sigDataUrl = '';
+            document.getElementById('sig-status').innerText = "";
+            saveData();
+        }
+
+        function resetForm() {
+            if (confirm("Làm mới sẽ XÓA HẾT toàn bộ dữ liệu đã lưu. Bạn có chắc chắn không?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        function formatDate(dateStr) {
+            if(!dateStr) return '……………………..…..';
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function exportToPDF() {
+            const flight = document.getElementById('flight-input').value || '………..……….....…';
+            const date = formatDate(document.getElementById('date-input').value);
+            const explanation = document.getElementById('explanation-input').value || '';
+            const nameSig = document.getElementById('name-sig').value || '';
+
+            let sigImgSrc = sigDrawn ? document.getElementById('canvas-sig').toDataURL('image/png') : '';
+
+            let rowsHTML = '';
+            
+            rawData.forEach(item => {
+                const nameVal = document.getElementById(`name-sub-${item.id}`).value || '';
+                rowsHTML += `
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">${item.id}</td>
+                        <td style="vertical-align: middle; padding: 6px 8px;">${item.title}</td>
+                        <td style="text-align: center; vertical-align: middle; width: 45px;">${state[item.id] === 'yes' ? '<b>X</b>' : ''}</td>
+                        <td style="text-align: center; vertical-align: middle; width: 55px;">${state[item.id] === 'no' ? '<b>X</b>' : ''}</td>
+                        <td style="vertical-align: middle; padding: 6px 8px;">${nameVal}</td>
+                    </tr>
+                `;
+            });
+
+            const printContainer = document.getElementById('print-area');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 11pt; line-height: 1.3;">
+                    
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #0054a6; font-weight: bold; font-size: 11pt; text-transform: uppercase;">TCT HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
+                    </div>
+
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-top: 15px; margin-bottom: 12px; text-transform: uppercase;">
+                        CHECKLIST KIỂM SOÁT ĐỐI TƯỢNG TIẾP CẬN VÀ LÊN TÀU BAY
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 20px; font-size: 11pt;">
+                        <span>Số hiệu chuyến bay : <b>${flight}</b></span>
+                        <span style="margin-left: 20px;">ngày bay : <b>${date}</b></span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px;" border="1">
+                        <thead>
+                            <tr style="background-color: #f8f9fa; text-align: center; font-weight: bold;">
+                                <th rowspan="2" style="width: 35px; padding: 6px;">STT</th>
+                                <th rowspan="2" style="padding: 6px; width: 45%;">ĐỐI TƯỢNG</th>
+                                <th colspan="2" style="padding: 6px;">THAM GIA THỰC HIỆN NHIỆM VỤ</th>
+                                <th rowspan="2" style="width: 28%; padding: 6px;">TÊN ĐỐI TƯỢNG</th>
+                            </tr>
+                            <tr style="background-color: #f8f9fa; text-align: center; font-weight: bold;">
+                                <th style="width: 45px; padding: 6px;">CÓ</th>
+                                <th style="width: 55px; padding: 6px;">KHÔNG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 15px; font-size: 10pt;">
+                        <span style="font-weight: bold; font-style: italic;">Ghi chú:</span> 
+                        <span style="font-style: italic;">Những đối tượng KHÔNG tham gia thực hiện nhiệm vụ nhưng CÓ TÊN trong checklist, người kiểm soát vui lòng giải trình bên dưới hoặc lập biên bản đính kèm.</span>
+                        <div style="min-height: 50px; border-bottom: 1px dotted #000; padding-top: 6px; font-style: italic;">
+                            ${explanation.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px; display: flex; justify-content: flex-end; text-align: center; font-size: 11pt; page-break-inside: avoid;">
+                        <div style="width: 220px;">
+                            <b>NGƯỜI KIỂM SOÁT</b><br>
+                            ${sigImgSrc ? `<img src="${sigImgSrc}" style="max-height: 60px; max-width: 100%; margin-top: 8px;"><br>` : '<div style="height:60px;"></div>'}
+                            <span style="font-size: 10pt; font-style: italic;">${nameSig}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            try {
+                window.print();
+            } catch (e) {
+                alert("Trình duyệt không cho phép tự động mở hộp thoại in. Bạn vui lòng nhấn tổ hợp phím Ctrl + P (hoặc Cmd + P trên Mac) để in/xuất PDF.");
+            }
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
