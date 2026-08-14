@@ -6,8 +6,8 @@
     <title>BIÊN BẢN BẤT THƯỜNG</title>
 
     <!-- Icon / Favicon -->
-    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/BBVV.png">
-    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/BBVV.png">
+    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/bbbt_1.png">
+    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/bbbt_1.png">
     
     <style>
         * {
@@ -15,6 +15,7 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            text-transform: uppercase; /* Ép toàn bộ văn bản và chữ gõ vào thành VIẾT HOA */
         }
 
         body {
@@ -65,7 +66,6 @@
             margin-bottom: 16px;
         }
 
-        /* Header logo/tên công ty */
         .org-header {
             display: flex;
             justify-content: space-between;
@@ -79,7 +79,6 @@
 
         .org-name {
             font-weight: bold;
-            text-transform: uppercase;
             line-height: 1.3;
             color: #0054a6;
         }
@@ -89,7 +88,6 @@
             color: #0056b3;
             font-size: 18px;
             font-weight: 800;
-            text-transform: uppercase;
             margin: 15px 0 16px 0;
             line-height: 1.3;
         }
@@ -102,7 +100,6 @@
             margin-bottom: 10px;
             border-left: 3px solid #0056b3;
             padding-left: 8px;
-            text-transform: uppercase;
         }
 
         .meta-grid {
@@ -112,15 +109,8 @@
             margin-bottom: 12px;
         }
 
-        .meta-grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
         @media (max-width: 600px) {
-            .meta-grid, .meta-grid-3 {
+            .meta-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -137,22 +127,19 @@
             margin-bottom: 4px;
         }
 
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             padding: 8px 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 13px;
             outline: none;
             background-color: #fff;
+            text-transform: uppercase;
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: #0056b3;
             box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.15);
-        }
-
-        .input-uppercase {
-            text-transform: uppercase;
         }
 
         .note-box {
@@ -185,8 +172,8 @@
         .signature-section {
             margin-top: 24px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
         }
 
         @media (max-width: 600px) {
@@ -198,13 +185,13 @@
         .sig-box {
             border: 1px dashed #9ca3af;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             background: #fafafa;
         }
 
         .sig-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #374151;
             margin-bottom: 8px;
@@ -213,7 +200,7 @@
         .sig-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 120px;
+            height: 110px;
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -229,14 +216,13 @@
 
         .sig-name-input {
             width: 100%;
-            padding: 6px 10px;
+            padding: 6px 8px;
             font-size: 12px;
             border: 1px solid #d1d5db;
             border-radius: 4px;
             margin-bottom: 8px;
             text-align: center;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
         .sig-actions {
@@ -246,7 +232,7 @@
         }
 
         .btn-sm {
-            padding: 5px 10px;
+            padding: 4px 8px;
             font-size: 11px;
             border-radius: 4px;
             border: 1px solid #d1d5db;
@@ -293,6 +279,12 @@
 
         #print-area {
             display: none;
+            text-transform: uppercase;
+        }
+
+        /* Class miễn trừ uppercase cho phần Mã số / Lần ban hành */
+        .no-uppercase {
+            text-transform: none !important;
         }
 
         @media print {
@@ -316,7 +308,7 @@
 
             @page {
                 size: A4 portrait;
-                margin: 12mm 15mm;
+                margin: 15mm 15mm 15mm 15mm;
             }
         }
     </style>
@@ -324,8 +316,8 @@
 <body>
 
     <div class="header-bar">
-        <h1>BIÊN BẢN BẤT THƯỜNG</h1>
-        <span class="save-status" id="save-status">✓ Đã tự động lưu</span>
+        <h1>BIÊN BẢN BẤT THƯỜNG (BM-CNVN-045)</h1>
+        <span class="save-status" id="save-status">✓ ĐÃ TỰ ĐỘNG LƯU</span>
     </div>
 
     <div class="container">
@@ -340,84 +332,103 @@
 
             <div class="doc-title">BIÊN BẢN BẤT THƯỜNG</div>
 
-            <div class="section-title">THÔNG TIN CHUYẾN BAY & ĐỊA ĐIỂM</div>
-            <div class="meta-grid-3">
+            <div class="section-title">THÔNG TIN SỰ VIỆC</div>
+            <div class="meta-grid">
                 <div class="form-group">
-                    <label>Số hiệu chuyến bay:</label>
-                    <input type="text" id="flight-input" class="input-uppercase" placeholder="VD: VN123" oninput="saveData()">
-                </div>
-                <div class="form-group">
-                    <label>Ngày bay:</label>
+                    <label>NGÀY XẢY RA:</label>
                     <input type="date" id="date-input" oninput="saveData()">
                 </div>
                 <div class="form-group">
-                    <label>Hành trình / Chặng bay:</label>
-                    <input type="text" id="route-input" class="input-uppercase" placeholder="VD: SGN-HAN" oninput="saveData()">
-                </div>
-            </div>
-
-            <div class="meta-grid">
-                <div class="form-group">
-                    <label>Thời gian phát hiện / Xảy ra:</label>
+                    <label>THỜI GIAN (GIỜ/PHÚT):</label>
                     <input type="time" id="time-input" oninput="saveData()">
                 </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>ĐỊA ĐIỂM XẢY RA SỰ CỐ:</label>
+                <input type="text" id="location-input" placeholder="VD: CỬA KHỞI HÀNH, SÂN ĐỖ..." oninput="saveData()">
+            </div>
+
+            <div class="section-title">THÀNH PHẦN THAM GIA (CÙNG NHAU LẬP BIÊN BẢN)</div>
+            
+            <div class="meta-grid" style="margin-bottom: 8px;">
                 <div class="form-group">
-                    <label>Địa điểm xảy ra sự cố:</label>
-                    <input type="text" id="location-input" placeholder="VD: Sân đỗ / Cửa khởi hành / Trên tàu bay" oninput="saveData()">
+                    <label>1. ÔNG/BÀ (HỌ TÊN): </label>
+                    <input type="text" id="person-1" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
+                </div>
+                <div class="form-group">
+                    <label>ĐẠI DIỆN: </label>
+                    <input type="text" id="rep-1" placeholder="VD: VNA / ĐƠN VỊ..." oninput="saveData()">
                 </div>
             </div>
 
-            <div class="section-title">PHÂN LOẠI SỰ CỐ / BẤT THƯỜNG</div>
-            <div class="meta-grid">
+            <div class="meta-grid" style="margin-bottom: 8px;">
                 <div class="form-group">
-                    <label>Loại bất thường:</label>
-                    <select id="type-input" onchange="saveData()">
-                        <option value="Hành khách / Hành lý">Hành khách / Hành lý</option>
-                        <option value="Hàng hóa / Bưu gửi">Hàng hóa / Bưu gửi</option>
-                        <option value="An ninh / An toàn">An ninh / An toàn hàng không</option>
-                        <option value="Kỹ thuật / Tàu bay">Kỹ thuật / Tàu bay</option>
-                        <option value="Khác">Khác</option>
-                    </select>
+                    <label>2. ÔNG/BÀ (HỌ TÊN):</label>
+                    <input type="text" id="person-2" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
                 </div>
                 <div class="form-group">
-                    <label>Đối tượng liên quan:</label>
-                    <input type="text" id="subject-input" class="input-uppercase" placeholder="VD: Hành khách A / Thùng hàng X" oninput="saveData()">
+                    <label>ĐẠI DIỆN:</label>
+                    <input type="text" id="rep-2" placeholder="VD: BÊN LIÊN QUAN..." oninput="saveData()">
                 </div>
             </div>
 
-            <div class="section-title">NỘI DUNG SỰ VIỆC & BIỆN PHÁP XỬ LÝ</div>
+            <div class="meta-grid" style="margin-bottom: 8px;">
+                <div class="form-group">
+                    <label>3. ÔNG/BÀ (HỌ TÊN):</label>
+                    <input type="text" id="person-3" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
+                </div>
+                <div class="form-group">
+                    <label>ĐẠI DIỆN:</label>
+                    <input type="text" id="rep-3" placeholder="VD: NGƯỜI LÀM CHỨNG..." oninput="saveData()">
+                </div>
+            </div>
+
+            <div class="section-title">NỘI DUNG XÁC NHẬN SỰ VIỆC</div>
             <div class="note-box">
-                <label>Mô tả chi tiết sự việc bất thường:</label>
-                <textarea id="description-input" placeholder="Nhập chi tiết diễn biến sự việc bất thường xảy ra..." oninput="saveData()"></textarea>
+                <label>MÔ TẢ CHI TIẾT NỘI DUNG SỰ VIỆC:</label>
+                <textarea id="description-input" style="height: 120px;" placeholder="NHẬP CHI TIẾT DIỄN BIẾN SỰ VIỆC BẤT THƯỜNG XẢY RA..." oninput="saveData()"></textarea>
             </div>
 
-            <div class="note-box">
-                <label>Biện pháp xử lý đã áp dụng & Tình trạng hiện tại:</label>
-                <textarea id="action-input" placeholder="Nhập các biện pháp đã xử lý tại chỗ, tình trạng sau xử lý..." oninput="saveData()"></textarea>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>BIÊN BẢN NÀY LÀ BẢN ĐIỆN TỬ, ĐƯỢC LẬP CÓ SỰ CHỨNG KIẾN VÀ KÝ XÁC NHẬN CỦA ĐẠI DIỆN HỢP PHÁP CÁC BÊN LIÊN QUAN.</label>
             </div>
 
+            <div class="section-title">CHỮ KÝ CÁC BÊN</div>
             <div class="signature-section">
                 <div class="sig-box">
-                    <div class="sig-title">NGƯỜI LẬP BIÊN BẢN</div>
+                    <div class="sig-title">ĐẠI DIỆN VNA</div>
                     <div class="sig-canvas-wrap" id="wrap-sig-1">
                         <canvas id="canvas-sig-1"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig-1" placeholder="Họ và tên..." oninput="saveData()">
+                    <input type="text" class="sig-name-input" id="name-sig-1" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
                     <div class="sig-actions">
-                        <button class="btn-sm" onclick="clearSignature(1)">Xóa / Ký lại</button>
+                        <button class="btn-sm" onclick="clearSignature(1)">XÓA / KÝ LẠI</button>
                         <span id="sig-status-1" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
                     </div>
                 </div>
 
                 <div class="sig-box">
-                    <div class="sig-title">ĐẠI DIỆN BÊN LIÊN QUAN / XÁC NHẬN</div>
+                    <div class="sig-title">ĐẠI DIỆN CÁC BÊN LIÊN QUAN</div>
                     <div class="sig-canvas-wrap" id="wrap-sig-2">
                         <canvas id="canvas-sig-2"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig-2" placeholder="Họ và tên..." oninput="saveData()">
+                    <input type="text" class="sig-name-input" id="name-sig-2" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
                     <div class="sig-actions">
-                        <button class="btn-sm" onclick="clearSignature(2)">Xóa / Ký lại</button>
+                        <button class="btn-sm" onclick="clearSignature(2)">XÓA / KÝ LẠI</button>
                         <span id="sig-status-2" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                    </div>
+                </div>
+
+                <div class="sig-box">
+                    <div class="sig-title">NGƯỜI LÀM CHỨNG</div>
+                    <div class="sig-canvas-wrap" id="wrap-sig-3">
+                        <canvas id="canvas-sig-3"></canvas>
+                    </div>
+                    <input type="text" class="sig-name-input" id="name-sig-3" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
+                    <div class="sig-actions">
+                        <button class="btn-sm" onclick="clearSignature(3)">XÓA / KÝ LẠI</button>
+                        <span id="sig-status-3" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
                     </div>
                 </div>
             </div>
@@ -426,43 +437,44 @@
     </div>
 
     <div class="bottom-bar">
-        <button class="btn-secondary" onclick="resetForm()">Làm mới</button>
-        <button class="btn-primary" onclick="exportToPDF()">Xuất PDF / In</button>
+        <button class="btn-secondary" onclick="resetForm()">LÀM MỚI</button>
+        <button class="btn-primary" onclick="exportToPDF()">XUẤT PDF / IN</button>
     </div>
 
     <div id="print-area"></div>
 
     <script>
-        const STORAGE_KEY = 'bien_ban_bat_thuong_data_v1';
+        const STORAGE_KEY = 'bien_ban_bat_thuong_official_data';
 
-        let sigDrawn1 = false;
-        let sigDataUrl1 = '';
-        let sigDrawn2 = false;
-        let sigDataUrl2 = '';
+        let sigDrawn = [false, false, false, false];
+        let sigDataUrl = ['', '', '', ''];
 
         document.getElementById('date-input').valueAsDate = new Date();
 
         function saveData() {
             const dataToSave = {
-                flight: document.getElementById('flight-input').value,
                 date: document.getElementById('date-input').value,
-                route: document.getElementById('route-input').value,
                 time: document.getElementById('time-input').value,
                 location: document.getElementById('location-input').value,
-                type: document.getElementById('type-input').value,
-                subject: document.getElementById('subject-input').value,
+                person1: document.getElementById('person-1').value,
+                rep1: document.getElementById('rep-1').value,
+                person2: document.getElementById('person-2').value,
+                rep2: document.getElementById('rep-2').value,
+                person3: document.getElementById('person-3').value,
+                rep3: document.getElementById('rep-3').value,
                 description: document.getElementById('description-input').value,
-                action: document.getElementById('action-input').value,
                 nameSig1: document.getElementById('name-sig-1').value,
                 nameSig2: document.getElementById('name-sig-2').value,
-                sigDataUrl1: sigDrawn1 ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '',
-                sigDataUrl2: sigDrawn2 ? document.getElementById('canvas-sig-2').toDataURL('image/png') : ''
+                nameSig3: document.getElementById('name-sig-3').value,
+                sigDataUrl1: sigDrawn[1] ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '',
+                sigDataUrl2: sigDrawn[2] ? document.getElementById('canvas-sig-2').toDataURL('image/png') : '',
+                sigDataUrl3: sigDrawn[3] ? document.getElementById('canvas-sig-3').toDataURL('image/png') : ''
             };
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
             
             const statusEl = document.getElementById('save-status');
-            statusEl.innerText = "✓ Đã tự động lưu";
+            statusEl.innerText = "✓ ĐÃ TỰ ĐỘNG LƯU";
             statusEl.style.opacity = "1";
         }
 
@@ -472,30 +484,32 @@
 
             try {
                 const parsed = JSON.parse(saved);
-                if (parsed.flight !== undefined) document.getElementById('flight-input').value = parsed.flight;
-                if (parsed.date !== undefined && parsed.date !== '') document.getElementById('date-input').value = parsed.date;
-                if (parsed.route !== undefined) document.getElementById('route-input').value = parsed.route;
-                if (parsed.time !== undefined) document.getElementById('time-input').value = parsed.time;
-                if (parsed.location !== undefined) document.getElementById('location-input').value = parsed.location;
-                if (parsed.type !== undefined) document.getElementById('type-input').value = parsed.type;
-                if (parsed.subject !== undefined) document.getElementById('subject-input').value = parsed.subject;
-                if (parsed.description !== undefined) document.getElementById('description-input').value = parsed.description;
-                if (parsed.action !== undefined) document.getElementById('action-input').value = parsed.action;
-                if (parsed.nameSig1 !== undefined) document.getElementById('name-sig-1').value = parsed.nameSig1;
-                if (parsed.nameSig2 !== undefined) document.getElementById('name-sig-2').value = parsed.nameSig2;
+                if (parsed.date) document.getElementById('date-input').value = parsed.date;
+                if (parsed.time) document.getElementById('time-input').value = parsed.time;
+                if (parsed.location) document.getElementById('location-input').value = parsed.location;
+                
+                if (parsed.person1) document.getElementById('person-1').value = parsed.person1;
+                if (parsed.rep1) document.getElementById('rep-1').value = parsed.rep1;
+                if (parsed.person2) document.getElementById('person-2').value = parsed.person2;
+                if (parsed.rep2) document.getElementById('rep-2').value = parsed.rep2;
+                if (parsed.person3) document.getElementById('person-3').value = parsed.person3;
+                if (parsed.rep3) document.getElementById('rep-3').value = parsed.rep3;
 
-                if (parsed.sigDataUrl1) {
-                    sigDataUrl1 = parsed.sigDataUrl1;
-                    sigDrawn1 = true;
-                    loadSignatureToCanvas(1, parsed.sigDataUrl1);
-                }
-                if (parsed.sigDataUrl2) {
-                    sigDataUrl2 = parsed.sigDataUrl2;
-                    sigDrawn2 = true;
-                    loadSignatureToCanvas(2, parsed.sigDataUrl2);
+                if (parsed.description) document.getElementById('description-input').value = parsed.description;
+
+                if (parsed.nameSig1) document.getElementById('name-sig-1').value = parsed.nameSig1;
+                if (parsed.nameSig2) document.getElementById('name-sig-2').value = parsed.nameSig2;
+                if (parsed.nameSig3) document.getElementById('name-sig-3').value = parsed.nameSig3;
+
+                for(let i = 1; i <= 3; i++) {
+                    if (parsed['sigDataUrl' + i]) {
+                        sigDataUrl[i] = parsed['sigDataUrl' + i];
+                        sigDrawn[i] = true;
+                        loadSignatureToCanvas(i, parsed['sigDataUrl' + i]);
+                    }
                 }
             } catch (e) {
-                console.error("Lỗi khôi phục dữ liệu:", e);
+                console.error("LỖI KHÔI PHỤC DỮ LIỆU:", e);
             }
         }
 
@@ -506,7 +520,7 @@
             img.onload = function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                document.getElementById(`sig-status-${id}`).innerText = "✓ Đã ký";
+                document.getElementById(`sig-status-${id}`).innerText = "✓ ĐÃ KÝ";
             };
             img.src = dataUrl;
         }
@@ -525,8 +539,7 @@
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '#002b66';
 
-                if (id === 1 && sigDataUrl1) loadSignatureToCanvas(1, sigDataUrl1);
-                if (id === 2 && sigDataUrl2) loadSignatureToCanvas(2, sigDataUrl2);
+                if (sigDataUrl[id]) loadSignatureToCanvas(id, sigDataUrl[id]);
             }
 
             window.addEventListener('resize', resize);
@@ -541,8 +554,7 @@
 
             function start(e) {
                 isDrawing = true;
-                if (id === 1) sigDrawn1 = true;
-                if (id === 2) sigDrawn2 = true;
+                sigDrawn[id] = true;
                 const p = getPos(e);
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
@@ -559,10 +571,9 @@
             function stop() {
                 if (isDrawing) {
                     isDrawing = false;
-                    const dataUrl = canvas.toDataURL('image/png');
-                    if (id === 1) sigDataUrl1 = dataUrl;
-                    if (id === 2) sigDataUrl2 = dataUrl;
-                    document.getElementById(`sig-status-${id}`).innerText = "✓ Đã ký";
+                    const url = canvas.toDataURL('image/png');
+                    sigDataUrl[id] = url;
+                    document.getElementById(`sig-status-${id}`).innerText = "✓ ĐÃ KÝ";
                     saveData();
                 }
             }
@@ -578,104 +589,168 @@
 
         initSignatureCanvas(1);
         initSignatureCanvas(2);
+        initSignatureCanvas(3);
 
         function clearSignature(id) {
             const canvas = document.getElementById(`canvas-sig-${id}`);
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById(`name-sig-${id}`).value = '';
-            if (id === 1) { sigDrawn1 = false; sigDataUrl1 = ''; }
-            if (id === 2) { sigDrawn2 = false; sigDataUrl2 = ''; }
+            sigDrawn[id] = false;
+            sigDataUrl[id] = '';
             document.getElementById(`sig-status-${id}`).innerText = "";
             saveData();
         }
 
         function resetForm() {
-            if (confirm("Làm mới sẽ XÓA HẾT toàn bộ dữ liệu đã lưu. Bạn có chắc chắn không?")) {
+            if (confirm("LÀM MỚI SẼ XÓA HẾT TOÀN BỘ DỮ LIỆU ĐÃ LƯU. BẠN CÓ CHẮC CHẮN KHÔNG?")) {
                 localStorage.removeItem(STORAGE_KEY);
                 location.reload();
             }
         }
 
-        function formatDate(dateStr) {
-            if(!dateStr) return '……………………..…..';
-            const parts = dateStr.split('-');
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
         function exportToPDF() {
-            const flight = document.getElementById('flight-input').value || '………..……….....…';
-            const date = formatDate(document.getElementById('date-input').value);
-            const route = document.getElementById('route-input').value || '………..……….....…';
-            const time = document.getElementById('time-input').value || '………..……';
-            const location = document.getElementById('location-input').value || '………..……….....…';
-            const type = document.getElementById('type-input').value || '';
-            const subject = document.getElementById('subject-input').value || '………..……….....…';
+            const dateVal = document.getElementById('date-input').value;
+            let day = '', month = '', year = '';
+            if (dateVal) {
+                const parts = dateVal.split('-');
+                year = parts[0];
+                month = parts[1];
+                day = parts[2];
+            }
+
+            const timeVal = document.getElementById('time-input').value;
+            let hour = '', minute = '';
+            if (timeVal) {
+                const tParts = timeVal.split(':');
+                hour = tParts[0];
+                minute = tParts[1];
+            }
+
+            const location = document.getElementById('location-input').value || '';
+            
+            const p1 = document.getElementById('person-1').value || '';
+            const r1 = document.getElementById('rep-1').value || '';
+            
+            const p2 = document.getElementById('person-2').value || '';
+            const r2 = document.getElementById('rep-2').value || '';
+
+            const p3 = document.getElementById('person-3').value || '';
+            const r3 = document.getElementById('rep-3').value || '';
+
             const description = document.getElementById('description-input').value || '';
-            const action = document.getElementById('action-input').value || '';
+
             const nameSig1 = document.getElementById('name-sig-1').value || '';
             const nameSig2 = document.getElementById('name-sig-2').value || '';
+            const nameSig3 = document.getElementById('name-sig-3').value || '';
 
-            let sigImgSrc1 = sigDrawn1 ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '';
-            let sigImgSrc2 = sigDrawn2 ? document.getElementById('canvas-sig-2').toDataURL('image/png') : '';
+            let sigImg1 = sigDrawn[1] ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '';
+            let sigImg2 = sigDrawn[2] ? document.getElementById('canvas-sig-2').toDataURL('image/png') : '';
+            let sigImg3 = sigDrawn[3] ? document.getElementById('canvas-sig-3').toDataURL('image/png') : '';
+
+            let linesHtml = '';
+            if (description) {
+                linesHtml = `<div style="text-align: justify; line-height: 2.2; text-indent: 20px;">${description.replace(/\n/g, '<br>')}</div>`;
+            } else {
+                for (let i = 0; i < 8; i++) {
+                    linesHtml += `<div style="border-bottom: 1px dotted #000; height: 28px;"></div>`;
+                }
+            }
 
             const printContainer = document.getElementById('print-area');
             printContainer.innerHTML = `
-                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 11pt; line-height: 1.4;">
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 13pt; line-height: 1.5; padding: 0 5mm; text-transform: uppercase;">
                     
-                    <div style="margin-bottom: 10px;">
-                        <span style="color: #0054a6; font-weight: bold; font-size: 11pt; text-transform: uppercase;">TCT HÀNG KHÔNG VIỆT NAM<br>CHI NHÁNH KHU VỰC VIỆT NAM</span>
-                    </div>
-
-                    <div style="text-align: center; font-weight: bold; font-size: 14pt; margin-top: 15px; margin-bottom: 15px; text-transform: uppercase;">
-                        BIÊN BẢN BẤT THƯỜNG
-                    </div>
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;" border="0">
+                    <!-- Header Table -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" border="0">
                         <tr>
-                            <td style="padding: 4px 0; width: 33%;">Số hiệu chuyến bay: <b>${flight}</b></td>
-                            <td style="padding: 4px 0; width: 33%;">Ngày bay: <b>${date}</b></td>
-                            <td style="padding: 4px 0; width: 34%;">Hành trình: <b>${route}</b></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;">Thời gian: <b>${time}</b></td>
-                            <td style="padding: 4px 0;" colspan="2">Địa điểm xảy ra: <b>${location}</b></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;">Phân loại: <b>${type}</b></td>
-                            <td style="padding: 4px 0;" colspan="2">Đối tượng liên quan: <b>${subject}</b></td>
+                            <td style="vertical-align: top; text-align: left; font-size: 11pt; color: #333; text-transform: uppercase;">
+                                TCT HÀNG KHÔNG VIỆT NAM<br>
+                                <b>CHI NHÁNH KHU VỰC VIỆT NAM</b>
+                            </td>
+                            <td class="no-uppercase" style="vertical-align: top; text-align: right; font-size: 11pt; font-style: italic; color: #333;">
+                                Mã Số: BM-CNVN-045<br>
+                                Lần Ban Hành: 01
+                            </td>
                         </tr>
                     </table>
 
-                    <div style="margin-top: 10px; margin-bottom: 15px;">
-                        <div style="font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">1. Mô tả nội dung sự việc:</div>
-                        <div style="min-height: 120px; border: 1px solid #000; padding: 8px; font-style: normal; white-space: pre-line;">${description}</div>
+                    <!-- Quốc hiệu & Tiêu đề -->
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="font-weight: bold; font-size: 13pt;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                        <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">
+                            <span style="border-bottom: 1px solid #000; padding-bottom: 1px;">ĐỘC LẬP - TỰ DO - HẠNH PHÚC</span>
+                        </div>
+                        <div style="font-size: 18pt; font-weight: bold; margin-top: 22px;">BIÊN BẢN BẤT THƯỜNG</div>
                     </div>
 
-                    <div style="margin-top: 10px; margin-bottom: 20px;">
-                        <div style="font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">2. Biện pháp xử lý & Tình trạng hiện tại:</div>
-                        <div style="min-height: 100px; border: 1px solid #000; padding: 8px; font-style: normal; white-space: pre-line;">${action}</div>
+                    <!-- Nội dung thông tin -->
+                    <div style="font-size: 13pt; line-height: 1.8;">
+                        <div style="margin-bottom: 10px;">
+                            HÔM NAY, NGÀY <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${day}</span> 
+                            THÁNG <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${month}</span> 
+                            NĂM <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${year}</span>, 
+                            VÀO HỒI <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${hour}</span> 
+                            GIỜ <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${minute}</span>, 
+                            TẠI : <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 200px;">${location}</span>
+                        </div>
+
+                        <div style="margin-top: 12px; margin-bottom: 8px;">CHÚNG TÔI GỒM :</div>
+
+                        <div style="margin-left: 25px; margin-bottom: 6px;">
+                            1. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p1}</span> 
+                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r1}</span>
+                        </div>
+                        <div style="margin-left: 25px; margin-bottom: 6px;">
+                            2. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p2}</span> 
+                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r2}</span>
+                        </div>
+                        <div style="margin-left: 25px; margin-bottom: 6px;">
+                            3. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p3}</span> 
+                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r3}</span>
+                        </div>
+
+                        <div style="margin-top: 14px; margin-bottom: 10px;">CÙNG NHAU LẬP BIÊN BẢN XÁC NHẬN SỰ VIỆC SAU :</div>
+
+                        <div style="margin-bottom: 15px;">
+                            ${linesHtml}
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            BIÊN BẢN NÀY LÀ BẢN ĐIỆN TỬ, ĐƯỢC LẬP CÓ SỰ CHỨNG KIẾN VÀ KÝ XÁC NHẬN CỦA ĐẠI DIỆN HỢP PHÁP CÁC BÊN LIÊN QUAN.
+                        </div>
                     </div>
 
-                    <div style="margin-top: 30px; display: flex; justify-content: space-between; text-align: center; font-size: 11pt; page-break-inside: avoid;">
-                        <div style="width: 45%;">
-                            <b>ĐẠI DIỆN BÊN LIÊN QUAN</b><br>
-                            ${sigImgSrc2 ? `<img src="${sigImgSrc2}" style="max-height: 60px; max-width: 100%; margin-top: 8px;"><br>` : '<div style="height:60px;"></div>'}
-                            <span style="font-size: 10pt; font-style: italic;">${nameSig2}</span>
-                        </div>
-                        <div style="width: 45%;">
-                            <b>NGƯỜI LẬP BIÊN BẢN</b><br>
-                            ${sigImgSrc1 ? `<img src="${sigImgSrc1}" style="max-height: 60px; max-width: 100%; margin-top: 8px;"><br>` : '<div style="height:60px;"></div>'}
-                            <span style="font-size: 10pt; font-style: italic;">${nameSig1}</span>
-                        </div>
+                    <!-- Chữ ký 3 cột -->
+                    <div style="margin-top: 40px; page-break-inside: avoid;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: center;" border="0">
+                            <tr>
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                    ĐẠI DIỆN VNA<br>
+                                    ${sigImg1 ? `<img src="${sigImg1}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <span style="font-size: 11pt; font-weight: normal;">${nameSig1}</span>
+                                </td>
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                    ĐẠI DIỆN CÁC BÊN LIÊN QUAN<br>
+                                    ${sigImg2 ? `<img src="${sigImg2}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <span style="font-size: 11pt; font-weight: normal;">${nameSig2}</span>
+                                </td>
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                    NGƯỜI LÀM CHỨNG<br>
+                                    ${sigImg3 ? `<img src="${sigImg3}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <span style="font-size: 11pt; font-weight: normal;">${nameSig3}</span>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
+
                 </div>
             `;
 
             try {
                 window.print();
             } catch (e) {
-                alert("Trình duyệt không cho phép tự động mở hộp thoại in. Bạn vui lòng nhấn tổ hợp phím Ctrl + P (hoặc Cmd + P trên Mac) để in/xuất PDF.");
+                alert("TRÌNH DUYỆT KHÔNG CHO PHÉP TỰ ĐỘNG MỞ HỘP THOẠI IN. BẠN VUI LÒNG NHẤN TỔ HỢP PHÍM CTRL + P (HOẶC CMD + P TRÊN MAC) ĐỂ IN/XUẤT PDF.");
             }
         }
 
