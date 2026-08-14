@@ -6,8 +6,8 @@
     <title>BIÊN BẢN BẤT THƯỜNG</title>
 
     <!-- Icon / Favicon -->
-    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/bbbt_1.png">
-    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/bbbt_1.png">
+    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/BBVV.png">
+    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/BBVV.png">
     
     <style>
         * {
@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            text-transform: uppercase; /* Ép toàn bộ văn bản và chữ gõ vào thành VIẾT HOA */
+            text-transform: uppercase;
         }
 
         body {
@@ -282,7 +282,6 @@
             text-transform: uppercase;
         }
 
-        /* Class miễn trừ uppercase cho phần Mã số / Lần ban hành */
         .no-uppercase {
             text-transform: none !important;
         }
@@ -451,7 +450,23 @@
 
         document.getElementById('date-input').valueAsDate = new Date();
 
+        function isCanvasBlank(canvas) {
+            const ctx = canvas.getContext('2d');
+            const pixelBuffer = new Uint32Array(
+                ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+            );
+            return !pixelBuffer.some(color => color !== 0);
+        }
+
         function saveData() {
+            for (let i = 1; i <= 3; i++) {
+                const cv = document.getElementById(`canvas-sig-${i}`);
+                if (cv && !isCanvasBlank(cv)) {
+                    sigDrawn[i] = true;
+                    sigDataUrl[i] = cv.toDataURL('image/png');
+                }
+            }
+
             const dataToSave = {
                 date: document.getElementById('date-input').value,
                 time: document.getElementById('time-input').value,
@@ -466,9 +481,9 @@
                 nameSig1: document.getElementById('name-sig-1').value,
                 nameSig2: document.getElementById('name-sig-2').value,
                 nameSig3: document.getElementById('name-sig-3').value,
-                sigDataUrl1: sigDrawn[1] ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '',
-                sigDataUrl2: sigDrawn[2] ? document.getElementById('canvas-sig-2').toDataURL('image/png') : '',
-                sigDataUrl3: sigDrawn[3] ? document.getElementById('canvas-sig-3').toDataURL('image/png') : ''
+                sigDataUrl1: sigDrawn[1] ? sigDataUrl[1] : '',
+                sigDataUrl2: sigDrawn[2] ? sigDataUrl[2] : '',
+                sigDataUrl3: sigDrawn[3] ? sigDataUrl[3] : ''
             };
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
@@ -610,6 +625,15 @@
         }
 
         function exportToPDF() {
+            // Ép lấy ảnh tức thời từ Canvas
+            for (let i = 1; i <= 3; i++) {
+                const cv = document.getElementById(`canvas-sig-${i}`);
+                if (cv && !isCanvasBlank(cv)) {
+                    sigDrawn[i] = true;
+                    sigDataUrl[i] = cv.toDataURL('image/png');
+                }
+            }
+
             const dateVal = document.getElementById('date-input').value;
             let day = '', month = '', year = '';
             if (dateVal) {
@@ -644,9 +668,9 @@
             const nameSig2 = document.getElementById('name-sig-2').value || '';
             const nameSig3 = document.getElementById('name-sig-3').value || '';
 
-            let sigImg1 = sigDrawn[1] ? document.getElementById('canvas-sig-1').toDataURL('image/png') : '';
-            let sigImg2 = sigDrawn[2] ? document.getElementById('canvas-sig-2').toDataURL('image/png') : '';
-            let sigImg3 = sigDrawn[3] ? document.getElementById('canvas-sig-3').toDataURL('image/png') : '';
+            let sigImg1 = sigDrawn[1] ? sigDataUrl[1] : '';
+            let sigImg2 = sigDrawn[2] ? sigDataUrl[2] : '';
+            let sigImg3 = sigDrawn[3] ? sigDataUrl[3] : '';
 
             let linesHtml = '';
             if (description) {
@@ -697,17 +721,17 @@
 
                         <div style="margin-top: 12px; margin-bottom: 8px;">CHÚNG TÔI GỒM :</div>
 
-                        <div style="margin-left: 25px; margin-bottom: 6px;">
-                            1. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p1}</span> 
-                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r1}</span>
+                        <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
+                            1. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p1}</span> 
+                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r1}</span>
                         </div>
-                        <div style="margin-left: 25px; margin-bottom: 6px;">
-                            2. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p2}</span> 
-                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r2}</span>
+                        <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
+                            2. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p2}</span> 
+                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r2}</span>
                         </div>
-                        <div style="margin-left: 25px; margin-bottom: 6px;">
-                            3. ÔNG/BÀ <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${p3}</span> 
-                            ĐẠI DIỆN <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px;">${r3}</span>
+                        <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
+                            3. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p3}</span> 
+                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r3}</span>
                         </div>
 
                         <div style="margin-top: 14px; margin-bottom: 10px;">CÙNG NHAU LẬP BIÊN BẢN XÁC NHẬN SỰ VIỆC SAU :</div>
@@ -722,22 +746,28 @@
                     </div>
 
                     <!-- Chữ ký 3 cột -->
-                    <div style="margin-top: 40px; page-break-inside: avoid;">
+                    <div style="margin-top: 30px; page-break-inside: avoid;">
                         <table style="width: 100%; border-collapse: collapse; text-align: center;" border="0">
                             <tr>
-                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 10pt; white-space: nowrap; padding: 0 2px;">
                                     ĐẠI DIỆN VNA<br>
-                                    ${sigImg1 ? `<img src="${sigImg1}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <div style="height: 80px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+                                        ${sigImg1 ? `<img src="${sigImg1}" class="sig-print-img" style="max-height: 80px; max-width: 100%;">` : ''}
+                                    </div>
                                     <span style="font-size: 11pt; font-weight: normal;">${nameSig1}</span>
                                 </td>
-                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 10pt; white-space: nowrap; padding: 0 2px;">
                                     ĐẠI DIỆN CÁC BÊN LIÊN QUAN<br>
-                                    ${sigImg2 ? `<img src="${sigImg2}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <div style="height: 80px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+                                        ${sigImg2 ? `<img src="${sigImg2}" class="sig-print-img" style="max-height: 80px; max-width: 100%;">` : ''}
+                                    </div>
                                     <span style="font-size: 11pt; font-weight: normal;">${nameSig2}</span>
                                 </td>
-                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 11pt;">
+                                <td style="width: 33.33%; vertical-align: top; font-weight: bold; font-size: 10pt; white-space: nowrap; padding: 0 2px;">
                                     NGƯỜI LÀM CHỨNG<br>
-                                    ${sigImg3 ? `<img src="${sigImg3}" style="max-height: 70px; max-width: 100%; margin-top: 10px;"><br>` : '<div style="height:70px;"></div>'}
+                                    <div style="height: 80px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+                                        ${sigImg3 ? `<img src="${sigImg3}" class="sig-print-img" style="max-height: 80px; max-width: 100%;">` : ''}
+                                    </div>
                                     <span style="font-size: 11pt; font-weight: normal;">${nameSig3}</span>
                                 </td>
                             </tr>
@@ -747,10 +777,38 @@
                 </div>
             `;
 
-            try {
-                window.print();
-            } catch (e) {
-                alert("TRÌNH DUYỆT KHÔNG CHO PHÉP TỰ ĐỘNG MỞ HỘP THOẠI IN. BẠN VUI LÒNG NHẤN TỔ HỢP PHÍM CTRL + P (HOẶC CMD + P TRÊN MAC) ĐỂ IN/XUẤT PDF.");
+            // Chờ các hình ảnh chữ ký nạp hoàn tất rồi mới gọi lệnh In
+            const printImgs = printContainer.querySelectorAll('.sig-print-img');
+            let loadedCount = 0;
+
+            const triggerPrint = () => {
+                setTimeout(() => {
+                    try {
+                        window.print();
+                    } catch (e) {
+                        alert("TRÌNH DUYỆT KHÔNG CHO PHÉP TỰ ĐỘNG MỞ HỘP THOẠI IN. BẠN VUI LÒNG NHẤN TỔ HỢP PHÍM CTRL + P ĐỂ IN/XUẤT PDF.");
+                    }
+                }, 150);
+            };
+
+            if (printImgs.length === 0) {
+                triggerPrint();
+            } else {
+                printImgs.forEach(img => {
+                    if (img.complete) {
+                        loadedCount++;
+                        if (loadedCount === printImgs.length) triggerPrint();
+                    } else {
+                        img.onload = () => {
+                            loadedCount++;
+                            if (loadedCount === printImgs.length) triggerPrint();
+                        };
+                        img.onerror = () => {
+                            loadedCount++;
+                            if (loadedCount === printImgs.length) triggerPrint();
+                        };
+                    }
+                });
             }
         }
 
