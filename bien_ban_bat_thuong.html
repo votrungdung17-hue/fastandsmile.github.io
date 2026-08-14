@@ -15,7 +15,6 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            text-transform: uppercase;
         }
 
         body {
@@ -42,6 +41,7 @@
         .header-bar h1 {
             font-size: 15px;
             font-weight: 700;
+            text-transform: uppercase;
         }
 
         .save-status {
@@ -81,6 +81,7 @@
             font-weight: bold;
             line-height: 1.3;
             color: #0054a6;
+            text-transform: uppercase;
         }
 
         .doc-title {
@@ -90,6 +91,7 @@
             font-weight: 800;
             margin: 15px 0 16px 0;
             line-height: 1.3;
+            text-transform: uppercase;
         }
 
         .section-title {
@@ -100,6 +102,7 @@
             margin-bottom: 10px;
             border-left: 3px solid #0056b3;
             padding-left: 8px;
+            text-transform: uppercase;
         }
 
         .meta-grid {
@@ -134,7 +137,6 @@
             font-size: 13px;
             outline: none;
             background-color: #fff;
-            text-transform: uppercase;
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -195,6 +197,7 @@
             font-weight: 700;
             color: #374151;
             margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
         .sig-canvas-wrap {
@@ -279,11 +282,6 @@
 
         #print-area {
             display: none;
-            text-transform: uppercase;
-        }
-
-        .no-uppercase {
-            text-transform: none !important;
         }
 
         @media print {
@@ -345,7 +343,7 @@
 
             <div class="form-group" style="margin-bottom: 12px;">
                 <label>ĐỊA ĐIỂM XẢY RA SỰ CỐ:</label>
-                <input type="text" id="location-input" placeholder="VD: CỬA KHỞI HÀNH, SÂN ĐỖ..." oninput="saveData()">
+                <input type="text" id="location-input" placeholder="VD: Sân đỗ bài 19..." oninput="saveData()">
             </div>
 
             <div class="section-title">THÀNH PHẦN THAM GIA (CÙNG NHAU LẬP BIÊN BẢN)</div>
@@ -353,44 +351,44 @@
             <div class="meta-grid" style="margin-bottom: 8px;">
                 <div class="form-group">
                     <label>1. ÔNG/BÀ (HỌ TÊN): </label>
-                    <input type="text" id="person-1" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
+                    <input type="text" id="person-1" placeholder="Nhập họ tên..." oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>ĐẠI DIỆN: </label>
-                    <input type="text" id="rep-1" placeholder="VD: VNA / ĐƠN VỊ..." oninput="saveData()">
+                    <input type="text" id="rep-1" placeholder="VD: VNA..." oninput="saveData()">
                 </div>
             </div>
 
             <div class="meta-grid" style="margin-bottom: 8px;">
                 <div class="form-group">
                     <label>2. ÔNG/BÀ (HỌ TÊN):</label>
-                    <input type="text" id="person-2" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
+                    <input type="text" id="person-2" placeholder="Nhập họ tên..." oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>ĐẠI DIỆN:</label>
-                    <input type="text" id="rep-2" placeholder="VD: BÊN LIÊN QUAN..." oninput="saveData()">
+                    <input type="text" id="rep-2" placeholder="VD: Đội xe..." oninput="saveData()">
                 </div>
             </div>
 
             <div class="meta-grid" style="margin-bottom: 8px;">
                 <div class="form-group">
                     <label>3. ÔNG/BÀ (HỌ TÊN):</label>
-                    <input type="text" id="person-3" placeholder="NHẬP HỌ TÊN..." oninput="saveData()">
+                    <input type="text" id="person-3" placeholder="Nhập họ tên..." oninput="saveData()">
                 </div>
                 <div class="form-group">
                     <label>ĐẠI DIỆN:</label>
-                    <input type="text" id="rep-3" placeholder="VD: NGƯỜI LÀM CHỨNG..." oninput="saveData()">
+                    <input type="text" id="rep-3" placeholder="VD: Bên liên quan..." oninput="saveData()">
                 </div>
             </div>
 
             <div class="section-title">NỘI DUNG XÁC NHẬN SỰ VIỆC</div>
             <div class="note-box">
                 <label>MÔ TẢ CHI TIẾT NỘI DUNG SỰ VIỆC:</label>
-                <textarea id="description-input" style="height: 120px;" placeholder="NHẬP CHI TIẾT DIỄN BIẾN SỰ VIỆC BẤT THƯỜNG XẢY RA..." oninput="saveData()"></textarea>
+                <textarea id="description-input" style="height: 120px;" placeholder="Nhập chi tiết diễn biến sự việc bất thường xảy ra..." oninput="saveData()"></textarea>
             </div>
 
             <div class="form-group" style="margin-top: 12px;">
-                <label>BIÊN BẢN NÀY LÀ BẢN ĐIỆN TỬ, ĐƯỢC LẬP CÓ SỰ CHỨNG KIẾN VÀ KÝ XÁC NHẬN CỦA ĐẠI DIỆN HỢP PHÁP CÁC BÊN LIÊN QUAN.</label>
+                <label>Biên bản này được lập có sự chứng kiến và ký nhận của các bên liên quan.</label>
             </div>
 
             <div class="section-title">CHỮ KÝ CÁC BÊN</div>
@@ -400,7 +398,7 @@
                     <div class="sig-canvas-wrap" id="wrap-sig-1">
                         <canvas id="canvas-sig-1"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig-1" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
+                    <input type="text" class="sig-name-input" id="name-sig-1" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature(1)">XÓA / KÝ LẠI</button>
                         <span id="sig-status-1" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -412,7 +410,7 @@
                     <div class="sig-canvas-wrap" id="wrap-sig-2">
                         <canvas id="canvas-sig-2"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig-2" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
+                    <input type="text" class="sig-name-input" id="name-sig-2" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature(2)">XÓA / KÝ LẠI</button>
                         <span id="sig-status-2" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -424,7 +422,7 @@
                     <div class="sig-canvas-wrap" id="wrap-sig-3">
                         <canvas id="canvas-sig-3"></canvas>
                     </div>
-                    <input type="text" class="sig-name-input" id="name-sig-3" placeholder="HỌ VÀ TÊN..." oninput="saveData()">
+                    <input type="text" class="sig-name-input" id="name-sig-3" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
                         <button class="btn-sm" onclick="clearSignature(3)">XÓA / KÝ LẠI</button>
                         <span id="sig-status-3" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
@@ -625,7 +623,6 @@
         }
 
         function exportToPDF() {
-            // Ép lấy ảnh tức thời từ Canvas
             for (let i = 1; i <= 3; i++) {
                 const cv = document.getElementById(`canvas-sig-${i}`);
                 if (cv && !isCanvasBlank(cv)) {
@@ -674,7 +671,8 @@
 
             let linesHtml = '';
             if (description) {
-                linesHtml = `<div style="text-align: justify; line-height: 2.2; text-indent: 20px;">${description.replace(/\n/g, '<br>')}</div>`;
+                /* ĐÃ THÊM font-style: italic ĐỂ IN NGHIÊNG NỘI DUNG MÔ TẢ */
+                linesHtml = `<div style="text-align: justify; line-height: 2.2; text-indent: 20px; font-style: italic;">${description.replace(/\n/g, '<br>')}</div>`;
             } else {
                 for (let i = 0; i < 8; i++) {
                     linesHtml += `<div style="border-bottom: 1px dotted #000; height: 28px;"></div>`;
@@ -683,16 +681,16 @@
 
             const printContainer = document.getElementById('print-area');
             printContainer.innerHTML = `
-                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 13pt; line-height: 1.5; padding: 0 5mm; text-transform: uppercase;">
+                <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 13pt; line-height: 1.5; padding: 0 5mm;">
                     
                     <!-- Header Table -->
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" border="0">
                         <tr>
-                            <td style="vertical-align: top; text-align: left; font-size: 11pt; color: #333; text-transform: uppercase;">
+                            <td style="vertical-align: top; text-align: left; font-size: 11pt; color: #333;">
                                 TCT HÀNG KHÔNG VIỆT NAM<br>
                                 <b>CHI NHÁNH KHU VỰC VIỆT NAM</b>
                             </td>
-                            <td class="no-uppercase" style="vertical-align: top; text-align: right; font-size: 11pt; font-style: italic; color: #333;">
+                            <td style="vertical-align: top; text-align: right; font-size: 11pt; font-style: italic; color: #333;">
                                 Mã Số: BM-CNVN-045<br>
                                 Lần Ban Hành: 01
                             </td>
@@ -703,7 +701,7 @@
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="font-weight: bold; font-size: 13pt;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
                         <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">
-                            <span style="border-bottom: 1px solid #000; padding-bottom: 1px;">ĐỘC LẬP - TỰ DO - HẠNH PHÚC</span>
+                            <span style="border-bottom: 1px solid #000; padding-bottom: 1px;">Độc lập - Tự do - Hạnh phúc</span>
                         </div>
                         <div style="font-size: 18pt; font-weight: bold; margin-top: 22px;">BIÊN BẢN BẤT THƯỜNG</div>
                     </div>
@@ -711,37 +709,37 @@
                     <!-- Nội dung thông tin -->
                     <div style="font-size: 13pt; line-height: 1.8;">
                         <div style="margin-bottom: 10px;">
-                            HÔM NAY, NGÀY <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${day}</span> 
-                            THÁNG <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${month}</span> 
-                            NĂM <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${year}</span>, 
-                            VÀO HỒI <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${hour}</span> 
-                            GIỜ <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${minute}</span>, 
-                            TẠI : <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 200px;">${location}</span>
+                            Hôm nay, ngày <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${day}</span> 
+                            tháng <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${month}</span> 
+                            năm <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${year}</span>, 
+                            vào hồi <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 45px; text-align: center;">${hour}</span> 
+                            giờ <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${minute}</span>, 
+                            tại: <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 200px;">${location}</span>
                         </div>
 
-                        <div style="margin-top: 12px; margin-bottom: 8px;">CHÚNG TÔI GỒM :</div>
+                        <div style="margin-top: 12px; margin-bottom: 8px;">Chúng tôi gồm:</div>
 
                         <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
-                            1. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p1}</span> 
-                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r1}</span>
+                            1. Ông/Bà: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p1}</span> 
+                            Đại diện: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r1}</span>
                         </div>
                         <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
-                            2. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p2}</span> 
-                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r2}</span>
+                            2. Ông/Bà: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p2}</span> 
+                            Đại diện: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r2}</span>
                         </div>
                         <div style="margin-left: 25px; margin-bottom: 6px; white-space: nowrap;">
-                            3. ÔNG/BÀ : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p3}</span> 
-                            ĐẠI DIỆN : <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r3}</span>
+                            3. Ông/Bà: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${p3}</span> 
+                            Đại diện: <span style="border-bottom: 1px dotted #000; display: inline-block; width: 220px; text-align: center;">${r3}</span>
                         </div>
 
-                        <div style="margin-top: 14px; margin-bottom: 10px;">CÙNG NHAU LẬP BIÊN BẢN XÁC NHẬN SỰ VIỆC SAU :</div>
+                        <div style="margin-top: 14px; margin-bottom: 10px;">Cùng nhau lập biên bản xác nhận sự việc sau:</div>
 
                         <div style="margin-bottom: 15px;">
                             ${linesHtml}
                         </div>
 
                         <div style="margin-top: 15px;">
-                            BIÊN BẢN NÀY LÀ BẢN ĐIỆN TỬ, ĐƯỢC LẬP CÓ SỰ CHỨNG KIẾN VÀ KÝ XÁC NHẬN CỦA ĐẠI DIỆN HỢP PHÁP CÁC BÊN LIÊN QUAN.
+                            Biên bản này được lập có sự chứng kiến và ký nhận của các bên liên quan.
                         </div>
                     </div>
 
@@ -777,7 +775,6 @@
                 </div>
             `;
 
-            // Chờ các hình ảnh chữ ký nạp hoàn tất rồi mới gọi lệnh In
             const printImgs = printContainer.querySelectorAll('.sig-print-img');
             let loadedCount = 0;
 
@@ -786,7 +783,7 @@
                     try {
                         window.print();
                     } catch (e) {
-                        alert("TRÌNH DUYỆT KHÔNG CHO PHÉP TỰ ĐỘNG MỞ HỘP THOẠI IN. BẠN VUI LÒNG NHẤN TỔ HỢP PHÍM CTRL + P ĐỂ IN/XUẤT PDF.");
+                        alert("Trình duyệt không cho phép tự động mở hộp thoại in. Bạn vui lòng nhấn Ctrl + P để in/xuất PDF.");
                     }
                 }, 150);
             };
