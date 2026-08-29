@@ -44,7 +44,7 @@
             background-color: #f8f9fa;
         }
 
-        /* KHUNG CHỨA DANH SÁCH 5 DÒNG CÓ SCROLL */
+        /* KHUNG CHỨA DANH SÁCH SCROLL */
         .flight-list-wrapper {
             background: #ffffff;
             border: 2px solid #007bff;
@@ -138,14 +138,21 @@
             border-top-left-radius: 16px; border-top-right-radius: 16px;
             width: 100%; text-align: center;
             animation: slideUp 0.2s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .form-group { margin-bottom: 12px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #333; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #333; }
         .form-group input {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; font-weight: bold;
+            width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; font-weight: bold;
         }
+
+        .form-row {
+            display: flex; gap: 8px;
+        }
+        .form-row .form-group { flex: 1; }
 
         .modal-buttons { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
         .btn-gate { background-color: #007bff; }
@@ -181,23 +188,56 @@
 </div>
 
 <div class="action-container">
-    <button id="updateBtn" class="btn btn-update">EDIT ATA/ATD</button>
+    <button id="updateBtn" class="btn btn-update">EDIT DATA</button>
     <button id="mvaBtn" class="btn btn-mva">TẠO TIN MVA</button>
     <button id="occBtn" class="btn btn-occ">TẠO TIN OCC</button>
 </div>
 
-<!-- Modal Edit ATA/ATD -->
+<!-- Modal Edit DATA -->
 <div id="updatePopup" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="font-size: 16px; margin-bottom: 12px;">Cập Nhật Giờ Thực Tế</h3>
+        <h3 style="font-size: 16px; margin-bottom: 12px;">Cập Nhật Thông Tin Chuyến Bay</h3>
+        
         <div class="form-group">
-            <label for="editAta">Giờ ATA (Đến thực tế):</label>
-            <input type="text" id="editAta" maxlength="5" placeholder="Ví dụ: 14:25 hoặc 1425" oninput="formatTimeInput(this)">
+            <label for="editAcReg">Số Hiệu Tàu Bay (A/C REG):</label>
+            <input type="text" id="editAcReg" placeholder="Ví dụ: VN-A338" style="text-transform: uppercase;">
         </div>
-        <div class="form-group">
-            <label for="editAtd">Giờ ATD (Đi thực tế):</label>
-            <input type="text" id="editAtd" maxlength="5" placeholder="Ví dụ: 15:10 hoặc 1510" oninput="formatTimeInput(this)">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editAta">Giờ ATA (Đến):</label>
+                <input type="text" id="editAta" maxlength="5" placeholder="14:25" oninput="formatTimeInput(this)">
+            </div>
+            <div class="form-group">
+                <label for="editAtd">Giờ ATD (Đi):</label>
+                <input type="text" id="editAtd" maxlength="5" placeholder="15:10" oninput="formatTimeInput(this)">
+            </div>
         </div>
+
+        <!-- HÀNG CODE 1 VÀ TIME 1 -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editCode1">CODE 1:</label>
+                <input type="text" id="editCode1" placeholder="VD: SG" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label for="editTime1">TIME 1 (Phút):</label>
+                <input type="number" id="editTime1" placeholder="VD: 15">
+            </div>
+        </div>
+
+        <!-- HÀNG CODE 2 VÀ TIME 2 -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editCode2">CODE 2:</label>
+                <input type="text" id="editCode2" placeholder="VD: RA" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label for="editTime2">TIME 2 (Phút):</label>
+                <input type="number" id="editTime2" placeholder="VD: 10">
+            </div>
+        </div>
+
         <div class="modal-buttons">
             <button class="btn btn-save" onclick="saveAtaAtd()">LƯU CẬP NHẬT</button>
             <button class="btn-cancel" onclick="closeUpdatePopup()">Hủy bỏ</button>
@@ -278,12 +318,9 @@
 
     function getTimeColor(actual, est) {
         if (!actual || actual === "-" || !est || est === "-") return "#212529";
-        
         const actualMinutes = timeToMinutes(actual);
         const estMinutes = timeToMinutes(est);
-
         if (actualMinutes === 0 || estMinutes === 0) return "#212529";
-
         return actualMinutes <= estMinutes ? "#28a745" : "#dc3545";
     }
 
@@ -376,8 +413,15 @@
             alert("Vui lòng chọn một chuyến bay!");
             return;
         }
-        document.getElementById("editAta").value = selectedRowObject.ata === "-" ? "" : selectedRowObject.ata;
-        document.getElementById("editAtd").value = selectedRowObject.atd === "-" ? "" : selectedRowObject.atd;
+        
+        document.getElementById("editAcReg").value = selectedRowObject.acReg === "-" ? "" : selectedRowObject.acReg;
+        document.getElementById("editAta").value   = selectedRowObject.ata === "-" ? "" : selectedRowObject.ata;
+        document.getElementById("editAtd").value   = selectedRowObject.atd === "-" ? "" : selectedRowObject.atd;
+        document.getElementById("editCode1").value = selectedRowObject.code1 || "";
+        document.getElementById("editTime1").value = selectedRowObject.time1 || "";
+        document.getElementById("editCode2").value = selectedRowObject.code2 || "";
+        document.getElementById("editTime2").value = selectedRowObject.time2 || "";
+
         document.getElementById("updatePopup").style.display = "flex";
     }
 
@@ -386,16 +430,17 @@
     }
 
     async function saveAtaAtd() {
-        const newAta = document.getElementById("editAta").value.trim();
-        const newAtd = document.getElementById("editAtd").value.trim();
-
         const payload = {
             action: "updateAtaAtd",
             date: selectedRowObject.date,
-            acReg: selectedRowObject.acReg,
             depFlight: selectedRowObject.depFlight,
-            ata: newAta,
-            atd: newAtd
+            acReg: document.getElementById("editAcReg").value.trim().toUpperCase(),
+            ata: document.getElementById("editAta").value.trim(),
+            atd: document.getElementById("editAtd").value.trim(),
+            code1: document.getElementById("editCode1").value.trim().toUpperCase(),
+            time1: document.getElementById("editTime1").value.trim(),
+            code2: document.getElementById("editCode2").value.trim().toUpperCase(),
+            time2: document.getElementById("editTime2").value.trim()
         };
 
         closeUpdatePopup();
