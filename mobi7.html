@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MVT Flight Data Mobile</title>
-        <!-- Icon / Favicon -->
-    <link rel="icon" type="image/png" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/kscb.png">
-    <link rel="apple-touch-icon" href="https://votrungdung17-hue.github.io/fastandsmile.github.io/kscb.png">
     <style>
         * {
             box-sizing: border-box;
@@ -85,12 +82,29 @@
         .card-row-top {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #e4e6eb;
+            padding-right: 20px; /* Nhường chỗ cho dấu check mark */
         }
-        .flight-no { font-weight: bold; font-size: 15px; color: #0056b3; }
+        .flight-info-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .flight-no { font-weight: bold; font-size: 14px; color: #0056b3; }
+        .pax-badge {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #bbdefb;
+        }
         .ac-reg { background: #e4e6eb; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 12px; }
 
+        /* KHUNG HIỂN THỊ 5 CỘT */
         .card-row-details {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; font-size: 11px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; text-align: center; font-size: 11px;
         }
         .detail-item { background: #f8f9fa; padding: 4px 2px; border-radius: 4px; }
         .detail-item .label { color: #65676b; font-size: 10px; display: block; margin-bottom: 1px; }
@@ -208,11 +222,15 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="editAta">Giờ ATA (Đến):</label>
+                <label for="editAta">Giờ ATA:</label>
                 <input type="text" id="editAta" maxlength="5" placeholder="14:25" oninput="formatTimeInput(this)">
             </div>
             <div class="form-group">
-                <label for="editAtd">Giờ ATD (Đi):</label>
+                <label for="editFht">Giờ FHT:</label>
+                <input type="text" id="editFht" maxlength="5" placeholder="14:50" oninput="formatTimeInput(this)">
+            </div>
+            <div class="form-group">
+                <label for="editAtd">Giờ ATD:</label>
                 <input type="text" id="editAtd" maxlength="5" placeholder="15:10" oninput="formatTimeInput(this)">
             </div>
         </div>
@@ -327,6 +345,30 @@
         return actualMinutes <= estMinutes ? "#28a745" : "#dc3545";
     }
 
+    function getFhtColor(fht, ata, etd) {
+        if (!fht || fht === "-") return "#212529";
+        
+        const fhtMin = timeToMinutes(fht);
+        const ataMin = timeToMinutes(ata);
+        const etdMin = timeToMinutes(etd);
+        
+        if (fhtMin === 0) return "#212529";
+
+        if (etdMin > 0) {
+            let diffEtd = fhtMin - etdMin;
+            if (diffEtd < -1000) diffEtd += 1440;
+            if (diffEtd <= 0) return "#28a745";
+        }
+
+        if (ataMin > 0) {
+            let diffAta = fhtMin - ataMin;
+            if (diffAta < -1000) diffAta += 1440;
+            if (diffAta <= 35) return "#28a745";
+        }
+
+        return "#dc3545";
+    }
+
     async function loadFlightData(selectedDate) {
         const container = document.getElementById("flightContainer");
         container.innerHTML = `<div style="text-align:center; padding: 20px; color: #888;">Đang tải dữ liệu ngày ${selectedDate}...</div>`;
@@ -355,6 +397,7 @@
                     ata:       row[8]  || "-", 
                     depFlight: row[9]  || "-", 
                     to:        row[10] || "",
+                    fht:       row[14] || "-",
                     etd:       row[12] || "-", 
                     atd:       row[13] || "-",
                     pushback:  row[15] || "",
@@ -363,19 +406,29 @@
                     code2:     row[21] || "",
                     time2:     row[22] || "",
                     config:    row[25] || "",
-                    details:   row[28] || ""
+                    details:   row[28] || "",
+                    adult:     row[29] !== undefined && row[29] !== "" ? row[29] : "-", // ADULT
+                    children:  row[30] !== undefined && row[30] !== "" ? row[30] : "-", // CHILDREN
+                    baby:      row[31] !== undefined && row[31] !== "" ? row[31] : "-"  // BABY
                 };
 
                 const ataColor = getTimeColor(flightItem.ata, flightItem.eta);
+                const fhtColor = getFhtColor(flightItem.fht, flightItem.ata, flightItem.etd);
                 const atdColor = getTimeColor(flightItem.atd, flightItem.etd);
 
                 const card = document.createElement("div");
                 card.className = "flight-card";
                 card.onclick = () => selectCard(card, flightItem);
 
+                /* TẠO HIỂN THỊ PAX A/C/I */
+                const paxText = `${flightItem.adult}/${flightItem.children}/${flightItem.baby}`;
+
                 card.innerHTML = `
                     <div class="card-row-top">
-                        <span class="flight-no">${flightItem.depFlight} (${flightItem.arrFlight})</span>
+                        <div class="flight-info-left">
+                            <span class="flight-no">${flightItem.depFlight} (${flightItem.arrFlight})</span>
+                            <span class="pax-badge" title="Adult / Children / Baby">${paxText}</span>
+                        </div>
                         <span class="ac-reg">${flightItem.acReg}</span>
                     </div>
                     <div class="card-row-details">
@@ -390,6 +443,10 @@
                         <div class="detail-item">
                             <span class="label">ETD</span>
                             <span class="val">${flightItem.etd}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">FHT</span>
+                            <span class="val" style="color:${fhtColor};">${flightItem.fht}</span>
                         </div>
                         <div class="detail-item">
                             <span class="label">ATD</span>
@@ -419,6 +476,7 @@
         
         document.getElementById("editAcReg").value = selectedRowObject.acReg === "-" ? "" : selectedRowObject.acReg;
         document.getElementById("editAta").value   = selectedRowObject.ata === "-" ? "" : selectedRowObject.ata;
+        document.getElementById("editFht").value   = selectedRowObject.fht === "-" ? "" : selectedRowObject.fht;
         document.getElementById("editAtd").value   = selectedRowObject.atd === "-" ? "" : selectedRowObject.atd;
         document.getElementById("editCode1").value = selectedRowObject.code1 || "";
         document.getElementById("editTime1").value = selectedRowObject.time1 || "";
@@ -439,6 +497,7 @@
             depFlight: selectedRowObject.depFlight,
             acReg: document.getElementById("editAcReg").value.trim().toUpperCase(),
             ata: document.getElementById("editAta").value.trim(),
+            fht: document.getElementById("editFht").value.trim(),
             atd: document.getElementById("editAtd").value.trim(),
             code1: document.getElementById("editCode1").value.trim().toUpperCase(),
             time1: document.getElementById("editTime1").value.trim(),
