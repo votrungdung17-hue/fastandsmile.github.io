@@ -653,12 +653,20 @@ Details : ${obj.details || ""}`;
         }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+   document.addEventListener("DOMContentLoaded", () => {
         const datePicker = document.getElementById("datePicker");
         const todayStr = getTodayString();
         datePicker.value = todayStr;
 
         loadFlightData(todayStr);
+
+        // Tự động tải lại dữ liệu khi mở lại ứng dụng/chuyển tab
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                const currentDate = datePicker.value || getTodayString();
+                loadFlightData(currentDate);
+            }
+        });
 
         datePicker.addEventListener("change", (e) => {
             if (e.target.value) loadFlightData(e.target.value);
