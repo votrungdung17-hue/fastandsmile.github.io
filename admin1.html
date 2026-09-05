@@ -1551,6 +1551,10 @@ function upload() {
 <button type="button" onclick="showImmiPopup()">
     👮‍♂️ IMMI
 </button>
+<!-- THÊM NÚT CAAV NÀY NGAY BÊN CẠNH -->
+<button type="button" onclick="showCaavPopup()" style="background: #17a2b8; color: white; font-weight: bold;">
+    ✈️ CAAV
+</button>
 <div id="immiPopup" class="popup">
 
     <div class="popup-box" style="width:350px">
@@ -1605,6 +1609,41 @@ function upload() {
 
     </div>
 
+</div>
+<!-- POPUP EXPORT CAAV (TỪ NGÀY - ĐẾN NGÀY) -->
+<div id="caavPopup" class="popup" style="display:none;">
+  <div class="popup-box" style="width:360px; padding:20px; border-radius:8px;">
+    <h3 style="margin-top:0; text-align:center;">✈️ EXPORT CAAV (HHK)</h3>
+
+    <div style="margin-top: 15px;">
+      <label style="font-weight: bold; display: block; margin-bottom: 3px;">Từ ngày:</label>
+      <input type="date" id="caavFromDate" style="width: 100%; padding: 6px; box-sizing: border-box;">
+    </div>
+
+    <div style="margin-top: 10px;">
+      <label style="font-weight: bold; display: block; margin-bottom: 3px;">Đến ngày:</label>
+      <input type="date" id="caavToDate" style="width: 100%; padding: 6px; box-sizing: border-box;">
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:40px; margin-top:20px; margin-bottom:20px;">
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold;">
+        <input type="checkbox" id="caavVN" checked> VN
+      </label>
+
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold;">
+        <input type="checkbox" id="caavBL" checked> BL
+      </label>
+    </div>
+
+    <div class="popup-actions" style="display:flex; justify-content:flex-end; gap:10px;">
+      <button type="button" onclick="exportCAAV()" style="background: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight:bold;">
+        📤 EXPORT
+      </button>
+      <button type="button" onclick="closeCaavPopup()" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+        ❌ CLOSE
+      </button>
+    </div>
+  </div>
 </div>
  
 <div id="lomoResult" style="margin-top:10px;"></div>
@@ -5411,6 +5450,73 @@ async function thongKePBB() {
   } finally {
     showLoading(false);
   }
+}
+</script>
+<script>
+// Hiển thị Popup CAAV (Tự động gán mặc định Từ ngày & Đến ngày = Ngày hiện tại trên Form)
+function showCaavPopup() {
+  const currentDate = document.getElementById("ngay").value || new Date().toISOString().split('T')[0];
+  document.getElementById("caavFromDate").value = currentDate;
+  document.getElementById("caavToDate").value = currentDate;
+  document.getElementById("caavPopup").style.display = "flex";
+}
+
+function closeCaavPopup() {
+  document.getElementById("caavPopup").style.display = "none";
+}
+
+// Gửi Request Xuất CAAV theo khoảng thời gian
+function exportCAAV() {
+  const fromDate = document.getElementById("caavFromDate").value;
+  const toDate = document.getElementById("caavToDate").value;
+  const isVN = document.getElementById("caavVN").checked;
+  const isBL = document.getElementById("caavBL").checked;
+
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ 'Từ ngày' và 'Đến ngày'!");
+    return;
+  }
+  
+  if (fromDate > toDate) {
+    alert("'Từ ngày' không được lớn hơn 'Đến ngày'!");
+    return;
+  }
+
+  if (!isVN && !isBL) {
+    alert("Vui lòng chọn ít nhất một hãng (VN hoặc BL)!");
+    return;
+  }
+
+  // Hiển thị Overlay Loading
+  const loading = document.getElementById("loadingOverlay") || document.getElementById("loading");
+  if (loading) loading.style.display = "flex";
+
+  const payload = {
+    action: "exportCAAV",
+    fromDate: fromDate,
+    toDate: toDate,
+    exportVN: isVN,
+    exportBL: isBL
+  };
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (loading) loading.style.display = "none";
+    if (res.status === "success" && res.url) {
+      window.open(res.url, "_blank");
+      closeCaavPopup();
+    } else {
+      alert("Lỗi xuất CAAV: " + (res.error || "Không lấy được liên kết tải file."));
+    }
+  })
+  .catch(err => {
+    if (loading) loading.style.display = "none";
+    alert("Có lỗi kết nối: " + err.message);
+  });
 }
 </script>
 <script>
