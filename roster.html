@@ -98,13 +98,18 @@
             opacity: 1;
         }
 
-        .sticky-col-0 { position: sticky; left: 0; z-index: 20; background-color: white; }
-        .sticky-col-1 { position: sticky; left: 48px; z-index: 20; background-color: white; }
-        .sticky-col-2 { position: sticky; left: 144px; z-index: 20; background-color: white; }
-
-        .sticky-header-0 { position: sticky; left: 0; z-index: 30; }
-        .sticky-header-1 { position: sticky; left: 48px; z-index: 30; }
-        .sticky-header-2 { position: sticky; left: 144px; z-index: 30; }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 20;
+            box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+        }
+        .sticky-col-header {
+            position: sticky;
+            left: 0;
+            z-index: 30;
+        }
 
         @media print {
             .no-print {
@@ -140,7 +145,6 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Header & Navigation -->
     <header class="bg-gradient-to-r from-aviation-dark via-aviation to-aviation-teal text-white shadow-lg no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
@@ -149,7 +153,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight uppercase">Đội Hỗ Trợ Hành Khách</h1>
-                    <p class="text-xs text-sky-200">Hệ Thống Phân Công & Quản Lý Lịch Trực Tuần Chuyên Nghiệp</p>
+                    <p class="text-xs text-sky-200">Hệ Thống Phân Công & Quản Lý Lịch Trực Tuần (Đồng bộ Google Sheet)</p>
                 </div>
             </div>
 
@@ -159,6 +163,11 @@
                     <i class="fa-solid fa-lock text-amber-300"></i>
                     <span>Chế độ: CHỈ XEM (Chưa mở khóa)</span>
                 </div>
+
+                <button id="btn-change-passcode" onclick="openChangePasscodeModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 shadow-md flex items-center bg-amber-500 hover:bg-amber-600 text-slate-950 hidden">
+                    <i class="fa-solid fa-key mr-1.5 text-sm"></i>
+                    <span>Đổi Passcode</span>
+                </button>
 
                 <button id="btn-lock-toggle" onclick="toggleEditMode()" class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 shadow-md flex items-center bg-sky-500 hover:bg-sky-600 text-slate-950">
                     <i id="btn-lock-icon" class="fa-solid fa-lock-open mr-1.5 text-sm"></i>
@@ -187,9 +196,7 @@
 
         <!-- TAB 1: SCHEDULE VIEW -->
         <section id="tab-schedule" class="space-y-5">
-            <!-- Toolbar Panel -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print flex flex-wrap gap-4 items-center justify-between">
-                
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center space-x-2 bg-slate-50 border border-slate-300 rounded-lg p-1.5 px-3">
                         <i class="fa-regular fa-calendar text-aviation-teal"></i>
@@ -197,7 +204,7 @@
                         <input type="date" id="week-start-date" onchange="updateWeekDates()" class="bg-transparent text-sm font-bold text-slate-700 focus:outline-none cursor-pointer">
                     </div>
                     <div id="week-label-display" class="text-sm font-semibold text-aviation px-3 py-1.5 bg-sky-50 rounded-lg border border-sky-200">
-                        Tuần --: --/--/---- - --/--/----
+                        Tuần 40: 28/09/2026 - 04/10/2026
                     </div>
                 </div>
 
@@ -207,61 +214,61 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <button id="btn-sync-sheets" onclick="syncToGoogleSheets()" disabled class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
-                        <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Đồng Bộ Google Sheets
-                    </button>
                     <button id="btn-auto-assign" onclick="autoAssignShifts()" disabled class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
                         <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Tự động phân ca
                     </button>
                     <button id="btn-clear-schedule" onclick="clearAllShifts()" disabled class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed text-rose-600 border border-rose-200 rounded-lg text-xs font-medium transition flex items-center">
                         <i class="fa-solid fa-trash-can mr-1.5"></i>Xóa lịch
                     </button>
-                    <button onclick="exportToCSV()" class="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
-                        <i class="fa-solid fa-file-excel mr-1.5"></i>Xuất CSV
+                    <button onclick="exportToCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
+                        <i class="fa-solid fa-file-excel mr-1.5"></i>Xuất Excel
                     </button>
-                    <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
+                    <button onclick="window.print()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
                         <i class="fa-solid fa-print mr-1.5"></i>In Lịch
                     </button>
                 </div>
             </div>
 
-            <!-- Read Only Notice Banner -->
             <div id="read-only-banner" class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-lg flex items-center justify-between text-xs text-amber-800 no-print">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-shield-halved text-amber-500 text-base"></i>
-                    <span>Bạn đang ở <strong>Chế độ Xem lịch</strong>. Nhấp vào nút <strong>"Mở Khóa Chỉnh Sửa"</strong> ở góc phải trên và nhập passcode để phân ca và đồng bộ.</span>
+                    <span>Bạn đang ở <strong>Chế độ Xem lịch</strong>. Nhấp vào nút <strong>"Mở Khóa Chỉnh Sửa"</strong> để xếp lịch. Dữ liệu sẽ đồng bộ lên Google Sheet.</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="openChangePasscodeModal()" class="text-amber-700 underline font-semibold hover:text-amber-900">
+                        <i class="fa-solid fa-key mr-1"></i>Đổi passcode
+                    </button>
                 </div>
             </div>
 
-            <!-- Print Header -->
             <div class="hidden print:block text-center mb-6">
                 <h1 class="text-2xl font-bold uppercase tracking-wider text-slate-900">BẢNG XẾP LỊCH TRỰC TUẦN - ĐỘI HỖ TRỢ HÀNH KHÁCH</h1>
-                <p id="print-week-range" class="text-sm font-medium text-slate-700 mt-1">Thời gian: --/--/---- - --/--/----</p>
+                <p id="print-week-range" class="text-sm font-medium text-slate-700 mt-1">Thời gian: 28/09/2026 - 04/10/2026</p>
             </div>
 
-            <!-- Schedule Table Container -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-full-width">
                 <div class="overflow-x-auto custom-scrollbar max-h-[680px]">
                     <table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider sticky top-0 z-30">
-                                <th class="p-3 font-semibold text-center w-12 border-b border-slate-700 sticky-header-0 bg-slate-800">STT</th>
-                                <th class="p-3 font-semibold w-24 border-b border-slate-700 sticky-header-1 bg-slate-800">Mã NV</th>
-                                <th class="p-3 font-semibold w-48 border-b border-slate-700 sticky-header-2 bg-slate-800">Họ và Tên</th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T2 <span id="th-d0" class="block text-[10px] text-sky-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T3 <span id="th-d1" class="block text-[10px] text-sky-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T4 <span id="th-d2" class="block text-[10px] text-sky-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T5 <span id="th-d3" class="block text-[10px] text-sky-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T6 <span id="th-d4" class="block text-[10px] text-sky-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-amber-300">T7 <span id="th-d5" class="block text-[10px] text-amber-300 font-normal">--/--</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-rose-300">CN <span id="th-d6" class="block text-[10px] text-rose-300 font-normal">--/--</span></th>
+                                <th class="p-3 font-semibold text-center w-12 border-b border-slate-700 sticky-col-header bg-slate-800">STT</th>
+                                <th class="p-3 font-semibold w-24 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 48px;">Mã NV</th>
+                                <th class="p-3 font-semibold w-48 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 144px;">Họ và Tên</th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T2 <span id="th-d0" class="block text-[10px] text-sky-300 font-normal">28/09</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T3 <span id="th-d1" class="block text-[10px] text-sky-300 font-normal">29/09</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T4 <span id="th-d2" class="block text-[10px] text-sky-300 font-normal">30/09</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T5 <span id="th-d3" class="block text-[10px] text-sky-300 font-normal">01/10</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T6 <span id="th-d4" class="block text-[10px] text-sky-300 font-normal">02/10</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-amber-300">T7 <span id="th-d5" class="block text-[10px] text-amber-300 font-normal">03/10</span></th>
+                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-rose-300">CN <span id="th-d6" class="block text-[10px] text-rose-300 font-normal">04/10</span></th>
                                 <th class="p-3 font-semibold text-center w-20 border-b border-slate-700 bg-slate-900">Tổng Ca</th>
                             </tr>
                         </thead>
-                        <tbody id="schedule-table-body" class="divide-y divide-slate-200 text-xs text-slate-700"></tbody>
+                        <tbody id="schedule-table-body" class="divide-y divide-slate-200 text-xs text-slate-700">
+                        </tbody>
                         <tfoot class="bg-slate-100 font-semibold text-xs border-t-2 border-slate-300 text-slate-800 sticky bottom-0 z-20">
                             <tr>
-                                <td colspan="3" class="p-3 text-right sticky-col-0 bg-slate-100 font-bold">Tổng NV Đi Làm / Ngày:</td>
+                                <td colspan="3" class="p-3 text-right sticky-col bg-slate-100 font-bold" style="left:0;">Tổng NV Đi Làm / Ngày:</td>
                                 <td id="daily-count-0" class="p-2 text-center text-aviation font-bold">0</td>
                                 <td id="daily-count-1" class="p-2 text-center text-aviation font-bold">0</td>
                                 <td id="daily-count-2" class="p-2 text-center text-aviation font-bold">0</td>
@@ -276,12 +283,12 @@
                 </div>
             </div>
 
-            <!-- Shift Legend -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
                     <i class="fa-solid fa-circle-info text-sky-500 mr-1.5"></i>Chú Thích Ký Hiệu Ca & Màu Sắc
                 </h3>
-                <div class="flex flex-wrap gap-2 text-xs" id="legend-container"></div>
+                <div class="flex flex-wrap gap-2 text-xs" id="legend-container">
+                </div>
             </div>
         </section>
 
@@ -290,7 +297,7 @@
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Danh Sách Nhân Viên Đội Hỗ Trợ Hành Khách</h2>
-                    <p class="text-xs text-slate-500">Thêm, sửa thông tin nhân viên trong đội ngũ (Yêu cầu Quản trị viên)</p>
+                    <p class="text-xs text-slate-500">Thêm, sửa thông tin nhân viên trong đội ngũ</p>
                 </div>
                 <button id="btn-add-staff" onclick="openStaffModal()" disabled class="px-4 py-2 bg-aviation hover:bg-aviation-dark disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition shadow-sm flex items-center">
                     <i class="fa-solid fa-user-plus mr-2"></i>Thêm Nhân Viên
@@ -307,7 +314,8 @@
                             <th class="p-3 w-32 text-center">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="staff-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    <tbody id="staff-table-body" class="divide-y divide-slate-100 text-slate-700">
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -317,14 +325,15 @@
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Danh Mục Các Ca Trực & Khung Giờ</h2>
-                    <p class="text-xs text-slate-500">Quản lý các mã ca trực và loại nghỉ phép (Yêu cầu Quản trị viên)</p>
+                    <p class="text-xs text-slate-500">Quản lý các mã ca trực và loại nghỉ phép</p>
                 </div>
                 <button id="btn-add-shift" onclick="openShiftModal()" disabled class="px-4 py-2 bg-aviation hover:bg-aviation-dark disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition shadow-sm flex items-center">
                     <i class="fa-solid fa-clock-plus mr-2"></i>Thêm Ca Mới
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="shifts-cards-container"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="shifts-cards-container">
+            </div>
         </section>
 
     </main>
@@ -353,6 +362,52 @@
                 <div class="flex space-x-2 pt-1">
                     <button type="button" onclick="closePasscodeModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Hủy</button>
                     <button type="submit" class="w-1/2 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow-md">Xác Nhận</button>
+                </div>
+            </form>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <button onclick="switchToChangePasscodeFromUnlock()" class="text-amber-600 hover:text-amber-700 font-semibold flex items-center">
+                    <i class="fa-solid fa-key mr-1"></i>Đổi Passcode
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CHANGE PASSCODE -->
+    <div id="change-passcode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative border border-slate-100">
+            <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-100">
+                <div class="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
+                    <i class="fa-solid fa-key text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Đổi Passcode Bảo Vệ</h3>
+                    <p class="text-xs text-slate-500">Thay đổi mật khẩu xác thực quyền Quản trị viên</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleChangePasscode(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Passcode Hiện Tại (*)</label>
+                    <input type="password" id="old-passcode-input" required placeholder="Nhập passcode đang dùng..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Passcode Mới (*)</label>
+                    <input type="password" id="new-passcode-input" required minlength="3" placeholder="Nhập passcode mới (tối thiểu 3 ký tự)..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Xác Nhận Passcode Mới (*)</label>
+                    <input type="password" id="confirm-passcode-input" required minlength="3" placeholder="Nhập lại passcode mới..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <p id="change-passcode-error" class="text-xs text-rose-600 font-medium hidden flex items-center space-x-1">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="change-passcode-error-text">Thông báo lỗi!</span>
+                </p>
+
+                <div class="flex justify-end space-x-2 pt-3">
+                    <button type="button" onclick="closeChangePasscodeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Hủy Bỏ</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs shadow-md">Cập Nhật Passcode</button>
                 </div>
             </form>
         </div>
@@ -417,133 +472,191 @@
     </div>
 
     <script>
-        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbziOav3ewNFUJ-iDXutXns8z4uOghbbu_kQT9GFg54btVi4L-nJBZDrDc4F40Xdo9hD/exec";
+        // GOOGLE APPS SCRIPT WEB APP LINK (Direct Sheets Integration)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZBc37yjb10bOn_jUcIPvi0WfWLSsqSqz1r6UTJa8BBtTW27DuwxcYFDfX5XaX5uXTpA/exec";
 
-        const DEFAULT_STAFF = [
-            { id: "032476", name: "Nguyễn Bạch Huệ" },
-            { id: "039147", name: "Lương Kim Đoan" },
-            { id: "040984", name: "Cổ Thuỵ Loan Anh" },
-            { id: "040943", name: "Huỳnh Hoàn Hảo" },
-            { id: "038970", name: "Trần Quốc Phong" },
-            { id: "039068", name: "Nguyễn Thị Diễm Kiều" },
-            { id: "040951", name: "Lê Quốc Quỳnh" },
-            { id: "039082", name: "Đinh Thị Kim Ngân" },
-            { id: "029650", name: "Nguyễn Văn Hậu" },
-            { id: "040955", name: "Bùi Thị Ngọc Dung" },
-            { id: "040954", name: "Phạm Thị Phi Nhung" },
-            { id: "039007", name: "Đàm Nguyễn Trọng Nhân" },
-            { id: "039072", name: "Lâm Thị Thuý Hoa" },
-            { id: "040957", name: "Thạch Phương Nam" },
-            { id: "040949", name: "Lê Quang Vinh" },
-            { id: "039005", name: "Nguyễn Quỳnh Như" },
-            { id: "038978", name: "Đào Thị Thu Hà" }
-        ];
+        // Fallback Default Data
+        const DEFAULT_STAFF = [];
 
-        const DEFAULT_SHIFTS = [
-            { code: "C001", time: "12:00-20:00", type: "work" },
-            { code: "C002", time: "12:00-21:00", type: "work" },
-            { code: "C003", time: "13:00-21:00", type: "work" },
-            { code: "C004", time: "13:30-21:30", type: "work" },
-            { code: "C005", time: "13:30-22:00", type: "work" },
-            { code: "C006", time: "14:00-02:00", type: "work" },
-            { code: "C007", time: "14:00-06:00", type: "work" },
-            { code: "C008", time: "14:00-21:00", type: "work" },
-            { code: "C009", time: "14:00-22:00", type: "work" },
-            { code: "C010", time: "15:00-23:00", type: "work" },
-            { code: "C011", time: "15:30-23:00", type: "work" },
-            { code: "C012", time: "17:00-01:00", type: "work" },
-            { code: "C013", time: "17:00-02:00", type: "work" },
-            { code: "C014", time: "17:00-08:00", type: "work" },
-            { code: "C015", time: "17:30-01:30", type: "work" },
-            { code: "C016", time: "17:30-02:30", type: "work" },
-            { code: "C017", time: "17:30-07:30", type: "work" },
-            { code: "C018", time: "18:00-02:00", type: "work" },
-            { code: "C019", time: "18:00-06:00", type: "work" },
-            { code: "C020", time: "18:00-22:00", type: "work" },
-            { code: "OFF", time: "Nghỉ tuần", type: "off" },
-            { code: "ROFF", time: "Nghỉ bù", type: "off" },
-            { code: "AL", time: "Phép năm", type: "leave" },
-            { code: "SL", time: "Nghỉ ốm", type: "leave" }
-        ];
+        const DEFAULT_SHIFTS = [];
 
-        const STORAGE_KEY_STAFF = 'aviation_staff_list_v4';
-        const STORAGE_KEY_SHIFTS = 'aviation_shifts_list_v4';
-        const STORAGE_KEY_SCHEDULES = 'aviation_schedules_data_v4';
-        const STORAGE_KEY_PASSCODE = 'aviation_admin_passcode_v4';
-
-        let staffList = JSON.parse(localStorage.getItem(STORAGE_KEY_STAFF)) || DEFAULT_STAFF;
-        let shiftList = JSON.parse(localStorage.getItem(STORAGE_KEY_SHIFTS)) || DEFAULT_SHIFTS;
-        let scheduleData = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULES)) || {};
-        let storedPasscode = localStorage.getItem(STORAGE_KEY_PASSCODE) || "1234";
+        // Khai báo ở đầu file HTML (cùng chỗ khai báo staffList)
+let staffList = [];
+let isDataLoaded = false; // Cờ bảo vệ dữ liệu Google Sheet
+        let shiftList = [];
+        let scheduleData = {};
+        let storedPasscode = "1234";
 
         let isEditMode = false;
         let currentStartDate = '2026-09-28';
+        let currentTab = 'schedule';
 
-        window.onload = function() {
-            document.getElementById('week-start-date').value = currentStartDate;
-            updateWeekDates();
-            renderLegend();
-            renderScheduleTable();
-            renderStaffTable();
-            renderShiftsCards();
-            updateUIForMode();
-        };
+        function syncUrlState() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', currentTab);
+            params.set('date', currentStartDate);
+            const newUrl = window.location.pathname + '?' + params.toString();
+            window.history.replaceState({ path: newUrl }, '', newUrl);
+        }
 
-        async function syncToGoogleSheets() {
-            if (!isEditMode) return;
+        function loadStateFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            const dateParam = params.get('date');
 
-            const weekKey = currentStartDate;
-            const data = scheduleData[weekKey] || {};
-
-            const startDate = new Date(weekKey);
-            const firstJan = new Date(startDate.getFullYear(), 0, 1);
-            const numberOfDays = Math.floor((startDate - firstJan) / (24 * 60 * 60 * 1000));
-            const weekNumber = Math.ceil((numberOfDays + firstJan.getDay() + 1) / 7);
-            const weekName = "Tuần " + weekNumber;
-
-            const rows = staffList.map((staff, index) => {
-                const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
-                let workCount = 0;
-
-                shifts.forEach(sCode => {
-                    const found = shiftList.find(s => s.code === sCode);
-                    if (found && found.type === 'work') workCount++;
-                });
-
-                return [
-                    index + 1,
-                    staff.id,
-                    staff.name,
-                    ...shifts,
-                    workCount
-                ];
-            });
-
-            showToast("Đang đồng bộ dữ liệu lên Google Sheets...");
-
-            try {
-                const response = await fetch(GOOGLE_WEB_APP_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8",
-                    },
-                    body: JSON.stringify({ 
-                        week: weekName, 
-                        rows: rows 
-                    })
-                });
-
-                const result = await response.json();
-                if (result.result === "success") {
-                    showToast(`Đã đồng bộ lên trang '${weekName}' thành công!`);
-                } else {
-                    showToast("Lỗi từ Google Sheets: " + result.message, true);
-                }
-            } catch (error) {
-                showToast("Không thể kết nối tới Google Sheets Web App!", true);
-                console.error(error);
+            if (dateParam && !isNaN(Date.parse(dateParam))) {
+                currentStartDate = dateParam;
+            }
+            if (tabParam && ['schedule', 'staff', 'shifts'].includes(tabParam)) {
+                currentTab = tabParam;
             }
         }
+
+// 1. Tải Passcode từ Google Sheet khi vào trang
+async function loadDataFromGoogleSheet() {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
+
+        if (data.status === "success") {
+            // Nạp passcode từ tab "cauhinh" trên Sheet
+            if (data.passcode) {
+                storedPasscode = data.passcode.toString();
+            }
+
+            // Nạp Nhân viên
+            if (data.staffList && data.staffList.length > 0) {
+                staffList = data.staffList;
+            }
+
+            // Nạp Danh mục Ca
+            if (data.shiftList && data.shiftList.length > 0) {
+                shiftList = data.shiftList.map(s => ({
+                    code: s.id,
+                    time: s.time,
+                    type: s.color || "work"
+                }));
+            }
+
+            // Nạp dữ liệu Lịch trực
+            if (data.schedule) {
+                scheduleData = data.schedule;
+            }
+
+            renderStaffTable();
+            renderShiftsCards();
+            renderLegend();
+            renderScheduleTable();
+
+            isDataLoaded = true;
+            console.log("Đã tải xong toàn bộ dữ liệu & Passcode từ Google Sheet!");
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu từ Google Sheet:", error);
+    }
+}
+    // SAVE DIRECTLY TO GOOGLE SHEET
+async function saveToStorage() {
+    try {
+        showToast("Đang lưu trực tiếp lên Google Sheet...");
+        
+        // Tạo bảng ánh xạ Mã NV -> Tên NV
+        const staffMap = {};
+        staffList.forEach(s => { staffMap[s.id] = s.name; });
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "updateSchedule",
+                scheduleData: scheduleData,
+                staffMap: staffMap
+            })
+        });
+        
+        const res = await response.json();
+        if (res.status === "success") {
+            showToast("Đã lưu lịch làm việc & sinh tab Tuần mới thành công!");
+        } else {
+            showToast("Lỗi khi đồng bộ lên Google Sheet!", true);
+        }
+    } catch (error) {
+        console.error("Lỗi Google Sheet Sync:", error);
+        showToast("Lỗi kết nối tới Google Sheet!", true);
+    }
+}
+window.onload = async function() {
+    loadStateFromUrl();
+    document.getElementById('week-start-date').value = currentStartDate;
+    switchTab(currentTab, false);
+    updateWeekDates();
+    
+    // Gán dữ liệu mặc định ban đầu làm fallback
+    shiftList = DEFAULT_SHIFTS;
+    staffList = DEFAULT_STAFF;
+
+    renderLegend();
+    renderScheduleTable();
+    renderStaffTable();
+    renderShiftsCards();
+    updateUIForMode();
+
+    // Chỉ thực hiện TẢI DỮ LIỆU từ Sheet về, không tự ý đẩy đè dữ liệu mặc định lên
+    await loadDataFromGoogleSheet();
+};
+// Hàm lưu (Thêm/Sửa) Nhân viên
+async function handleSaveStaff(e) {
+    e.preventDefault();
+    if (!isEditMode) return;
+
+    const editId = document.getElementById('staff-edit-id').value;
+    const code = document.getElementById('staff-code-input').value.trim();
+    const name = document.getElementById('staff-name-input').value.trim();
+
+    if (editId) {
+        const staff = staffList.find(s => s.id === editId);
+        if (staff) staff.name = name;
+    } else {
+        if (staffList.some(s => s.id === code)) {
+            alert("Mã nhân viên này đã tồn tại!");
+            return;
+        }
+        staffList.push({ id: code, name: name });
+    }
+
+    renderStaffTable();
+    renderScheduleTable();
+    closeStaffModal();
+
+    // Gửi dữ liệu vừa nhập lên Google Sheet
+    await syncStaffToSheet(staffList);
+}
+
+// Hàm Xóa Nhân viên
+async function deleteStaff(id) {
+    if (!isEditMode) return;
+    if (confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
+        // Xóa khỏi mảng local
+        staffList = staffList.filter(s => s.id !== id);
+        
+        renderStaffTable();
+        renderScheduleTable();
+        showToast("Đã xóa nhân viên!");
+
+        // Nếu xóa hết sạch nhân viên thì gửi mảng rỗng (Cần cho phép xóa sạch nếu cố ý)
+        // Gọi thẳng fetch để update khi xóa thật sự
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                contentType: 'application/json',
+                body: JSON.stringify({ action: 'updateStaff', staffData: staffList })
+            });
+        } catch (e) {
+            console.error("Lỗi xóa trên Sheet:", e);
+        }
+    }
+}
 
         function toggleEditMode() {
             if (isEditMode) {
@@ -579,14 +692,88 @@
             }
         }
 
+        function openChangePasscodeModal() {
+            document.getElementById('old-passcode-input').value = "";
+            document.getElementById('new-passcode-input').value = "";
+            document.getElementById('confirm-passcode-input').value = "";
+            document.getElementById('change-passcode-error').classList.add('hidden');
+            document.getElementById('change-passcode-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('old-passcode-input').focus(), 100);
+        }
+
+        function closeChangePasscodeModal() {
+            document.getElementById('change-passcode-modal').classList.add('hidden');
+        }
+
+        function switchToChangePasscodeFromUnlock() {
+            closePasscodeModal();
+            openChangePasscodeModal();
+        }
+
+       // 2. Hàm Đổi Passcode và Lưu trực tiếp lên Sheet
+async function handleChangePasscode(e) {
+    e.preventDefault();
+    const oldPass = document.getElementById('old-passcode-input').value;
+    const newPass = document.getElementById('new-passcode-input').value;
+    const confirmPass = document.getElementById('confirm-passcode-input').value;
+    const errorEl = document.getElementById('change-passcode-error');
+    const errorText = document.getElementById('change-passcode-error-text');
+
+    if (oldPass !== storedPasscode) {
+        errorText.innerText = "Passcode hiện tại không chính xác!";
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    if (newPass !== confirmPass) {
+        errorText.innerText = "Passcode mới và Xác nhận không trùng khớp!";
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    if (newPass.length < 3) {
+        errorText.innerText = "Passcode mới phải dài ít nhất 3 ký tự!";
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    // Cập nhật biến tạm local
+    storedPasscode = newPass;
+    closeChangePasscodeModal();
+    showToast("Đang đồng bộ Passcode mới lên Google Sheet...");
+
+    // Gửi request cập nhật lên tab cauhinh
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "updatePasscode",
+                passcode: newPass
+            })
+        });
+
+        const res = await response.json();
+        if (res.status === "success") {
+            showToast("Đã đổi Passcode bảo vệ & lưu lên Google Sheet!");
+        } else {
+            showToast("Lỗi đồng bộ passcode lên Sheet!", true);
+        }
+    } catch (err) {
+        console.error("Lỗi đổi passcode:", err);
+        showToast("Lỗi kết nối tới Google Sheet!", true);
+    }
+}
+
         function updateUIForMode() {
             const badge = document.getElementById('mode-status-badge');
             const btnLockToggle = document.getElementById('btn-lock-toggle');
             const btnLockText = document.getElementById('btn-lock-text');
             const btnLockIcon = document.getElementById('btn-lock-icon');
+            const btnChangePass = document.getElementById('btn-change-passcode');
             const banner = document.getElementById('read-only-banner');
 
-            const btnSync = document.getElementById('btn-sync-sheets');
             const btnAuto = document.getElementById('btn-auto-assign');
             const btnClear = document.getElementById('btn-clear-schedule');
             const btnAddStaff = document.getElementById('btn-add-staff');
@@ -600,9 +787,9 @@
                 btnLockText.innerText = "Khóa Chỉnh Sửa";
                 btnLockIcon.className = "fa-solid fa-lock mr-1.5 text-sm";
 
+                btnChangePass.classList.remove('hidden');
                 banner.classList.add('hidden');
 
-                btnSync.disabled = false;
                 btnAuto.disabled = false;
                 btnClear.disabled = false;
                 btnAddStaff.disabled = false;
@@ -615,9 +802,9 @@
                 btnLockText.innerText = "Mở Khóa Chỉnh Sửa";
                 btnLockIcon.className = "fa-solid fa-lock-open mr-1.5 text-sm";
 
+                btnChangePass.classList.add('hidden');
                 banner.classList.remove('hidden');
 
-                btnSync.disabled = true;
                 btnAuto.disabled = true;
                 btnClear.disabled = true;
                 btnAddStaff.disabled = true;
@@ -633,6 +820,7 @@
             const dateInput = document.getElementById('week-start-date').value;
             if (!dateInput) return;
             currentStartDate = dateInput;
+            syncUrlState();
 
             const startDate = new Date(dateInput);
             const dayOfWeek = startDate.getDay();
@@ -664,13 +852,6 @@
             document.getElementById('print-week-range').innerText = `Thời gian: ${mondayStr} - ${sundayStr}`;
 
             renderScheduleTable();
-        }
-
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY_STAFF, JSON.stringify(staffList));
-            localStorage.setItem(STORAGE_KEY_SHIFTS, JSON.stringify(shiftList));
-            localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(scheduleData));
-            localStorage.setItem(STORAGE_KEY_PASSCODE, storedPasscode);
         }
 
         function showToast(msg, isError = false) {
@@ -717,9 +898,9 @@
                 const userShifts = scheduleData[weekKey][staff.id];
                 let userShiftCount = 0;
 
-                let tdHtml = `<td class="p-2.5 text-center font-medium border-b border-slate-200 sticky-col-0 text-slate-500">${index + 1}</td>`;
-                tdHtml += `<td class="p-2.5 font-semibold text-slate-700 border-b border-slate-200 sticky-col-1">${staff.id}</td>`;
-                tdHtml += `<td class="p-2.5 font-medium text-slate-900 border-b border-slate-200 sticky-col-2">${staff.name}</td>`;
+                let tdHtml = `<td class="p-2.5 text-center font-medium border-b border-slate-200 sticky-col text-slate-500" style="left:0;">${index + 1}</td>`;
+                tdHtml += `<td class="p-2.5 font-semibold text-slate-700 border-b border-slate-200 sticky-col" style="left:48px;">${staff.id}</td>`;
+                tdHtml += `<td class="p-2.5 font-medium text-slate-900 border-b border-slate-200 sticky-col" style="left:144px;">${staff.name}</td>`;
 
                 for (let day = 0; day < 7; day++) {
                     const currentVal = userShifts[day] || "";
@@ -770,20 +951,20 @@
             document.getElementById('total-week-shifts').innerText = grandTotalShifts;
         }
 
-        function updateShift(staffId, dayIndex, shiftCode) {
+        async function updateShift(staffId, dayIndex, shiftCode) {
             if (!isEditMode) return;
             const weekKey = currentStartDate;
             if (!scheduleData[weekKey]) scheduleData[weekKey] = {};
             if (!scheduleData[weekKey][staffId]) scheduleData[weekKey][staffId] = ["", "", "", "", "", "", ""];
 
             scheduleData[weekKey][staffId][dayIndex] = shiftCode;
-            saveToStorage();
             renderScheduleTable();
+            await saveToStorage();
         }
 
-        function autoAssignShifts() {
+        async function autoAssignShifts() {
             if (!isEditMode) return;
-            if (!confirm("Hệ thống sẽ tự động phân ca hợp lý cho toàn bộ nhân viên. Bạn có muốn tiếp tục?")) return;
+            if (!confirm("Hệ thống sẽ tự động phân ca ngẫu nhiên cho toàn bộ nhân viên và lưu trực tiếp lên Google Sheet. Bạn có muốn tiếp tục?")) return;
 
             const weekKey = currentStartDate;
             scheduleData[weekKey] = {};
@@ -809,19 +990,17 @@
                 scheduleData[weekKey][staff.id] = assigned;
             });
 
-            saveToStorage();
             renderScheduleTable();
-            showToast("Đã phân bổ ca tự động thành công!");
+            await saveToStorage();
         }
 
-        function clearAllShifts() {
+        async function clearAllShifts() {
             if (!isEditMode) return;
-            if (!confirm("Bạn có chắc chắn muốn xóa tất cả ca trực trong tuần này không?")) return;
+            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ ca trực tuần này trên Google Sheet không?")) return;
             const weekKey = currentStartDate;
             scheduleData[weekKey] = {};
-            saveToStorage();
             renderScheduleTable();
-            showToast("Đã xóa toàn bộ ca làm việc tuần này.");
+            await saveToStorage();
         }
 
         function renderLegend() {
@@ -878,43 +1057,50 @@
             document.getElementById('staff-modal').classList.add('hidden');
         }
 
-        function handleSaveStaff(e) {
-            e.preventDefault();
-            if (!isEditMode) return;
-            const editId = document.getElementById('staff-edit-id').value;
-            const code = document.getElementById('staff-code-input').value.trim();
-            const name = document.getElementById('staff-name-input').value.trim();
+        async function handleSaveStaff(e) {
+    e.preventDefault();
+    if (!isEditMode) return;
+    const editId = document.getElementById('staff-edit-id').value;
+    const code = document.getElementById('staff-code-input').value.trim();
+    const name = document.getElementById('staff-name-input').value.trim();
 
-            if (editId) {
-                const staff = staffList.find(s => s.id === editId);
-                if (staff) staff.name = name;
-                showToast("Cập nhật thông tin nhân viên thành công!");
-            } else {
-                if (staffList.some(s => s.id === code)) {
-                    alert("Mã nhân viên này đã tồn tại!");
-                    return;
-                }
-                staffList.push({ id: code, name: name });
-                showToast("Thêm nhân viên mới thành công!");
-            }
-
-            saveToStorage();
-            renderStaffTable();
-            renderScheduleTable();
-            closeStaffModal();
+    if (editId) {
+        const staff = staffList.find(s => s.id === editId);
+        if (staff) staff.name = name;
+        showToast("Cập nhật thông tin nhân viên thành công!");
+    } else {
+        if (staffList.some(s => s.id === code)) {
+            alert("Mã nhân viên này đã tồn tại!");
+            return;
         }
+        staffList.push({ id: code, name: name });
+        showToast("Thêm nhân viên mới thành công!");
+    }
+
+    renderStaffTable();
+    renderScheduleTable();
+    closeStaffModal();
+    saveToStorage();
+
+    // Thêm dòng này để đẩy danh sách nhân viên sang Google Sheet
+    await syncStaffToSheet(staffList);
+}
 
         function editStaff(id) { openStaffModal(id); }
 
-        function deleteStaff(id) {
-            if (!isEditMode) return;
-            if (!confirm("Bạn có chắc chắn muốn xóa nhân viên này khỏi danh sách?")) return;
-            staffList = staffList.filter(s => s.id !== id);
-            saveToStorage();
-            renderStaffTable();
-            renderScheduleTable();
-            showToast("Đã xóa nhân viên.");
-        }
+        async function deleteStaff(id) {
+    if (!isEditMode) return;
+    if (confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
+        staffList = staffList.filter(s => s.id !== id);
+        renderStaffTable();
+        renderScheduleTable();
+        saveToStorage();
+        showToast("Đã xóa nhân viên!");
+
+        // Đồng bộ danh sách mới lên Google Sheet sau khi xóa
+        await syncStaffToSheet(staffList);
+    }
+}
 
         function renderShiftsCards() {
             const container = document.getElementById('shifts-cards-container');
@@ -966,51 +1152,57 @@
             document.getElementById('shift-modal').classList.add('hidden');
         }
 
-        function handleSaveShift(e) {
-            e.preventDefault();
-            if (!isEditMode) return;
-            const editCode = document.getElementById('shift-edit-code').value;
-            const code = document.getElementById('shift-code-field').value.trim().toUpperCase();
-            const time = document.getElementById('shift-time-field').value.trim();
-            const type = document.getElementById('shift-type-field').value;
+async function handleSaveShift(e) {
+    e.preventDefault();
+    if (!isEditMode) return;
 
-            if (editCode) {
-                const shift = shiftList.find(s => s.code === editCode);
-                if (shift) {
-                    shift.time = time;
-                    shift.type = type;
-                }
-                showToast("Cập nhật ca trực thành công!");
-            } else {
-                if (shiftList.some(s => s.code === code)) {
-                    alert("Mã ca này đã tồn tại!");
-                    return;
-                }
-                shiftList.push({ code, time, type });
-                showToast("Thêm mã ca mới thành công!");
-            }
+    const editCode = document.getElementById('shift-edit-code').value;
+    const code = document.getElementById('shift-code-field').value.trim().toUpperCase();
+    const time = document.getElementById('shift-time-field').value.trim();
+    const type = document.getElementById('shift-type-field').value;
 
-            saveToStorage();
-            renderShiftsCards();
-            renderLegend();
-            renderScheduleTable();
-            closeShiftModal();
+    if (editCode) {
+        const shift = shiftList.find(s => s.code === editCode);
+        if (shift) {
+            shift.time = time;
+            shift.type = type;
         }
-
-        function editShift(code) { openShiftModal(code); }
-
-        function deleteShift(code) {
-            if (!isEditMode) return;
-            if (!confirm("Bạn có chắc muốn xóa ca này khỏi danh mục?")) return;
-            shiftList = shiftList.filter(s => s.code !== code);
-            saveToStorage();
-            renderShiftsCards();
-            renderLegend();
-            renderScheduleTable();
-            showToast("Đã xóa mã ca.");
+        showToast("Cập nhật ca làm việc thành công!");
+    } else {
+        if (shiftList.some(s => s.code === code)) {
+            alert("Mã ca này đã tồn tại!");
+            return;
         }
+        shiftList.push({ code: code, time: time, type: type });
+        showToast("Thêm ca làm việc mới thành công!");
+    }
 
-        function switchTab(tabName) {
+    renderShiftsCards();
+    renderLegend();
+    renderScheduleTable();
+    closeShiftModal();
+
+    // Gửi mảng danh mục ca cập nhật lên Sheet
+    await syncShiftsToSheet(shiftList);
+}
+
+async function deleteShift(code) {
+    if (!isEditMode) return;
+    if (confirm("Bạn có chắc chắn muốn xóa ca làm việc này?")) {
+        shiftList = shiftList.filter(s => s.code !== code);
+        
+        renderShiftsCards();
+        renderLegend();
+        renderScheduleTable();
+        showToast("Đã xóa ca làm việc!");
+
+        // Gửi mảng mới lên Sheet sau khi xóa
+        await syncShiftsToSheet(shiftList);
+    }
+}
+
+        function switchTab(tabName, shouldSyncUrl = true) {
+            currentTab = tabName;
             ['schedule', 'staff', 'shifts'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`btn-tab-${t}`).classList.remove('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
@@ -1021,6 +1213,10 @@
             const activeBtn = document.getElementById(`btn-tab-${tabName}`);
             activeBtn.classList.add('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
             activeBtn.classList.remove('hover:bg-white/10', 'text-sky-100');
+
+            if (shouldSyncUrl) {
+                syncUrlState();
+            }
         }
 
         function exportToCSV() {
@@ -1058,8 +1254,67 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast("Đã tải xuống file CSV thành công!");
+            showToast("Đã xuất file Excel/CSV thành công!");
         }
+// Ví dụ hàm đẩy danh sách Nhân viên lên Google Sheet
+async function syncStaffToSheet(staffs) {
+    // LỚP BẢO VỆ 1: Chưa load xong dữ liệu từ Sheet thì KHÔNG ĐƯỢC phép đẩy lên
+    if (!isDataLoaded) {
+        console.warn("Chưa tải xong dữ liệu từ Google Sheet, chặn thao tác ghi đè!");
+        return;
+    }
+
+    // LỚP BẢO VỆ 2: Mảng rỗng thì KHÔNG ĐƯỢC gửi (tránh xóa nhầm Sheet)
+    if (!staffs || staffs.length === 0) {
+        console.warn("Danh sách rỗng, không gửi lên Sheet để tránh mất dữ liệu!");
+        return;
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            contentType: 'application/json',
+            body: JSON.stringify({
+                action: 'updateStaff',
+                staffData: staffs
+            })
+        });
+        const result = await response.json();
+        console.log("Cập nhật Google Sheet thành công:", result);
+    } catch (error) {
+        console.error("Lỗi khi gửi lên Google Sheet:", error);
+    }
+}
+
+async function syncShiftsToSheet(shifts) {
+    if (!isDataLoaded) return;
+    if (!shifts || shifts.length === 0) return;
+
+    // Chuẩn hóa dữ liệu tương thích với Apps Script (id, name, time, color)
+    const formattedShifts = shifts.map(s => ({
+        id: s.code || s.id || "",
+        name: s.code || s.id || "",
+        time: s.time || "",
+        color: s.type || s.color || ""
+    }));
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({
+                action: 'updateShifts',
+                shiftData: formattedShifts
+            })
+        });
+        
+        console.log("Đã đồng bộ danh mục ca sang Google Sheet thành công!");
+    } catch (error) {
+        console.error("Lỗi khi đồng bộ danh mục ca:", error);
+    }
+}
     </script>
 </body>
 </html>
