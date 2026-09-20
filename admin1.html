@@ -1695,7 +1695,108 @@ function upload() {
   </div>
 </div>
 
+<!-- STYLE TỐI ƯU CHO BẢNG 12 THÁNG -->
+<style>
+  .osp-otp-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+  }
 
+  .table-responsive-compact {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .stat-table-compact {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px; /* Thu nhỏ cỡ chữ để vừa 12 tháng */
+    text-align: center;
+    background: #fff;
+  }
+
+  .stat-table-compact th, 
+  .stat-table-compact td {
+    padding: 6px 4px; /* Giảm khoảng cách cell */
+    border: 1px solid #e0e0e0;
+    white-space: nowrap;
+  }
+
+  .stat-table-compact th {
+    background-color: #8A2BE2; /* Màu tím như giao diện của bạn */
+    color: white;
+    font-weight: bold;
+  }
+
+  .stat-table-compact tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .stat-table-compact .metric-name {
+    font-weight: bold;
+    text-align: left;
+    padding-left: 8px;
+    background-color: #f0f0f0;
+    min-width: 90px;
+  }
+
+  .stat-table-compact .highlight-val {
+    color: #0056b3;
+    font-weight: bold;
+  }
+</style>
+
+<!-- CONTAINER CHỨA 2 BẢNG -->
+<div class="osp-otp-container">
+
+  <!-- BẢNG OSP STATISTIC -->
+  <div class="main-box chart-panel" style="background: #fff; border: 1px solid #ccc; padding: 15px;">
+    <div class="section-header" style="background: #007bff; color: white; margin-bottom: 10px; display: inline-block; padding: 6px 15px; border-radius: 4px; font-weight: bold;">
+      📊 OSP STATISTIC
+    </div>
+    <div class="table-responsive-compact">
+      <table class="stat-table-compact" id="ospTable">
+        <thead>
+          <tr>
+            <th>Chỉ số</th>
+            <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+            <th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th>
+            <th style="background-color: #6a1b9a;">CẢ NĂM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="14">⏳ Đang tải dữ liệu OSP...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BẢNG OTP STATISTIC -->
+  <div class="main-box chart-panel" style="background: #fff; border: 1px solid #ccc; padding: 15px;">
+    <div class="section-header" style="background: #28a745; color: white; margin-bottom: 10px; display: inline-block; padding: 6px 15px; border-radius: 4px; font-weight: bold;">
+      📊 OTP STATISTIC
+    </div>
+    <div class="table-responsive-compact">
+      <table class="stat-table-compact" id="otpTable">
+        <thead>
+          <tr>
+            <th>Chỉ số</th>
+            <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+            <th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th>
+            <th style="background-color: #1b5e20;">CẢ NĂM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="14">⏳ Đang tải dữ liệu OTP...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
 
 <!-- CARGO TAB -->
 <div id="cargoTab" class="tab-content">
@@ -5903,7 +6004,90 @@ function copyBCTCN() {
 
   alert("Đã copy báo cáo");
 }
+// Hàm hỗ trợ định dạng số: làm tròn 1 chữ số thập phân và loại bỏ #DIV/0!
+function formatNumberValue(val) {
+  if (val === null || val === undefined || val === "" || String(val).includes("#DIV/0!")) {
+    return null; // Dữ liệu trống hoặc lỗi
+  }
+  
+  let num = parseFloat(val);
+  if (isNaN(num)) return null;
 
+  // Nếu là dạng tỷ lệ phần trăm thập phân (VD: 0.72195... -> hiển thị 72.2% hoặc 0.7)
+  // Dưới đây làm tròn lấy 1 chữ số thập phân tiêu chuẩn:
+  return Math.round(num * 10) / 10;
+}
+
+// Hàm render dữ liệu chính
+function renderYearlyTable(tableId, metricData) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!tbody) return;
+
+  if (!metricData || metricData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="14">Không có dữ liệu</td></tr>';
+    return;
+  }
+
+  let html = "";
+
+  metricData.forEach(row => {
+    const metricName = String(row[0] || "").trim();
+
+    // 1. Lọc bỏ các hàng không có tên chỉ số, hàng rỗng, hàng "THÁNG" hoặc chữ "OTP"
+    if (!metricName || metricName.toUpperCase() === "THÁNG" || metricName.toUpperCase() === "OTP") {
+      return; 
+    }
+
+    // Lấy 12 giá trị của 12 tháng (từ cột index 1 đến 12)
+    const monthValues = row.slice(1, 13);
+    
+    let sum = 0;
+    let count = 0;
+    let monthCellsHtml = "";
+
+    monthValues.forEach(val => {
+      const formattedVal = formatNumberValue(val);
+
+      if (formattedVal !== null) {
+        sum += formattedVal;
+        count++;
+        monthCellsHtml += `<td>${formattedVal}</td>`;
+      } else {
+        monthCellsHtml += `<td>-</td>`;
+      }
+    });
+
+    // 2. Tính Trung bình cộng cho cột "CẢ NĂM"
+    let yearlyAvg = count > 0 ? (Math.round((sum / count) * 10) / 10) : "-";
+
+    html += `<tr>`;
+    html += `<td class="metric-name">${metricName}</td>`;
+    html += monthCellsHtml;
+    html += `<td class="highlight-val">${yearlyAvg}</td>`;
+    html += `</tr>`;
+  });
+
+  tbody.innerHTML = html;
+}
+
+// Hàm gọi API lấy dữ liệu từ Google Sheet
+async function loadOSPOTPData() {
+  try {
+    const response = await fetch(API + "?action=getOSPOTP&t=" + Date.now());
+    const result = await response.json();
+
+    if (result && result.osp) {
+      renderYearlyTable("ospTable", result.osp);
+    }
+    if (result && result.otp) {
+      renderYearlyTable("otpTable", result.otp);
+    }
+  } catch (err) {
+    console.error("Lỗi tải dữ liệu OSP/OTP:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadOSPOTPData);
 </script>
 
 
