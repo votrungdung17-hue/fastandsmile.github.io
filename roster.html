@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<!-- Thư viện hỗ trợ định dạng Màu sắc & Style cho Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý & Xếp Lịch Làm Việc Tuần - Đội Hỗ Trợ Hành Khách</title>
@@ -220,9 +223,10 @@
                     <button id="btn-clear-schedule" onclick="clearAllShifts()" disabled class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed text-rose-600 border border-rose-200 rounded-lg text-xs font-medium transition flex items-center">
                         <i class="fa-solid fa-trash-can mr-1.5"></i>Xóa lịch
                     </button>
-                    <button onclick="exportToCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
-                        <i class="fa-solid fa-file-excel mr-1.5"></i>Xuất Excel
-                    </button>
+                    <!-- Cập nhật onclick="exportToExcel()" -->
+<button onclick="exportToExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
+    <i class="fa-solid fa-file-excel mr-1.5"></i>Xuất Excel
+</button>
                     <button onclick="window.print()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition shadow-sm flex items-center">
                         <i class="fa-solid fa-print mr-1.5"></i>In Lịch
                     </button>
@@ -1219,43 +1223,259 @@ async function deleteShift(code) {
             }
         }
 
-        function exportToCSV() {
-            const weekKey = currentStartDate;
-            const data = scheduleData[weekKey] || {};
+   async function exportToExcel() {
+    const weekKey = currentStartDate;
+    const data = scheduleData[weekKey] || {};
 
-            let csvContent = "\uFEFF";
-            csvContent += "STT,Mã NV,Họ và Tên,Thứ 2,Thứ 3,Thứ 4,Thứ 5,Thứ 6,Thứ 7,Chủ Nhật,Tổng Ca\n";
+    // 1. Khởi tạo Workbook và Worksheet
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet('HTDVHK', {
+        views: [{ showGridLines: true }]
+    });
 
-            staffList.forEach((staff, index) => {
-                const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
-                let workCount = 0;
+    // Font chữ mặc định chuẩn file mẫu: Times New Roman
+    ws.font = { name: 'Times New Roman', size: 12 };
 
-                const rowShifts = shifts.map(sCode => {
-                    const found = shiftList.find(s => s.code === sCode);
-                    if (found && found.type === 'work') workCount++;
-                    return `"${sCode || ''}"`;
-                });
+    // Tính ngày trong tuần
+    const startDate = new Date(weekKey);
+    const dayOfWeek = startDate.getDay();
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    const monday = new Date(startDate);
+    monday.setDate(startDate.getDate() + diffToMonday);
 
-                const row = [
-                    index + 1,
-                    `"${staff.id}"`,
-                    `"${staff.name}"`,
-                    ...rowShifts,
-                    workCount
-                ];
-                csvContent += row.join(",") + "\n";
-            });
+    const daysOfWeek = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Lich_Truc_Doi_Ho_Tro_Hanh_Khach_${weekKey}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Đã xuất file Excel/CSV thành công!");
+    // 2. Thêm các dòng Tiêu đề Cảng & Đội
+    ws.addRow(["CẢNG HÀNG KHÔNG QUỐC TẾ PHÚ QUỐC"]);
+    ws.addRow(["PHÒNG ĐIỀU HÀNH SÂN BAY"]);
+    ws.addRow(["ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
+    ws.addRow([]);
+    ws.addRow(["LỊCH TRỰC ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
+    ws.addRow([`THÁNG ${String(monday.getMonth() + 1).padStart(2, '0')} NĂM ${monday.getFullYear()}`]);
+    ws.addRow([]);
+
+    // Style tiêu đề lớn
+    ws.getCell('A5').font = { name: 'Times New Roman', size: 14, bold: true };
+    ws.getCell('A6').font = { name: 'Times New Roman', size: 13, bold: true };
+    ws.getCell('A5').alignment = { horizontal: 'center' };
+    ws.getCell('A6').alignment = { horizontal: 'center' };
+
+    // 3. Header Bảng Lịch Trực Tuần (Dòng 8 & 9)
+    const headerRow1 = ws.addRow([
+        "Ngày", "Thứ", "HÀNH CHÍNH", "CA 1\n05:30-13:30", 
+        "CA 2\n09:30-17:30", "CA 3\n17:30-01:30", "OFF Tuần", 
+        "Nghỉ Phép,\nTS, Đi Học…", "Ghi Chú", "", "", "", "", ""
+    ]);
+    const headerRow2 = ws.addRow([]); // Dòng trống để gộp ô 2 tầng
+
+    // Merge các ô tiêu đề bảng
+    ws.mergeCells('A1:D1'); ws.mergeCells('A2:D2'); ws.mergeCells('A3:D3');
+    ws.mergeCells('A5:L5'); ws.mergeCells('A6:L6');
+
+    ws.mergeCells('A8:A9'); ws.mergeCells('B8:B9'); ws.mergeCells('C8:C9');
+    ws.mergeCells('D8:D9'); ws.mergeCells('E8:E9'); ws.mergeCells('F8:F9');
+    ws.mergeCells('G8:G9'); ws.mergeCells('H8:H9'); ws.mergeCells('I8:N9');
+
+    // Mẫu màu chuẩn giống hệt ảnh:
+    const BLUE_FILL = 'FFB7DEE8'; // Màu xanh nhạt tiêu đề/cột Thứ
+    const BLUE_TEXT = 'FF0033CC'; // Màu chữ xanh
+    const HIGHLIGHT_DAY_FILL = 'FFFCE4D6'; // Màu cam/đào dòng ngày hiện tại
+    const BORDER_STYLE = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } }
+    };
+
+    // Tô màu Header Bảng 1 (Xanh lam nhạt + Chữ Xanh đậm)
+    for (let c = 1; c <= 14; c++) {
+        const cell = headerRow1.getCell(c);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        cell.border = BORDER_STYLE;
+        headerRow2.getCell(c).border = BORDER_STYLE;
+    }
+
+    // 4. Đổ dữ liệu 7 ngày trong tuần
+    for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + dayIdx);
+        const dateStr = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+        const dayName = daysOfWeek[dayIdx];
+
+        let hcList = [], ca1List = [], ca2List = [], ca3List = [], offList = [], leaveList = [];
+
+        staffList.forEach(staff => {
+            const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
+            const shiftCode = shifts[dayIdx] || "";
+            const shiftInfo = shiftList.find(s => s.code === shiftCode);
+
+            if (shiftCode) {
+                const shortName = staff.name.split(' ').pop();
+                if (["OFF", "ROFF"].includes(shiftCode)) offList.push(shortName);
+                else if (["AL", "SL"].includes(shiftCode) || (shiftInfo && shiftInfo.type === 'leave')) leaveList.push(`${shortName}(${shiftCode})`);
+                else if (shiftCode === "HC" || shiftCode === "C043") hcList.push(shortName);
+                else if (["C011", "C160", "CA1", "C1"].some(c => shiftCode.includes(c))) ca1List.push(shortName);
+                else if (["C021", "C196", "CA2", "C2"].some(c => shiftCode.includes(c))) ca2List.push(shortName);
+                else if (["C031", "C015", "CA3", "C3"].some(c => shiftCode.includes(c))) ca3List.push(shortName);
+                else ca1List.push(shortName);
+            }
+        });
+
+        let ghiChuMain = "";
+        let ghiChuExtra = [];
+        if (dayIdx === 0) { ghiChuMain = "CA 1"; ghiChuExtra = ca1List.slice(0, 5); }
+        else if (dayIdx === 1) { ghiChuMain = "CA 2"; ghiChuExtra = ca2List.slice(0, 4); }
+        else if (dayIdx === 2) { ghiChuMain = "CA 3"; ghiChuExtra = ca3List.slice(0, 4); }
+        else if (dayIdx === 3) { ghiChuMain = "Ca thay thế"; }
+        else if (dayIdx === 4) { ghiChuMain = "Ca HC"; }
+        else if (dayIdx === 5) { ghiChuMain = "Thai sản"; }
+        else if (dayIdx === 6) { ghiChuMain = "Phép"; }
+
+        const rowValues = [
+            dateStr, dayName, hcList.join(", "), ca1List.join(", "),
+            ca2List.join(", "), ca3List.join(", "), offList.join(", "),
+            leaveList.join(", "), ghiChuMain, ...ghiChuExtra
+        ];
+
+        while (rowValues.length < 14) rowValues.push("");
+        const row = ws.addRow(rowValues);
+
+        // Định dạng từng ô trong dòng ngày
+        for (let c = 1; c <= 14; c++) {
+            const cell = row.getCell(c);
+            cell.border = BORDER_STYLE;
+            cell.alignment = { vertical: 'middle', horizontal: (c <= 2 || c === 9) ? 'center' : 'left' };
+
+            // Cột Ngày (Cột A)
+            if (c === 1) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
+                if (dayIdx === 4) { // Highlight ngày thứ 6 giống hình
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HIGHLIGHT_DAY_FILL } };
+                }
+            }
+            // Cột Thứ (Cột B) tô màu Xanh Nhạt
+            else if (c === 2) {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
+            }
+            // Cột Ghi chú
+            else if (c === 9) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true };
+            }
         }
+    }
+
+   // 5. Bảng Danh sách nhân viên & Khung LƯU Ý phía dưới
+ws.addRow([]); // Dòng 17
+ws.addRow(["Ghi chú:"]); // Dòng 18
+
+// --- TẠO CỘT HEADER CHO BẢNG NHÂN VIÊN (Dòng 19) ---
+const staffHeader = ws.addRow(["Số TT", "Họ Tên", "", "Điện thoại", "Email", "Ca Làm Việc", "Mã Ca LV", "Thời gian", "LƯU Ý"]);
+const headerRowIdx = staffHeader.number; // Dòng 19
+
+// Merge ô cho chính dòng Header (Họ Tên & LƯU Ý)
+ws.mergeCells(`B${headerRowIdx}:C${headerRowIdx}`);
+ws.mergeCells(`I${headerRowIdx}:N${headerRowIdx}`);
+
+// Style cho dòng Header
+for (let c = 1; c <= 14; c++) {
+    const cell = staffHeader.getCell(c);
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+    cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = BORDER_STYLE;
+}
+
+// --- ĐỔ DỮ LIỆU TỪNG NHÂN VIÊN (Từ Dòng 20 trở đi) ---
+const sampleEmails = ["huenb", "nhandnt", "phongtq01", "haunv03", "kieuntd", "hoaltt", "doanlk", "ngandtk03", "haohh", "vinhlq04", "huynhlq", "nhungptp", "dungbtn01", "namtp01", "anhctl"];
+const samplePhones = ["0917687545", "0898759546", "0946826836", "0783948626", "0911657065", "0366888612", "0397281229", "0702910361", "0986820940", "0939279394", "0705332407", "0773040866", "0979972578", "0397073151", "0971234221"];
+const sampleNotes = [
+
+    "", "", "", ""
+];
+
+staffList.forEach((staff, index) => {
+    let caLV = "", maCa = "", thoiGian = "";
+    if (index === 0) { caLV = "Ca HC"; maCa = "C043"; thoiGian = "08h00-16h00"; }
+    else if (index === 1) { caLV = "CA 1"; maCa = "C160"; thoiGian = "05:30-13:30"; }
+    else if (index === 2) { caLV = "CA 2"; maCa = "C196"; thoiGian = "09:30-17:30"; }
+    else if (index === 3) { caLV = "CA 3"; maCa = "C015"; thoiGian = "17:30-01:30"; }
+
+    // Dòng nhân viên mới
+    const row = ws.addRow([
+        index + 1, 
+        staff.name, 
+        "",
+        samplePhones[index % samplePhones.length],
+        `${sampleEmails[index % sampleEmails.length]}@sunairport.vn`,
+        caLV, 
+        maCa, 
+        thoiGian,
+        sampleNotes[index] || ""
+    ]);
+
+    const rIndex = row.number; // Tự động lấy số dòng hiện tại (luôn chính xác)
+
+    // Merge ô Họ Tên & Ô LƯU Ý cho từng dòng nhân viên
+    ws.mergeCells(`B${rIndex}:C${rIndex}`);
+    ws.mergeCells(`I${rIndex}:N${rIndex}`);
+
+    // Định dạng viền và căn lề
+    for (let c = 1; c <= 14; c++) {
+        const cell = row.getCell(c);
+        cell.border = BORDER_STYLE;
+        cell.alignment = { vertical: 'middle', horizontal: (c === 1 || (c >= 6 && c <= 8)) ? 'center' : 'left' };
+        
+        if (c === 2) {
+            cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+        }
+        if (c === 9) {
+            if (index === 0) {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+            } else if (index >= 1 && index <= 3) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+            } else {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true };
+            }
+        }
+    }
+});
+
+    // 6. Chữ ký cuối bảng
+    ws.addRow([]);
+    const signRow = ws.addRow(["", "Người lập bảng", "", "", "", "", "Người phê duyệt"]);
+    signRow.getCell(2).font = { name: 'Times New Roman', size: 11, bold: true };
+    signRow.getCell(7).font = { name: 'Times New Roman', size: 11, bold: true };
+
+    // Đặt độ rộng các cột
+    ws.columns = [
+        { width: 14 }, { width: 10 }, { width: 15 }, { width: 25 },
+        { width: 28 }, { width: 28 }, { width: 20 }, { width: 22 },
+        { width: 12 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }
+    ];
+
+    // 7. Xuất file về máy
+  // 1. Hàm tính số tuần trong năm
+function getISOWeek(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+// 2. Thay thế dòng saveAs ở cuối hàm exportToExcel():
+const weekNumber = getISOWeek(monday);
+const year = monday.getFullYear();
+
+const buffer = await workbook.xlsx.writeBuffer();
+saveAs(new Blob([buffer]), `Lich_Truc_HTDVHK_Tuan_${weekNumber}_${year}.xlsx`);
+
+    showToast("Đã xuất file Excel!");
+}
 // Ví dụ hàm đẩy danh sách Nhân viên lên Google Sheet
 async function syncStaffToSheet(staffs) {
     // LỚP BẢO VỆ 1: Chưa load xong dữ liệu từ Sheet thì KHÔNG ĐƯỢC phép đẩy lên
