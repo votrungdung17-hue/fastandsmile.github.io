@@ -2748,6 +2748,9 @@ function selectRow(row){
   fht.value = formatTimeForInput(row[14]);
   pushback.value = formatTimeForInput(row[15]);
   takeoff.value = formatTimeForInput(row[16]);
+  ldmPaxAdult = row[41] || "";
+  ldmPaxChildren = row[42] || "";
+  ldmPaxBaby = row[43] || "";
 
   // Các trường text
   code1.value = row[19] || "";
