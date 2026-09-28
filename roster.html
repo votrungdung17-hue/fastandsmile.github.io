@@ -829,24 +829,24 @@
         }
 
         function calculateMonthlyOff(staffId) {
-    // 1. Xác định chu kỳ từ ngày 25 tháng này đến 24 tháng sau dựa vào currentStartDate
     const selectedDate = new Date(currentStartDate);
     const day = selectedDate.getDate();
     let cycleStart, cycleEnd;
 
-    if (day >= 25) {
-        // Ví dụ: Ngày 28/09 -> Chu kỳ từ 25/09 đến 24/10
-        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 25);
-        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 24, 23, 59, 59);
+    // Xác định chu kỳ từ ngày 26 đến ngày 25
+    if (day >= 26) {
+        // Ví dụ: Ngày 28/09 -> Chu kỳ từ 26/09 đến 25/10
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 26);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 25, 23, 59, 59);
     } else {
-        // Ví dụ: Ngày 10/10 -> Chu kỳ từ 25/09 đến 24/10
-        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 25);
-        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 24, 23, 59, 59);
+        // Ví dụ: Ngày 10/10 -> Chu kỳ từ 26/09 đến 25/10
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 26);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 25, 23, 59, 59);
     }
 
     let totalOffCount = 0;
 
-    // 2. Duyệt qua tất cả các tuần trong scheduleData
+    // Duyệt qua tất cả các tuần trong scheduleData
     Object.keys(scheduleData).forEach(weekKey => {
         const mondayDate = new Date(weekKey);
         if (isNaN(mondayDate.getTime())) return;
@@ -858,7 +858,7 @@
             const currentDate = new Date(mondayDate);
             currentDate.setDate(mondayDate.getDate() + i);
 
-            // Kiểm tra xem ngày này có thuộc chu kỳ 25 đến 24 không
+            // Kiểm tra xem ngày có thuộc chu kỳ 26 đến 25 không
             if (currentDate >= cycleStart && currentDate <= cycleEnd) {
                 const shiftCode = shifts[i];
                 if (!shiftCode) continue;
@@ -878,16 +878,19 @@
 }
 // Hàm tính tổng số ngày Chủ Nhật trong chu kỳ từ 25 tháng này đến 24 tháng sau
 function calculateMonthlyOffQuota() {
-    const selectedDate = new Date(currentStartDate);
-    const day = selectedDate.getDate();
+    const parts = currentStartDate.split('-'); // Định dạng YYYY-MM-DD
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1; // 0-indexed month
+    const day = parseInt(parts[2]);
+
     let cycleStart, cycleEnd;
 
-    if (day >= 25) {
-        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 25);
-        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 24);
+    if (day >= 26) {
+        cycleStart = new Date(year, month, 26);
+        cycleEnd = new Date(year, month + 1, 25);
     } else {
-        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 25);
-        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 24);
+        cycleStart = new Date(year, month - 1, 26);
+        cycleEnd = new Date(year, month, 25);
     }
 
     let sundayCount = 0;
@@ -901,7 +904,7 @@ function calculateMonthlyOffQuota() {
     return sundayCount;
 }
 
-    function renderScheduleTable() {
+   function renderScheduleTable() {
     const tbody = document.getElementById('schedule-table-body');
     const searchKeyword = document.getElementById('search-input').value.toLowerCase().trim();
     const weekKey = currentStartDate;
@@ -918,6 +921,7 @@ function calculateMonthlyOffQuota() {
     let grandTotalShifts = 0;
     let grandTotalMonthOff = 0;
 
+    // Tính định mức số ngày Chủ Nhật trong chu kỳ 26 -> 25
     const quotaOffCount = calculateMonthlyOffQuota();
 
     filteredStaff.forEach((staff, index) => {
@@ -970,7 +974,7 @@ function calculateMonthlyOffQuota() {
         const monthOffCount = calculateMonthlyOff(staff.id);
         grandTotalMonthOff += monthOffCount;
 
-        // --- ĐẶT ĐÚNG THỨ TỰ: TỔNG CA -> ĐỊNH MỨC OFF -> TỔNG OFF THÁNG ---
+        // Thứ tự các cột: TỔNG CA -> ĐỊNH MỨC OFF THÁNG -> TỔNG OFF THÁNG
         tdHtml += `
             <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-slate-50 text-aviation">
                 ${userShiftCount}
