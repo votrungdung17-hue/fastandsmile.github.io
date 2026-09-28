@@ -253,37 +253,39 @@
                 <div class="overflow-x-auto custom-scrollbar max-h-[680px]">
                     <table class="w-full text-left border-collapse min-w-[1050px]">
                         <thead>
-                            <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider sticky top-0 z-30">
-                                <th class="p-3 font-semibold text-center w-12 border-b border-slate-700 sticky-col-header bg-slate-800">STT</th>
-                                <th class="p-3 font-semibold w-24 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 48px;">Mã NV</th>
-                                <th class="p-3 font-semibold w-48 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 144px;">Họ và Tên</th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T2 <span id="th-d0" class="block text-[10px] text-sky-300 font-normal">28/09</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T3 <span id="th-d1" class="block text-[10px] text-sky-300 font-normal">29/09</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T4 <span id="th-d2" class="block text-[10px] text-sky-300 font-normal">30/09</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T5 <span id="th-d3" class="block text-[10px] text-sky-300 font-normal">01/10</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T6 <span id="th-d4" class="block text-[10px] text-sky-300 font-normal">02/10</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-amber-300">T7 <span id="th-d5" class="block text-[10px] text-amber-300 font-normal">03/10</span></th>
-                                <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-rose-300">CN <span id="th-d6" class="block text-[10px] text-rose-300 font-normal">04/10</span></th>
-                                <th class="p-3 font-semibold text-center w-20 border-b border-slate-700 bg-slate-900">Tổng Ca</th>
-                                <th class="p-3 font-semibold text-center w-28 border-b border-slate-700 bg-amber-900 text-amber-200">TỔNG OFF THÁNG</th>
-                            </tr>
-                        </thead>
+    <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider sticky top-0 z-30">
+        <th class="p-3 font-semibold text-center w-12 border-b border-slate-700 sticky-col-header bg-slate-800">STT</th>
+        <th class="p-3 font-semibold w-24 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 48px;">Mã NV</th>
+        <th class="p-3 font-semibold w-48 border-b border-slate-700 sticky-col-header bg-slate-800" style="left: 144px;">Họ và Tên</th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T2 <span id="th-d0" class="block text-[10px] text-sky-300 font-normal">28/09</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T3 <span id="th-d1" class="block text-[10px] text-sky-300 font-normal">29/09</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T4 <span id="th-d2" class="block text-[10px] text-sky-300 font-normal">30/09</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T5 <span id="th-d3" class="block text-[10px] text-sky-300 font-normal">01/10</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700">T6 <span id="th-d4" class="block text-[10px] text-sky-300 font-normal">02/10</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-amber-300">T7 <span id="th-d5" class="block text-[10px] text-amber-300 font-normal">03/10</span></th>
+        <th class="p-2 font-semibold text-center w-28 border-b border-slate-700 text-rose-300">CN <span id="th-d6" class="block text-[10px] text-rose-300 font-normal">04/10</span></th>
+        <th class="p-3 font-semibold text-center w-20 border-b border-slate-700 bg-slate-900">Tổng Ca</th>
+        <th class="p-3 font-semibold text-center w-28 border-b border-slate-700 bg-sky-900 text-sky-200">ĐỊNH MỨC OFF THÁNG</th>
+        <th class="p-3 font-semibold text-center w-28 border-b border-slate-700 bg-amber-900 text-amber-200">TỔNG OFF THÁNG</th>
+    </tr>
+</thead>
                         <tbody id="schedule-table-body" class="divide-y divide-slate-200 text-xs text-slate-700">
                         </tbody>
                         <tfoot class="bg-slate-100 font-semibold text-xs border-t-2 border-slate-300 text-slate-800 sticky bottom-0 z-20">
-                            <tr>
-                                <td colspan="3" class="p-3 text-right sticky-col bg-slate-100 font-bold" style="left:0;">Tổng NV Đi Làm / Ngày:</td>
-                                <td id="daily-count-0" class="p-2 text-center text-aviation font-bold">0</td>
-                                <td id="daily-count-1" class="p-2 text-center text-aviation font-bold">0</td>
-                                <td id="daily-count-2" class="p-2 text-center text-aviation font-bold">0</td>
-                                <td id="daily-count-3" class="p-2 text-center text-aviation font-bold">0</td>
-                                <td id="daily-count-4" class="p-2 text-center text-aviation font-bold">0</td>
-                                <td id="daily-count-5" class="p-2 text-center text-amber-700 font-bold">0</td>
-                                <td id="daily-count-6" class="p-2 text-center text-rose-700 font-bold">0</td>
-                                <td id="total-week-shifts" class="p-3 text-center text-emerald-700 font-bold bg-slate-200">0</td>
-                                <td id="total-month-off" class="p-3 text-center text-amber-800 font-bold bg-amber-100">0</td>
-                            </tr>
-                        </tfoot>
+    <tr>
+        <td colspan="3" class="p-3 text-right sticky-col bg-slate-100 font-bold" style="left:0;">Tổng NV Đi Làm / Ngày:</td>
+        <td id="daily-count-0" class="p-2 text-center text-aviation font-bold">0</td>
+        <td id="daily-count-1" class="p-2 text-center text-aviation font-bold">0</td>
+        <td id="daily-count-2" class="p-2 text-center text-aviation font-bold">0</td>
+        <td id="daily-count-3" class="p-2 text-center text-aviation font-bold">0</td>
+        <td id="daily-count-4" class="p-2 text-center text-aviation font-bold">0</td>
+        <td id="daily-count-5" class="p-2 text-center text-amber-700 font-bold">0</td>
+        <td id="daily-count-6" class="p-2 text-center text-rose-700 font-bold">0</td>
+        <td id="total-week-shifts" class="p-3 text-center text-emerald-700 font-bold bg-slate-200">0</td>
+        <td id="total-month-quota" class="p-3 text-center text-sky-800 font-bold bg-sky-100">0</td>
+        <td id="total-month-off" class="p-3 text-center text-amber-800 font-bold bg-amber-100">0</td>
+    </tr>
+</tfoot>
                     </table>
                 </div>
             </div>
@@ -827,111 +829,175 @@
         }
 
         function calculateMonthlyOff(staffId) {
-            const currentYearMonth = currentStartDate.substring(0, 7);
-            let totalOffCount = 0;
+    // 1. Xác định chu kỳ từ ngày 25 tháng này đến 24 tháng sau dựa vào currentStartDate
+    const selectedDate = new Date(currentStartDate);
+    const day = selectedDate.getDate();
+    let cycleStart, cycleEnd;
 
-            Object.keys(scheduleData).forEach(weekKey => {
-                if (weekKey.startsWith(currentYearMonth)) {
-                    const shifts = scheduleData[weekKey][staffId] || [];
-                    shifts.forEach(shiftCode => {
-                        if (!shiftCode) return;
-                        const shiftInfo = shiftList.find(s => s.code === shiftCode);
-                        if (["OFF", "ROFF", "AL", "SL"].includes(shiftCode) || (shiftInfo && (shiftInfo.type === 'off' || shiftInfo.type === 'leave'))) {
-                            totalOffCount++;
-                        }
-                    });
+    if (day >= 25) {
+        // Ví dụ: Ngày 28/09 -> Chu kỳ từ 25/09 đến 24/10
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 25);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 24, 23, 59, 59);
+    } else {
+        // Ví dụ: Ngày 10/10 -> Chu kỳ từ 25/09 đến 24/10
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 25);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 24, 23, 59, 59);
+    }
+
+    let totalOffCount = 0;
+
+    // 2. Duyệt qua tất cả các tuần trong scheduleData
+    Object.keys(scheduleData).forEach(weekKey => {
+        const mondayDate = new Date(weekKey);
+        if (isNaN(mondayDate.getTime())) return;
+
+        const shifts = scheduleData[weekKey][staffId] || [];
+
+        // Duyệt từng ngày trong tuần (0: T2 -> 6: CN)
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(mondayDate);
+            currentDate.setDate(mondayDate.getDate() + i);
+
+            // Kiểm tra xem ngày này có thuộc chu kỳ 25 đến 24 không
+            if (currentDate >= cycleStart && currentDate <= cycleEnd) {
+                const shiftCode = shifts[i];
+                if (!shiftCode) continue;
+
+                const shiftInfo = shiftList.find(s => s.code === shiftCode);
+                if (
+                    ["OFF", "ROFF", "AL", "SL"].includes(shiftCode) || 
+                    (shiftInfo && (shiftInfo.type === 'off' || shiftInfo.type === 'leave'))
+                ) {
+                    totalOffCount++;
                 }
-            });
-
-            return totalOffCount;
-        }
-
-        function renderScheduleTable() {
-            const tbody = document.getElementById('schedule-table-body');
-            const searchKeyword = document.getElementById('search-input').value.toLowerCase().trim();
-            const weekKey = currentStartDate;
-
-            if (!scheduleData[weekKey]) scheduleData[weekKey] = {};
-
-            tbody.innerHTML = '';
-
-            const filteredStaff = staffList.filter(s => 
-                s.name.toLowerCase().includes(searchKeyword) || s.id.toLowerCase().includes(searchKeyword)
-            );
-
-            let dailyCounts = [0, 0, 0, 0, 0, 0, 0];
-            let grandTotalShifts = 0;
-            let grandTotalMonthOff = 0;
-
-            filteredStaff.forEach((staff, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-sky-50/50 transition-colors";
-
-                if (!scheduleData[weekKey][staff.id]) {
-                    scheduleData[weekKey][staff.id] = ["", "", "", "", "", "", ""];
-                }
-
-                const userShifts = scheduleData[weekKey][staff.id];
-                let userShiftCount = 0;
-
-                let tdHtml = `<td class="p-2.5 text-center font-medium border-b border-slate-200 sticky-col text-slate-500" style="left:0;">${index + 1}</td>`;
-                tdHtml += `<td class="p-2.5 font-semibold text-slate-700 border-b border-slate-200 sticky-col" style="left:48px;">${staff.id}</td>`;
-                tdHtml += `<td class="p-2.5 font-medium text-slate-900 border-b border-slate-200 sticky-col" style="left:144px;">${staff.name}</td>`;
-
-                for (let day = 0; day < 7; day++) {
-                    const currentVal = userShifts[day] || "";
-                    const shiftInfo = shiftList.find(s => s.code === currentVal);
-
-                    if (currentVal && shiftInfo && shiftInfo.type === 'work') {
-                        userShiftCount++;
-                        dailyCounts[day]++;
-                    }
-
-                    let badgeBg = "bg-slate-50 border-slate-200 text-slate-700";
-                    if (currentVal) {
-                        if (currentVal === "OFF" || currentVal === "ROFF") badgeBg = "bg-amber-100 border-amber-300 text-amber-800 font-bold";
-                        else if (currentVal === "AL" || currentVal === "SL") badgeBg = "bg-rose-100 border-rose-300 text-rose-800 font-bold";
-                        else badgeBg = "bg-sky-100 border-sky-300 text-sky-900 font-bold";
-                    }
-
-                    const tooltipText = shiftInfo ? `${shiftInfo.code}: ${shiftInfo.time}` : 'Chưa phân ca';
-
-                    tdHtml += `
-                        <td class="p-1 border-b border-slate-200 text-center">
-                            <div class="tooltip w-full">
-                                <select ${!isEditMode ? 'disabled' : ''} onchange="updateShift('${staff.id}', ${day}, this.value)" class="w-full py-1 px-1 text-xs text-center border rounded font-medium focus:ring-1 focus:ring-sky-500 focus:outline-none ${badgeBg} ${!isEditMode ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}">
-                                    <option value="">--</option>
-                                    ${shiftList.map(s => `<option value="${s.code}" ${s.code === currentVal ? 'selected' : ''}>${s.code}</option>`).join('')}
-                                </select>
-                                <span class="tooltip-text">${tooltipText}</span>
-                            </div>
-                        </td>
-                    `;
-                }
-
-                grandTotalShifts += userShiftCount;
-                const monthOffCount = calculateMonthlyOff(staff.id);
-                grandTotalMonthOff += monthOffCount;
-
-                tdHtml += `
-                    <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-slate-50 text-aviation">
-                        ${userShiftCount}
-                    </td>
-                    <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-amber-50 text-amber-800">
-                        ${monthOffCount}
-                    </td>
-                `;
-
-                tr.innerHTML = tdHtml;
-                tbody.appendChild(tr);
-            });
-
-            for (let d = 0; d < 7; d++) {
-                document.getElementById(`daily-count-${d}`).innerText = dailyCounts[d];
             }
-            document.getElementById('total-week-shifts').innerText = grandTotalShifts;
-            document.getElementById('total-month-off').innerText = grandTotalMonthOff;
         }
+    });
+
+    return totalOffCount;
+}
+// Hàm tính tổng số ngày Chủ Nhật trong chu kỳ từ 25 tháng này đến 24 tháng sau
+function calculateMonthlyOffQuota() {
+    const selectedDate = new Date(currentStartDate);
+    const day = selectedDate.getDate();
+    let cycleStart, cycleEnd;
+
+    if (day >= 25) {
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 25);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 24);
+    } else {
+        cycleStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 25);
+        cycleEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 24);
+    }
+
+    let sundayCount = 0;
+    let cur = new Date(cycleStart);
+    while (cur <= cycleEnd) {
+        if (cur.getDay() === 0) { // 0 là Chủ Nhật
+            sundayCount++;
+        }
+        cur.setDate(cur.getDate() + 1);
+    }
+    return sundayCount;
+}
+
+    function renderScheduleTable() {
+    const tbody = document.getElementById('schedule-table-body');
+    const searchKeyword = document.getElementById('search-input').value.toLowerCase().trim();
+    const weekKey = currentStartDate;
+
+    if (!scheduleData[weekKey]) scheduleData[weekKey] = {};
+
+    tbody.innerHTML = '';
+
+    const filteredStaff = staffList.filter(s => 
+        s.name.toLowerCase().includes(searchKeyword) || s.id.toLowerCase().includes(searchKeyword)
+    );
+
+    let dailyCounts = [0, 0, 0, 0, 0, 0, 0];
+    let grandTotalShifts = 0;
+    let grandTotalMonthOff = 0;
+
+    const quotaOffCount = calculateMonthlyOffQuota();
+
+    filteredStaff.forEach((staff, index) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/50 transition-colors";
+
+        if (!scheduleData[weekKey][staff.id]) {
+            scheduleData[weekKey][staff.id] = ["", "", "", "", "", "", ""];
+        }
+
+        const userShifts = scheduleData[weekKey][staff.id];
+        let userShiftCount = 0;
+
+        let tdHtml = `<td class="p-2.5 text-center font-medium border-b border-slate-200 sticky-col text-slate-500" style="left:0;">${index + 1}</td>`;
+        tdHtml += `<td class="p-2.5 font-semibold text-slate-700 border-b border-slate-200 sticky-col" style="left:48px;">${staff.id}</td>`;
+        tdHtml += `<td class="p-2.5 font-medium text-slate-900 border-b border-slate-200 sticky-col" style="left:144px;">${staff.name}</td>`;
+
+        for (let day = 0; day < 7; day++) {
+            const currentVal = userShifts[day] || "";
+            const shiftInfo = shiftList.find(s => s.code === currentVal);
+
+            if (currentVal && shiftInfo && shiftInfo.type === 'work') {
+                userShiftCount++;
+                dailyCounts[day]++;
+            }
+
+            let badgeBg = "bg-slate-50 border-slate-200 text-slate-700";
+            if (currentVal) {
+                if (currentVal === "OFF" || currentVal === "ROFF") badgeBg = "bg-amber-100 border-amber-300 text-amber-800 font-bold";
+                else if (currentVal === "AL" || currentVal === "SL") badgeBg = "bg-rose-100 border-rose-300 text-rose-800 font-bold";
+                else badgeBg = "bg-sky-100 border-sky-300 text-sky-900 font-bold";
+            }
+
+            const tooltipText = shiftInfo ? `${shiftInfo.code}: ${shiftInfo.time}` : 'Chưa phân ca';
+
+            tdHtml += `
+                <td class="p-1 border-b border-slate-200 text-center">
+                    <div class="tooltip w-full">
+                        <select ${!isEditMode ? 'disabled' : ''} onchange="updateShift('${staff.id}', ${day}, this.value)" class="w-full py-1 px-1 text-xs text-center border rounded font-medium focus:ring-1 focus:ring-sky-500 focus:outline-none ${badgeBg} ${!isEditMode ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}">
+                            <option value="">--</option>
+                            ${shiftList.map(s => `<option value="${s.code}" ${s.code === currentVal ? 'selected' : ''}>${s.code}</option>`).join('')}
+                        </select>
+                        <span class="tooltip-text">${tooltipText}</span>
+                    </div>
+                </td>
+            `;
+        }
+
+        grandTotalShifts += userShiftCount;
+        const monthOffCount = calculateMonthlyOff(staff.id);
+        grandTotalMonthOff += monthOffCount;
+
+        // --- ĐẶT ĐÚNG THỨ TỰ: TỔNG CA -> ĐỊNH MỨC OFF -> TỔNG OFF THÁNG ---
+        tdHtml += `
+            <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-slate-50 text-aviation">
+                ${userShiftCount}
+            </td>
+            <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-sky-50 text-sky-800">
+                ${quotaOffCount}
+            </td>
+            <td class="p-2.5 text-center font-bold border-b border-slate-200 bg-amber-50 text-amber-800">
+                ${monthOffCount}
+            </td>
+        `;
+
+        tr.innerHTML = tdHtml;
+        tbody.appendChild(tr);
+    });
+
+    for (let d = 0; d < 7; d++) {
+        document.getElementById(`daily-count-${d}`).innerText = dailyCounts[d];
+    }
+    document.getElementById('total-week-shifts').innerText = grandTotalShifts;
+    document.getElementById('total-month-off').innerText = grandTotalMonthOff;
+
+    const totalQuotaElem = document.getElementById('total-month-quota');
+    if (totalQuotaElem) {
+        totalQuotaElem.innerText = quotaOffCount;
+    }
+}
 
         async function updateShift(staffId, dayIndex, shiftCode) {
             if (!isEditMode) return;
