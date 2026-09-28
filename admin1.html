@@ -3973,11 +3973,13 @@ function openDetailModal(row) {
     <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">LOẠI BẤT THƯỜNG:</div>
     <select id="inp-irreg-type" style="width:100%; margin-bottom:8px; padding:4px;">
       <option value="" ${!row[50] ? 'selected' : ''}>-- Chọn loại bất thường --</option>
-      <option value="Suất ăn" ${row[50] === 'Suất ăn' ? 'selected' : ''}>Suất ăn (Meal Issue)</option>
-      <option value="Hành lý" ${row[50] === 'Hành lý' ? 'selected' : ''}>Hành lý (Baggage)</option>
-      <option value="Trễ chuyến" ${row[50] === 'Trễ chuyến' ? 'selected' : ''}>Trễ chuyến (Delay)</option>
-      <option value="Chuyển hướng" ${row[50] === 'Chuyển hướng' ? 'selected' : ''}>Chuyển hướng (Diverted)</option>
-      <option value="Khác" ${row[50] === 'Khác' ? 'selected' : ''}>Khác (Other)</option>
+      <option value="Giao Hành lý" ${row[50] === 'Giao Hành lý' ? 'selected' : ''}>Giao Hành lý</option>
+      <option value="Bồi thường thiện chí do ovb, offload" ${row[50] === 'Bồi thường thiện chí do ovb, offload' ? 'selected' : ''}>Bồi thường thiện chí do ovb, offload</option>
+      <option value="Bồi thường thiện chí do downgrade" ${row[50] === 'Bồi thường thiện chí do downgrade' ? 'selected' : ''}>Bồi thường thiện chí do downgrade</option>
+      <option value="Phục vụ uống do chuyến bay delay" ${row[50] === 'Phục vụ uống do chuyến bay delay' ? 'selected' : ''}>Phục vụ uống do chuyến bay delay</option>
+      <option value="Phục vụ ăn do chuyến bay delay" ${row[50] === 'Phục vụ ăn do chuyến bay delay' ? 'selected' : ''}>Phục vụ ăn do chuyến bay delay</option>
+      <option value="Phục vụ ăn giftcard do phòng C quá tải" ${row[50] === 'Phục vụ ăn giftcard do phòng C quá tải' ? 'selected' : ''}>Phục vụ ăn giftcard do phòng C quá tải</option>
+      <option value="Bất thường khác" ${row[50] === 'Bất thường khác' ? 'selected' : ''}>Bất thường khác</option>
     </select>
 
     <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI TIẾT:</div>
