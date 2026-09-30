@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-     <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BIÊN BẢN BẤT THƯỜNG">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BIÊN BẢN BẤT THƯỜNG">
     <title>BIÊN BẢN BẤT THƯỜNG</title>
 
     <!-- Icon / Favicon -->
@@ -233,19 +233,36 @@
 
         .sig-actions {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 11px;
+        .sig-btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .btn-sm, label.btn-sm {
+            flex: 1;
+            padding: 5px 4px;
+            font-size: 10px;
             border-radius: 4px;
             border: 1px solid #d1d5db;
             cursor: pointer;
             background: #ffffff;
             color: #374151;
             font-weight: 600;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-sm:hover, label.btn-sm:hover {
+            background-color: #f3f4f6;
+        }
+
+        input[type="file"].sig-file-input {
+            display: none;
         }
 
         .bottom-bar {
@@ -396,39 +413,63 @@
 
             <div class="section-title">CHỮ KÝ CÁC BÊN</div>
             <div class="signature-section">
+                <!-- Chữ ký 1 -->
                 <div class="sig-box">
                     <div class="sig-title">ĐẠI DIỆN VNA</div>
                     <div class="sig-canvas-wrap" id="wrap-sig-1">
-                        <canvas id="canvas-sig-1"></canvas>
+                        <canvas id="canvas-sig-1" width="232" height="110"></canvas>
                     </div>
                     <input type="text" class="sig-name-input" id="name-sig-1" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
-                        <button class="btn-sm" onclick="clearSignature(1)">XÓA / KÝ LẠI</button>
-                        <span id="sig-status-1" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                        <div class="sig-btn-row">
+                            <label class="btn-sm" for="file-sig-1">📤 Tải ảnh lên</label>
+                            <input type="file" id="file-sig-1" class="sig-file-input" accept="image/*" onchange="uploadSignature(1, event)">
+                            <button class="btn-sm" onclick="downloadSignature(1)">📥 Tải về</button>
+                        </div>
+                        <div class="sig-btn-row" style="margin-top: 4px;">
+                            <button class="btn-sm" style="width: 100%; color: #dc2626;" onclick="clearSignature(1)">🗑️ XÓA / KÝ LẠI</button>
+                        </div>
+                        <span id="sig-status-1" style="font-size: 11px; font-weight: bold; color: #10b981; margin-top: 2px;"></span>
                     </div>
                 </div>
 
+                <!-- Chữ ký 2 -->
                 <div class="sig-box">
                     <div class="sig-title">ĐẠI DIỆN CÁC BÊN LIÊN QUAN</div>
                     <div class="sig-canvas-wrap" id="wrap-sig-2">
-                        <canvas id="canvas-sig-2"></canvas>
+                        <canvas id="canvas-sig-2" width="232" height="110"></canvas>
                     </div>
                     <input type="text" class="sig-name-input" id="name-sig-2" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
-                        <button class="btn-sm" onclick="clearSignature(2)">XÓA / KÝ LẠI</button>
-                        <span id="sig-status-2" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                        <div class="sig-btn-row">
+                            <label class="btn-sm" for="file-sig-2">📤 Tải ảnh lên</label>
+                            <input type="file" id="file-sig-2" class="sig-file-input" accept="image/*" onchange="uploadSignature(2, event)">
+                            <button class="btn-sm" onclick="downloadSignature(2)">📥 Tải về</button>
+                        </div>
+                        <div class="sig-btn-row" style="margin-top: 4px;">
+                            <button class="btn-sm" style="width: 100%; color: #dc2626;" onclick="clearSignature(2)">🗑️ XÓA / KÝ LẠI</button>
+                        </div>
+                        <span id="sig-status-2" style="font-size: 11px; font-weight: bold; color: #10b981; margin-top: 2px;"></span>
                     </div>
                 </div>
 
+                <!-- Chữ ký 3 -->
                 <div class="sig-box">
                     <div class="sig-title">NGƯỜI LÀM CHỨNG</div>
                     <div class="sig-canvas-wrap" id="wrap-sig-3">
-                        <canvas id="canvas-sig-3"></canvas>
+                        <canvas id="canvas-sig-3" width="232" height="110"></canvas>
                     </div>
                     <input type="text" class="sig-name-input" id="name-sig-3" placeholder="Họ và tên..." oninput="saveData()">
                     <div class="sig-actions">
-                        <button class="btn-sm" onclick="clearSignature(3)">XÓA / KÝ LẠI</button>
-                        <span id="sig-status-3" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+                        <div class="sig-btn-row">
+                            <label class="btn-sm" for="file-sig-3">📤 Tải ảnh lên</label>
+                            <input type="file" id="file-sig-3" class="sig-file-input" accept="image/*" onchange="uploadSignature(3, event)">
+                            <button class="btn-sm" onclick="downloadSignature(3)">📥 Tải về</button>
+                        </div>
+                        <div class="sig-btn-row" style="margin-top: 4px;">
+                            <button class="btn-sm" style="width: 100%; color: #dc2626;" onclick="clearSignature(3)">🗑️ XÓA / KÝ LẠI</button>
+                        </div>
+                        <span id="sig-status-3" style="font-size: 11px; font-weight: bold; color: #10b981; margin-top: 2px;"></span>
                     </div>
                 </div>
             </div>
@@ -607,11 +648,52 @@
         initSignatureCanvas(2);
         initSignatureCanvas(3);
 
+        // --- BỔ SUNG: TẢI ẢNH CHỮ KÝ LÊN CANVAS ---
+        function uploadSignature(id, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById(`canvas-sig-${id}`);
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    sigDrawn[id] = true;
+                    sigDataUrl[id] = canvas.toDataURL('image/png');
+                    document.getElementById(`sig-status-${id}`).innerText = "✓ ĐÃ TẢI ẢNH";
+                    saveData();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- BỔ SUNG: TẢI ẢNH CHỮ KÝ VỀ MÁY (.PNG) ---
+        function downloadSignature(id) {
+            const canvas = document.getElementById(`canvas-sig-${id}`);
+            if (isCanvasBlank(canvas)) {
+                alert("Chưa có chữ ký để tải về!");
+                return;
+            }
+            const dataURL = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = `chu-ky-vitri-${id}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function clearSignature(id) {
             const canvas = document.getElementById(`canvas-sig-${id}`);
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById(`name-sig-${id}`).value = '';
+            document.getElementById(`file-sig-${id}`).value = '';
             sigDrawn[id] = false;
             sigDataUrl[id] = '';
             document.getElementById(`sig-status-${id}`).innerText = "";
@@ -652,13 +734,10 @@
             }
 
             const location = document.getElementById('location-input').value || '';
-            
             const p1 = document.getElementById('person-1').value || '';
             const r1 = document.getElementById('rep-1').value || '';
-            
             const p2 = document.getElementById('person-2').value || '';
             const r2 = document.getElementById('rep-2').value || '';
-
             const p3 = document.getElementById('person-3').value || '';
             const r3 = document.getElementById('rep-3').value || '';
 
@@ -674,7 +753,6 @@
 
             let linesHtml = '';
             if (description) {
-                /* ĐÃ THÊM font-style: italic ĐỂ IN NGHIÊNG NỘI DUNG MÔ TẢ */
                 linesHtml = `<div style="text-align: justify; line-height: 2.2; text-indent: 20px; font-style: italic;">${description.replace(/\n/g, '<br>')}</div>`;
             } else {
                 for (let i = 0; i < 8; i++) {
@@ -686,7 +764,6 @@
             printContainer.innerHTML = `
                 <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; box-sizing: border-box; font-size: 13pt; line-height: 1.5; padding: 0 5mm;">
                     
-                    <!-- Header Table -->
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" border="0">
                         <tr>
                             <td style="vertical-align: top; text-align: left; font-size: 11pt; color: #333;">
@@ -700,7 +777,6 @@
                         </tr>
                     </table>
 
-                    <!-- Quốc hiệu & Tiêu đề -->
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="font-weight: bold; font-size: 13pt;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
                         <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">
@@ -709,7 +785,6 @@
                         <div style="font-size: 18pt; font-weight: bold; margin-top: 22px;">BIÊN BẢN BẤT THƯỜNG</div>
                     </div>
 
-                    <!-- Nội dung thông tin -->
                     <div style="font-size: 13pt; line-height: 1.8;">
                         <div style="margin-bottom: 10px;">
                             Hôm nay, ngày <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 40px; text-align: center;">${day}</span> 
@@ -746,7 +821,6 @@
                         </div>
                     </div>
 
-                    <!-- Chữ ký 3 cột -->
                     <div style="margin-top: 30px; page-break-inside: avoid;">
                         <table style="width: 100%; border-collapse: collapse; text-align: center;" border="0">
                             <tr>
