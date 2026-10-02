@@ -3944,20 +3944,23 @@ function openDetailModal(row) {
           </div>
         </div>
 
-     <!-- 5. IRREGULARITY & COST -->
+    <!-- 5. IRREGULARITY & COST -->
 <div class="detail-card" style="margin-top: 12px;">
   <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>⚠️ LỖI & BẤT THƯỜNG </span>
+    <span>⚠️ LỖI & BẤT THƯỜNG</span>
     <button type="button" id="btn-edit-irreg" class="btn-row-action btn-row-edit" onclick="toggleEditIrregularity('${flightId}')">✏️ Edit</button>
   </div>
   
+  <!-- VIEW MODE -->
   <div id="irreg-view-mode">
     <div class="detail-item">
       <span class="detail-label">LOẠI BẤT THƯỜNG:</span> 
-      <span class="detail-value" id="val-irreg-type" style="font-weight: bold; color: #d9534f;">${row[50] || 'N/A'}</span>
+      <div class="detail-value" id="val-irreg-type" style="font-weight: bold; color: #d9534f; margin-top: 4px;">
+        ${row[50] || 'N/A'}
+      </div>
     </div>
     <div class="detail-item">
-      <span class="detail-label">CHI TIÉT:</span> 
+      <span class="detail-label">CHI TIẾT:</span> 
       <span class="detail-value" id="val-irreg-detail">${row[51] || 'Không có'}</span>
     </div>
     <div class="detail-item">
@@ -3972,25 +3975,31 @@ function openDetailModal(row) {
     </div>
   </div>
 
+  <!-- EDIT MODE -->
   <div id="irreg-edit-mode" style="display:none; margin-top:8px;">
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">LOẠI BẤT THƯỜNG:</div>
-    <select id="inp-irreg-type" style="width:100%; margin-bottom:8px; padding:4px;">
-      <option value="" ${!row[50] ? 'selected' : ''}>-- Chọn loại bất thường --</option>
-      <option value="Giao Hành lý" ${row[50] === 'Giao Hành lý' ? 'selected' : ''}>Giao Hành lý</option>
-      <option value="Bồi thường thiện chí do ovb, offload" ${row[50] === 'Bồi thường thiện chí do ovb, offload' ? 'selected' : ''}>Bồi thường thiện chí do ovb, offload</option>
-      <option value="Bồi thường thiện chí do downgrade" ${row[50] === 'Bồi thường thiện chí do downgrade' ? 'selected' : ''}>Bồi thường thiện chí do downgrade</option>
-      <option value="Phục vụ uống do chuyến bay delay" ${row[50] === 'Phục vụ uống do chuyến bay delay' ? 'selected' : ''}>Phục vụ uống do chuyến bay delay</option>
-      <option value="Phục vụ ăn do chuyến bay delay" ${row[50] === 'Phục vụ ăn do chuyến bay delay' ? 'selected' : ''}>Phục vụ ăn do chuyến bay delay</option>
-      <option value="Phục vụ ăn giftcard do phòng C quá tải" ${row[50] === 'Phục vụ ăn giftcard do phòng C quá tải' ? 'selected' : ''}>Phục vụ ăn giftcard do phòng C quá tải</option>
-      <option value="Bất thường khác" ${row[50] === 'Bất thường khác' ? 'selected' : ''}>Bất thường khác</option>
-    </select>
+    <div style="font-size:11px; margin-bottom:6px; font-weight:bold;">LOẠI BẤT THƯỜNG (Tích chọn nhiều mục):</div>
+    
+    <!-- KHUNG CHỌN CHECKBOX -->
+    <div style="border: 1px solid #ccc; border-radius: 4px; padding: 8px; max-height: 150px; overflow-y: auto; background: #fff; margin-bottom: 8px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý đến chậm"> Bồi thường hành lý đến chậm</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý rách vỡ"> Bồi thường hành lý rách vỡ</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Giao Hành lý"> Giao Hành lý</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do ovb, offload"> Bồi thường thiện chí do ovb, offload</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do downgrade"> Bồi thường thiện chí do downgrade</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ uống do chuyến bay delay"> Phục vụ uống do chuyến bay delay</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn do chuyến bay delay"> Phục vụ ăn do chuyến bay delay</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn giftcard do phòng C quá tải"> Phục vụ ăn giftcard do phòng C quá tải</label>
+        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bất thường khác"> Bất thường khác</label>
+      </div>
+    </div>
 
     <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI TIẾT:</div>
     <textarea id="inp-irreg-detail" rows="2" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Mô tả nội dung sự cố...">${row[51] || ''}</textarea>
 
     <div style="display:flex; gap:8px; margin-bottom:8px;">
       <div style="width:50%;">
-        <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ KHÁCH ẢNH HƯỞNG:</div>
+        <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ KHÁCH ẢNH HƯỜNG:</div>
         <input type="number" id="inp-irreg-pax" value="${row[52] || 0}" style="width:100%; padding:4px;">
       </div>
       <div style="width:50%;">
@@ -4000,7 +4009,7 @@ function openDetailModal(row) {
     </div>
 
     <div style="text-align:right;">
-      <button type="button" class="btn-row-action btn-row-save" onclick="saveIrregularity('${flightId}')">💾 Save</button>
+      <button type="button" class="btn-row-action btn-row-save" onclick="saveIrregularity('${flightId}', event)">💾 Save</button>
       <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditIrregularity()">❌ Cancel</button>
     </div>
   </div>
@@ -4207,73 +4216,147 @@ function saveCkinGroup(flightId) {
 }
 // ===== XỬ LÝ RIÊNG CHO LỖI & BẤT THƯỜNG (IRREGULARITY) =====
 
-// 1. Chuyển sang chế độ Chỉnh sửa
+// 1. Hàm Bật/Tắt chỉnh sửa & Nạp dữ liệu vào Checkbox
 function toggleEditIrregularity(flightId) {
-  document.getElementById("irreg-view-mode").style.display = "none";
-  document.getElementById("irreg-edit-mode").style.display = "block";
-  document.getElementById("btn-edit-irreg").style.display = "none";
+  const viewMode = document.getElementById('irreg-view-mode');
+  const editMode = document.getElementById('irreg-edit-mode');
+  const btnEdit = document.getElementById('btn-edit-irreg');
+
+  if (!viewMode || !editMode) return;
+
+  const isHidden = editMode.style.display === 'none' || editMode.style.display === '';
+
+  if (isHidden) {
+    if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+      const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
+      if (row) {
+        // Lấy chuỗi loại bất thường hiện tại (Ví dụ: "Giao Hành lý / Bồi thường hành lý rách vỡ")
+        const currentTypeStr = row[50] || '';
+        const currentTypes = currentTypeStr.split('/').map(s => s.trim());
+
+        // Đánh dấu tích vào các checkbox tương ứng
+        document.querySelectorAll('.chk-irreg-item').forEach(chk => {
+          chk.checked = currentTypes.includes(chk.value.trim());
+        });
+
+        if (document.getElementById('inp-irreg-detail')) document.getElementById('inp-irreg-detail').value = row[51] || '';
+        if (document.getElementById('inp-irreg-pax')) document.getElementById('inp-irreg-pax').value = row[52] || 0;
+        if (document.getElementById('inp-irreg-cost')) document.getElementById('inp-irreg-cost').value = row[53] || 0;
+      }
+    }
+    editMode.style.display = 'block';
+    viewMode.style.display = 'none';
+    if (btnEdit) btnEdit.style.display = 'none';
+  } else {
+    cancelEditIrregularity();
+  }
 }
 
-// 2. Hủy chế độ Chỉnh sửa
+// 2. Hàm Hủy chỉnh sửa
 function cancelEditIrregularity() {
-  document.getElementById("irreg-view-mode").style.display = "block";
-  document.getElementById("irreg-edit-mode").style.display = "none";
-  document.getElementById("btn-edit-irreg").style.display = "inline-block";
+  if (document.getElementById('irreg-edit-mode')) document.getElementById('irreg-edit-mode').style.display = 'none';
+  if (document.getElementById('irreg-view-mode')) document.getElementById('irreg-view-mode').style.display = 'block';
+  const btnEdit = document.getElementById('btn-edit-irreg');
+  if (btnEdit) btnEdit.style.display = 'inline-block';
 }
 
-// 3. Hàm Gửi API Lưu dữ liệu Bất thường & Chi phí
-function saveIrregularity(flightId) {
-  const typeVal = document.getElementById("inp-irreg-type").value;
-  const detailVal = document.getElementById("inp-irreg-detail").value.trim();
-  const paxVal = parseInt(document.getElementById("inp-irreg-pax").value, 10) || 0;
-  const costVal = parseFloat(document.getElementById("inp-irreg-cost").value) || 0;
+// 3. Hàm Lưu dữ liệu từ Checkbox lên Sheet & Cập nhật UI
+function saveIrregularity(flightId, event) {
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
 
-  const targetUrl = typeof API !== "undefined" ? API : (typeof WEB_APP_URL !== "undefined" ? WEB_APP_URL : "");
+  const btnSave = document.querySelector('#irreg-edit-mode .btn-row-save');
+  if (btnSave) {
+    btnSave.innerText = "⏳ Saving...";
+    btnSave.disabled = true;
+  }
 
-  fetch(targetUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
+  try {
+    // Lấy tất cả các checkbox được tích chọn và nối lại bằng " / "
+    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
+    const selectedList = Array.from(checkedBoxes).map(cb => cb.value.trim());
+    const typeVal = selectedList.join(' / ');
+
+    const elDetail = document.getElementById('inp-irreg-detail');
+    const elPax = document.getElementById('inp-irreg-pax');
+    const elCost = document.getElementById('inp-irreg-cost');
+
+    const detailVal = elDetail ? elDetail.value.trim() : '';
+    const paxVal = elPax ? (parseInt(elPax.value, 10) || 0) : 0;
+    const costVal = elCost ? (parseFloat(elCost.value) || 0) : 0;
+
+    const payload = {
       action: "updateIrregularity",
       flightId: flightId,
       irregType: typeVal,
       irregDetail: detailVal,
       irregPax: paxVal,
       irregCost: costVal
+    };
+
+    const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+
+    if (!targetUrl) {
+      alert("❌ Chưa khai báo URL Web App!");
+      if (btnSave) { btnSave.innerText = "💾 Save"; btnSave.disabled = false; }
+      return;
+    }
+
+    fetch(targetUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
     })
-  })
-  .then(res => res.text())
-  .then(text => {
-    // A. Cập nhật dữ liệu mới vào mảng bộ nhớ tạm globalFlightsData
-    let freshRow = null;
-    if (typeof globalFlightsData !== "undefined" && Array.isArray(globalFlightsData)) {
-      freshRow = globalFlightsData.find(r => String(r[0]) === String(flightId));
-      if (freshRow) {
-        freshRow[50] = typeVal;   // Loại bất thường
-        freshRow[51] = detailVal; // Chi tiết
-        freshRow[52] = paxVal;    // Số khách bị ảnh hưởng
-        freshRow[53] = costVal;   // Chi phí (VND)
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        // Cập nhật bộ nhớ toàn cục (Index 50, 51, 52, 53)
+        if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+          const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
+          if (row) {
+            row[50] = typeVal;
+            row[51] = detailVal;
+            row[52] = paxVal;
+            row[53] = costVal;
+          }
+        }
+
+        // Cập nhật View Mode lập tức
+        if (document.getElementById('val-irreg-type')) document.getElementById('val-irreg-type').innerText = typeVal || 'N/A';
+        if (document.getElementById('val-irreg-detail')) document.getElementById('val-irreg-detail').innerText = detailVal || 'Không có';
+        if (document.getElementById('val-irreg-pax')) document.getElementById('val-irreg-pax').innerText = paxVal + ' pax';
+        if (document.getElementById('val-irreg-cost')) document.getElementById('val-irreg-cost').innerText = costVal ? Number(costVal).toLocaleString('vi-VN') + ' ₫' : '0 ₫';
+
+        // Render lại bảng chính ngoài màn hình
+        if (typeof renderTable === 'function') renderTable(globalFlightsData);
+        else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
+
+        alert("Lưu thông tin Bất thường thành công!");
+        cancelEditIrregularity();
+      } else {
+        alert("Lỗi từ máy chủ: " + (data.message || data.error));
       }
-    }
+    })
+    .catch(err => {
+      console.error("Lỗi khi lưu Bất thường:", err);
+      alert("Lỗi kết nối khi gửi dữ liệu!");
+    })
+    .finally(() => {
+      if (btnSave) {
+        btnSave.innerText = "💾 Save";
+        btnSave.disabled = false;
+      }
+    });
 
-    // B. Cập nhật thuộc tính data-row ngoài bảng
-    if (typeof updateEyeButtonDataRow === "function") {
-      updateEyeButtonDataRow(flightId, freshRow);
+  } catch (error) {
+    console.error("Lỗi JS saveIrregularity:", error);
+    alert("Lỗi JavaScript: " + error.message);
+    if (btnSave) {
+      btnSave.innerText = "💾 Save";
+      btnSave.disabled = false;
     }
-
-    alert("✅ Lưu thông tin Bất thường & Chi phí thành công!");
-
-    // C. Refresh lại Popup tại chỗ
-    if (freshRow && typeof openDetailModal === "function") {
-      openDetailModal(freshRow);
-    } else {
-      cancelEditIrregularity();
-    }
-  })
-  .catch(err => {
-    console.error("Lỗi Save Irregularity:", err);
-    alert("❌ Lỗi kết nối khi lưu dữ liệu Bất thường!");
-  });
+  }
 }
 // ===== XỬ LÝ RIÊNG CHO TRỰC CA (DUTY STAFF) =====
 
@@ -4345,8 +4428,83 @@ function saveDutyStaff(flightId) {
 
 
 <script>
+// Dữ liệu ban đầu
+  let currentIrregText = "${row[50] || ''}";
 
+  // 1. Hiển thị View Mode
+  function renderIrregView(str) {
+    const el = document.getElementById('val-irreg-type');
+    if (!el) return;
+    if (!str || !str.trim()) {
+      el.innerHTML = '<span style="color:#999; font-weight:normal;">Không có</span>';
+      return;
+    }
+    // Tách các mục và nối lại bằng " / "
+    const items = str.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+    el.textContent = items.join(' / ');
+  }
 
+  // 2. Chuyển sang Edit Mode và đánh dấu các Checkbox
+  function toggleEditIrregularity(flightId) {
+    const viewEl = document.getElementById('irreg-view-mode');
+    const editEl = document.getElementById('irreg-edit-mode');
+
+    if (editEl.style.display === 'none') {
+      viewEl.style.display = 'none';
+      editEl.style.display = 'block';
+
+      // Lấy chuỗi hiện tại đang hiển thị
+      const currentText = document.getElementById('val-irreg-type').textContent.trim();
+      const existingItems = currentText.split(/[\/,]/).map(s => s.trim().toLowerCase());
+
+      // Tự động tick vào checkbox tương ứng
+      document.querySelectorAll('.chk-irreg-item').forEach(chk => {
+        chk.checked = existingItems.includes(chk.value.trim().toLowerCase());
+      });
+    } else {
+      cancelEditIrregularity();
+    }
+  }
+
+  function cancelEditIrregularity() {
+    document.getElementById('irreg-view-mode').style.display = 'block';
+    document.getElementById('irreg-edit-mode').style.display = 'none';
+  }
+
+  // 3. Hàm Save gom tất cả Checkbox được tick
+  function saveIrregularity(flightId) {
+    // Lấy mảng tất cả checkbox đang được chọn
+    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
+    const selectedValues = Array.from(checkedBoxes).map(cb => cb.value);
+
+    // GHÉP LẠI BẰNG DẤU " / "
+    const finalIrregType = selectedValues.join(' / ');
+
+    // Cập nhật lại giao diện View ngay trên màn hình
+    renderIrregView(finalIrregType);
+    document.getElementById('val-irreg-detail').textContent = document.getElementById('inp-irreg-detail').value || 'Không có';
+    document.getElementById('val-irreg-pax').textContent = (document.getElementById('inp-irreg-pax').value || 0) + ' pax';
+    
+    const costVal = Number(document.getElementById('inp-irreg-cost').value) || 0;
+    document.getElementById('val-irreg-cost').textContent = costVal.toLocaleString('vi-VN') + ' ₫';
+
+    // Đóng form sửa
+    cancelEditIrregularity();
+
+    // Dữ liệu payload để lưu Backend
+    const payload = {
+      flightId: flightId,
+      irregType: finalIrregType,
+      irregDetail: document.getElementById('inp-irreg-detail').value,
+      irregPax: Number(document.getElementById('inp-irreg-pax').value) || 0,
+      irregCost: costVal
+    };
+
+    console.log("Đã lưu dữ liệu thành công:", payload);
+  }
+
+  // Chạy hiển thị ban đầu
+  renderIrregView(currentIrregText);
 //const API = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
 
 fetch(API + "?type=wbchart&t=" + Date.now())
@@ -5660,7 +5818,10 @@ function cancelEditPin() {
 let globalFlightsData = [];
 
 function loadAllFlightsFromSheet() {
-  fetch(WEB_APP_URL + "?action=getFlights")
+  const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+  if (!targetUrl) return;
+
+  fetch(targetUrl + "?action=getFlights")
     .then(res => res.json())
     .then(data => {
       if (Array.isArray(data)) {
@@ -5671,7 +5832,7 @@ function loadAllFlightsFromSheet() {
     .catch(err => console.error("Lỗi load dữ liệu doGet:", err));
 }
 
-// 3. Hàm Mở Chi Tiết Chuyến Bay (CẬP NHẬT: Đọc thêm cột 44, 45, 46)
+// 3. Hàm Mở Chi Tiết Chuyến Bay (Đọc dữ liệu từ mảng toàn cục)
 function showFlightDetail(flightId) {
   const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
   if (!row) {
@@ -5692,10 +5853,16 @@ function showFlightDetail(flightId) {
   const obW = row[42] !== "" && row[42] !== undefined ? row[42] : 0;
   const obY = row[43] !== "" && row[43] !== undefined ? row[43] : 0;
 
-  // --- BỔ SUNG: PIN, BAG WAIVED, UPGRADE ---
+  // --- PIN, BAG WAIVED, UPGRADE ---
   const pinVal = row[44] !== "" && row[44] !== undefined ? row[44] : 0;
   const bagVal = row[45] !== "" && row[45] !== undefined ? row[45] : 0;
   const upgVal = row[46] !== "" && row[46] !== undefined ? row[46] : '---';
+
+  // --- IRREGULARITY ---
+  const irregType = row[50] || '';
+  const irregDetail = row[51] || '';
+  const irregPax = row[52] || 0;
+  const irregCost = row[53] || 0;
 
   // --- ĐIỀN VÀO VIEW MODE ---
   if (document.getElementById('val-bk')) document.getElementById('val-bk').innerText = `${bkJ} / ${bkW} / ${bkY}`;
@@ -5705,6 +5872,11 @@ function showFlightDetail(flightId) {
   if (document.getElementById('val-pin')) document.getElementById('val-pin').innerText = pinVal;
   if (document.getElementById('val-bag')) document.getElementById('val-bag').innerText = bagVal;
   if (document.getElementById('val-upg')) document.getElementById('val-upg').innerText = upgVal;
+
+  if (document.getElementById('val-irreg-type')) document.getElementById('val-irreg-type').innerText = irregType || 'N/A';
+  if (document.getElementById('val-irreg-detail')) document.getElementById('val-irreg-detail').innerText = irregDetail || 'Không có';
+  if (document.getElementById('val-irreg-pax')) document.getElementById('val-irreg-pax').innerText = irregPax + ' pax';
+  if (document.getElementById('val-irreg-cost')) document.getElementById('val-irreg-cost').innerText = irregCost ? Number(irregCost).toLocaleString('vi-VN') + ' ₫' : '0 ₫';
 
   // --- ĐIỀN VÀO EDIT MODE ---
   if (document.getElementById('inp-bk-j')) document.getElementById('inp-bk-j').value = bkJ;
@@ -5722,6 +5894,11 @@ function showFlightDetail(flightId) {
   if (document.getElementById('inp-pin')) document.getElementById('inp-pin').value = pinVal;
   if (document.getElementById('inp-bag')) document.getElementById('inp-bag').value = bagVal;
   if (document.getElementById('inp-upg')) document.getElementById('inp-upg').value = upgVal === '---' ? '' : upgVal;
+
+  if (document.getElementById('inp-irreg-type')) document.getElementById('inp-irreg-type').value = irregType;
+  if (document.getElementById('inp-irreg-detail')) document.getElementById('inp-irreg-detail').value = irregDetail;
+  if (document.getElementById('inp-irreg-pax')) document.getElementById('inp-irreg-pax').value = irregPax;
+  if (document.getElementById('inp-irreg-cost')) document.getElementById('inp-irreg-cost').value = irregCost;
 
   cancelEditBookingMeal();
   cancelEditPin();
@@ -5755,7 +5932,9 @@ function saveBookingMeal(flightId) {
     onboard: [obJ, obW, obY]
   };
 
-  fetch(WEB_APP_URL, {
+  const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+
+  fetch(targetUrl, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
@@ -5763,7 +5942,6 @@ function saveBookingMeal(flightId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === "success") {
-      // 1. Cập nhật mảng biến toàn cục trong bộ nhớ
       if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
         const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
         if (row) {
@@ -5773,12 +5951,10 @@ function saveBookingMeal(flightId) {
         }
       }
 
-      // 2. Cập nhật text hiển thị trên Modal
       if (document.getElementById('val-bk')) document.getElementById('val-bk').innerText = `${bkJ} / ${bkW} / ${bkY}`;
       if (document.getElementById('val-ml')) document.getElementById('val-ml').innerText = `${mlJ} / ${mlW} / ${mlY}`;
       if (document.getElementById('val-ob')) document.getElementById('val-ob').innerText = `${obJ} / ${obW} / ${obY}`;
 
-      // 3. Render lại bảng danh sách chính ngoài màn hình ngay lập tức (thay bằng tên hàm vẽ bảng thực tế của bạn)
       if (typeof renderTable === 'function') renderTable(globalFlightsData);
       else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
       else if (typeof displayData === 'function') displayData(globalFlightsData);
@@ -5800,87 +5976,117 @@ function saveBookingMeal(flightId) {
     }
   });
 }
-// ==========================================
-// 4.3 Hàm Lưu dữ liệu LỖI & BẤT THƯỜNG (IRREGULARITY)
-// ==========================================
-function saveIrregularity(flightId) {
-  const typeVal = document.getElementById('inp-irreg-type').value;
-  const detailVal = document.getElementById('inp-irreg-detail').value.trim();
-  const paxVal = parseInt(document.getElementById('inp-irreg-pax').value, 10) || 0;
-  const costVal = parseFloat(document.getElementById('inp-irreg-cost').value) || 0;
 
-  // Hiệu ứng loading trên nút Save
-  const btnSave = document.querySelector('#irreg-edit-mode .btn-row-save');
+// ==========================================
+// 4.3 Hàm Lưu dữ liệu LỖI & BẤT THƯỜNG (IRREGULARITY) - ĐÃ SỬA CHO CHECKBOX
+// ==========================================
+function saveIrregularity(flightId, event) {
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
+
+  const btnSave = document.querySelector('#irreg-edit-mode .btn-row-save') || 
+                  document.querySelector('#irreg-edit-mode button[onclick*="saveIrregularity"]') ||
+                  (event && event.target);
   if (btnSave) {
     btnSave.innerText = "⏳ Saving...";
     btnSave.disabled = true;
   }
 
-  const payload = {
-    action: "updateIrregularity",
-    flightId: flightId,
-    irregType: typeVal,
-    irregDetail: detailVal,
-    irregPax: paxVal,
-    irregCost: costVal
-  };
+  try {
+    // 1. LẤY DỮ LIỆU TỪ CHECKBOX (Nối các lựa chọn bằng dấu /)
+    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
+    const selectedList = Array.from(checkedBoxes).map(cb => cb.value.trim());
+    const typeVal = selectedList.join(' / ');
 
-  const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+    // 2. Lấy dữ liệu các ô nhập còn lại
+    const elDetail = document.getElementById('inp-irreg-detail');
+    const elPax = document.getElementById('inp-irreg-pax');
+    const elCost = document.getElementById('inp-irreg-cost');
 
-  fetch(targetUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      // 1. Cập nhật mảng dữ liệu toàn cục trong bộ nhớ (Row index: 50, 51, 52, 53)
-      if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
-        const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
-        if (row) {
-          row[50] = typeVal;
-          row[51] = detailVal;
-          row[52] = paxVal;
-          row[53] = costVal;
-        }
-      }
+    const detailVal = elDetail ? elDetail.value.trim() : '';
+    const paxVal = elPax ? (parseInt(elPax.value, 10) || 0) : 0;
+    const costVal = elCost ? (parseFloat(elCost.value) || 0) : 0;
 
-      // 2. Cập nhật text hiển thị trực tiếp trên Modal View Mode
-      if (document.getElementById('val-irreg-type')) {
-        document.getElementById('val-irreg-type').innerText = typeVal || 'N/A';
-      }
-      if (document.getElementById('val-irreg-detail')) {
-        document.getElementById('val-irreg-detail').innerText = detailVal || 'Không có';
-      }
-      if (document.getElementById('val-irreg-pax')) {
-        document.getElementById('val-irreg-pax').innerText = paxVal + ' pax';
-      }
-      if (document.getElementById('val-irreg-cost')) {
-        document.getElementById('val-irreg-cost').innerText = costVal ? costVal.toLocaleString('vi-VN') + ' ₫' : '0 ₫';
-      }
+    const payload = {
+      action: "updateIrregularity",
+      flightId: flightId,
+      irregType: typeVal,
+      irregDetail: detailVal,
+      irregPax: paxVal,
+      irregCost: costVal
+    };
 
-      // 3. Render lại bảng danh sách chính ngoài màn hình
-      if (typeof renderTable === 'function') renderTable(globalFlightsData);
-      else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
-      else if (typeof displayData === 'function') displayData(globalFlightsData);
+    const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
 
-      alert("Lưu thông tin Bất thường & Chi phí thành công!");
-      cancelEditIrregularity();
-    } else {
-      alert("Lỗi từ máy chủ: " + (data.message || data.error));
+    if (!targetUrl) {
+      alert("❌ Chưa khai báo URL API (WEB_APP_URL hoặc API)!");
+      if (btnSave) { btnSave.innerText = "💾 Save"; btnSave.disabled = false; }
+      return;
     }
-  })
-  .catch(err => {
-    console.error("Save Irregularity error:", err);
-    alert("Lỗi kết nối khi gửi dữ liệu!");
-  })
-  .finally(() => {
+
+    fetch(targetUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        // 3. Cập nhật mảng toàn cục (Index 50, 51, 52, 53)
+        if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+          const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
+          if (row) {
+            row[50] = typeVal;
+            row[51] = detailVal;
+            row[52] = paxVal;
+            row[53] = costVal;
+          }
+        }
+
+        // 4. Ép cập nhật giao diện View Mode ngay lập tức
+        const valTypeEl = document.getElementById('val-irreg-type');
+        const valDetailEl = document.getElementById('val-irreg-detail');
+        const valPaxEl = document.getElementById('val-irreg-pax');
+        const valCostEl = document.getElementById('val-irreg-cost');
+
+        if (valTypeEl) valTypeEl.innerText = typeVal || 'N/A';
+        if (valDetailEl) valDetailEl.innerText = detailVal || 'Không có';
+        if (valPaxEl) valPaxEl.innerText = paxVal + ' pax';
+        if (valCostEl) valCostEl.innerText = costVal ? Number(costVal).toLocaleString('vi-VN') + ' ₫' : '0 ₫';
+
+        // 5. Render lại bảng chính ngoài màn hình
+        if (typeof renderTable === 'function') renderTable(globalFlightsData);
+        else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
+        else if (typeof displayData === 'function') displayData(globalFlightsData);
+
+        alert("Lưu thông tin Bất thường & Chi phí thành công!");
+        
+        // Đóng chế độ Edit
+        if (typeof cancelEditIrregularity === 'function') cancelEditIrregularity();
+      } else {
+        alert("Lỗi từ máy chủ: " + (data.message || data.error));
+      }
+    })
+    .catch(err => {
+      console.error("Save Irregularity error:", err);
+      alert("Lỗi kết nối khi gửi dữ liệu!");
+    })
+    .finally(() => {
+      if (btnSave) {
+        btnSave.innerText = "💾 Save";
+        btnSave.disabled = false;
+      }
+    });
+
+  } catch (error) {
+    console.error("Lỗi thực thi saveIrregularity:", error);
+    alert("Lỗi JavaScript: " + error.message);
     if (btnSave) {
       btnSave.innerText = "💾 Save";
       btnSave.disabled = false;
     }
-  });
+  }
 }
 // ==========================================
 // 4.4 Hàm Lưu dữ liệu NHÂN SỰ TRỰC CA (DUTY STAFF)
@@ -5889,7 +6095,6 @@ function saveDutyStaff(flightId) {
   const mainVal = document.getElementById('inp-duty-main').value.trim();
   const subVal = document.getElementById('inp-duty-sub').value.trim();
 
-  // Hiệu ứng loading trên nút Save
   const btnSave = document.querySelector('#duty-edit-mode .btn-row-save');
   if (btnSave) {
     btnSave.innerText = "⏳ Saving...";
@@ -5913,30 +6118,23 @@ function saveDutyStaff(flightId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === "success") {
-      // 1. Cập nhật mảng dữ liệu toàn cục trong bộ nhớ (Row index: 54, 55)
       if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
         const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
         if (row) {
-          row[54] = mainVal; // Trực chính (Cột 55 trong Google Sheet)
-          row[55] = subVal;  // Trực phụ (Cột 56 trong Google Sheet)
+          row[54] = mainVal;
+          row[55] = subVal;
         }
       }
 
-      // 2. Cập nhật text hiển thị trực tiếp trên Modal View Mode
-      if (document.getElementById('val-duty-main')) {
-        document.getElementById('val-duty-main').innerText = mainVal || 'Chưa phân công';
-      }
-      if (document.getElementById('val-duty-sub')) {
-        document.getElementById('val-duty-sub').innerText = subVal || 'Chưa phân công';
-      }
+      if (document.getElementById('val-duty-main')) document.getElementById('val-duty-main').innerText = mainVal || 'Chưa phân công';
+      if (document.getElementById('val-duty-sub')) document.getElementById('val-duty-sub').innerText = subVal || 'Chưa phân công';
 
-      // 3. Render lại bảng danh sách chính ngoài màn hình
       if (typeof renderTable === 'function') renderTable(globalFlightsData);
       else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
       else if (typeof displayData === 'function') displayData(globalFlightsData);
 
       alert("Lưu thông tin Trực ca thành công!");
-      cancelEditDuty();
+      if (typeof cancelEditDuty === 'function') cancelEditDuty();
     } else {
       alert("Lỗi từ máy chủ: " + (data.message || data.error));
     }
@@ -5975,7 +6173,9 @@ function savePinUpgrade(flightId) {
     upgrade: upgVal
   };
 
-  fetch(WEB_APP_URL, {
+  const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+
+  fetch(targetUrl, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
@@ -5983,7 +6183,6 @@ function savePinUpgrade(flightId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === "success") {
-      // 1. Cập nhật mảng biến toàn cục trong bộ nhớ
       if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
         const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
         if (row) {
@@ -5993,12 +6192,10 @@ function savePinUpgrade(flightId) {
         }
       }
 
-      // 2. Cập nhật text hiển thị trên Modal
       if (document.getElementById('val-pin')) document.getElementById('val-pin').innerText = pinVal;
       if (document.getElementById('val-bag')) document.getElementById('val-bag').innerText = bagVal;
       if (document.getElementById('val-upg')) document.getElementById('val-upg').innerText = upgVal || '---';
 
-      // 3. Render lại bảng danh sách chính ngoài màn hình ngay lập tức
       if (typeof renderTable === 'function') renderTable(globalFlightsData);
       else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
       else if (typeof displayData === 'function') displayData(globalFlightsData);
@@ -6020,7 +6217,10 @@ function savePinUpgrade(flightId) {
     }
   });
 }
-// Hàm Save nhóm Check-in: Cập nhật trực tiếp vào bộ nhớ và gọi lại giao diện hiển thị
+
+// ==========================================
+// Hàm Save nhóm Check-in
+// ==========================================
 function saveCkinGroup(flightId) {
   const ckinVal = parseInt(document.getElementById('inp-ckin-online').value, 10) || 0;
   const quayVal = document.getElementById('inp-quay-y').value.trim();
@@ -6037,7 +6237,9 @@ function saveCkinGroup(flightId) {
     vipCip: vipVal
   };
 
-  fetch(WEB_APP_URL, {
+  const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+
+  fetch(targetUrl, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
@@ -6045,36 +6247,28 @@ function saveCkinGroup(flightId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === "success") {
-
-      // BƯỚC 1: Tìm mảng dữ liệu đang lưu chuyến bay trên HTML và CẬP NHẬT TRỰC TIẾP
       let flightArray = null;
       if (typeof globalFlightsData !== 'undefined') flightArray = globalFlightsData;
       else if (typeof flightsData !== 'undefined') flightArray = flightsData;
-      else if (typeof dataFlights !== 'undefined') flightArray = dataFlights;
 
       if (flightArray && Array.isArray(flightArray)) {
         const row = flightArray.find(r => String(r[0]) === String(flightId));
         if (row) {
-          // Ghi đè trực tiếp vào các chỉ số cột (Cột 48, 49, 50 tương ứng Index JS 47, 48, 49)
           row[47] = ckinVal;
           row[48] = quayVal;
           row[49] = vipVal;
         }
       }
 
-      // BƯỚC 2: Cập nhật lại text View Mode ngay lập tức trên Popup
       if (document.getElementById('val-ckin-online')) document.getElementById('val-ckin-online').innerText = ckinVal;
       if (document.getElementById('val-quay-y')) document.getElementById('val-quay-y').innerText = quayVal || '---';
       if (document.getElementById('val-vip-cip')) document.getElementById('val-vip-cip').innerText = vipVal || '---';
 
       alert("Lưu thông tin Check-in & Khách hàng thành công!");
-      cancelEditCkin();
+      if (typeof cancelEditCkin === 'function') cancelEditCkin();
 
-      // BƯỚC 3: TỰ ĐỘNG CHẠY HÀM FETCH ĐỌC LẠI SHEET SAU 1 GIÂY
       setTimeout(() => {
-        if (typeof loadData === 'function') loadData();
-        else if (typeof loadAllFlightsFromSheet === 'function') loadAllFlightsFromSheet();
-        else if (typeof fetchFlights === 'function') fetchFlights();
+        if (typeof loadAllFlightsFromSheet === 'function') loadAllFlightsFromSheet();
       }, 1000);
 
     } else {
