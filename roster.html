@@ -1350,161 +1350,204 @@ function calculateMonthlyOffQuota() {
             }
         }
 
-        // --- HÀM XUẤT EXCEL BÁO CÁO (ĐÃ SỬA LỖI MAPPING MÃ CA C196 VÀO CA 2) ---
-        async function exportToExcel() {
-            const weekKey = currentStartDate;
-            const data = scheduleData[weekKey] || {};
+       async function exportToExcel() {
+    const weekKey = currentStartDate;
+    const data = scheduleData[weekKey] || {};
 
-            const workbook = new ExcelJS.Workbook();
-            const ws = workbook.addWorksheet('HTDVHK', {
-                views: [{ showGridLines: true }]
-            });
+    const workbook = new ExcelJS.Workbook();
 
-            ws.font = { name: 'Times New Roman', size: 12 };
+    // ==========================================
+    // SHEET 1: BÁO CÁO LỊCH TRỰC (FORM CŨ)
+    // ==========================================
+    const ws1 = workbook.addWorksheet('HTDVHK', {
+        views: [{ showGridLines: true }]
+    });
 
-            const startDate = new Date(weekKey);
-            const dayOfWeek = startDate.getDay();
-            const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-            const monday = new Date(startDate);
-            monday.setDate(startDate.getDate() + diffToMonday);
+    ws1.font = { name: 'Times New Roman', size: 12 };
 
-            const daysOfWeek = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
+    const startDate = new Date(weekKey);
+    const dayOfWeek = startDate.getDay();
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    const monday = new Date(startDate);
+    monday.setDate(startDate.getDate() + diffToMonday);
 
-            ws.addRow(["CẢNG HÀNG KHÔNG QUỐC TẾ PHÚ QUỐC"]);
-            ws.addRow(["PHÒNG ĐIỀU HÀNH SÂN BAY"]);
-            ws.addRow(["ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
-            ws.addRow([]);
-            ws.addRow(["LỊCH TRỰC ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
-            ws.addRow([`THÁNG ${String(monday.getMonth() + 1).padStart(2, '0')} NĂM ${monday.getFullYear()}`]);
-            ws.addRow([]);
+    const daysOfWeek = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
 
-            ws.getCell('A5').font = { name: 'Times New Roman', size: 14, bold: true };
-            ws.getCell('A6').font = { name: 'Times New Roman', size: 13, bold: true };
-            ws.getCell('A5').alignment = { horizontal: 'center' };
-            ws.getCell('A6').alignment = { horizontal: 'center' };
+    ws1.addRow(["CẢNG HÀNG KHÔNG QUỐC TẾ PHÚ QUỐC"]);
+    ws1.addRow(["PHÒNG ĐIỀU HÀNH SÂN BAY"]);
+    ws1.addRow(["ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
+    ws1.addRow([]);
+    ws1.addRow(["LỊCH TRỰC ĐỘI HỖ TRỢ HÀNH KHÁCH"]);
+    ws1.addRow([`THÁNG ${String(monday.getMonth() + 1).padStart(2, '0')} NĂM ${monday.getFullYear()}`]);
+    ws1.addRow([]);
 
-            const headerRow1 = ws.addRow([
-                "Ngày", "Thứ", "HÀNH CHÍNH", "CA 1\n05:30-13:30", 
-                "CA 2\n09:30-17:30", "CA 3\n17:30-01:30", "OFF Tuần", 
-                "Nghỉ Phép,\nTS, Đi Học…", "Ghi Chú", "", "", "", "", ""
-            ]);
-            const headerRow2 = ws.addRow([]);
+    ws1.getCell('A5').font = { name: 'Times New Roman', size: 14, bold: true };
+    ws1.getCell('A6').font = { name: 'Times New Roman', size: 13, bold: true };
+    ws1.getCell('A5').alignment = { horizontal: 'center' };
+    ws1.getCell('A6').alignment = { horizontal: 'center' };
 
-            ws.mergeCells('A1:D1'); ws.mergeCells('A2:D2'); ws.mergeCells('A3:D3');
-            ws.mergeCells('A5:L5'); ws.mergeCells('A6:L6');
+    const headerRow1 = ws1.addRow([
+        "Ngày", "Thứ", "HÀNH CHÍNH", "CA 1\n05:30-13:30", 
+        "CA 2\n09:30-17:30", "CA 3\n17:30-01:30", "OFF Tuần", 
+        "Nghỉ Phép,\nTS, Đi Học…", "Ghi Chú", "", "", "", "", ""
+    ]);
+    const headerRow2 = ws1.addRow([]);
 
-            ws.mergeCells('A8:A9'); ws.mergeCells('B8:B9'); ws.mergeCells('C8:C9');
-            ws.mergeCells('D8:D9'); ws.mergeCells('E8:E9'); ws.mergeCells('F8:F9');
-            ws.mergeCells('G8:G9'); ws.mergeCells('H8:H9'); ws.mergeCells('I8:N9');
+    ws1.mergeCells('A1:D1'); ws1.mergeCells('A2:D2'); ws1.mergeCells('A3:D3');
+    ws1.mergeCells('A5:L5'); ws1.mergeCells('A6:L6');
 
-            const BLUE_FILL = 'FFB7DEE8';
-            const BLUE_TEXT = 'FF0033CC';
-            const HIGHLIGHT_DAY_FILL = 'FFFCE4D6';
-            const BORDER_STYLE = {
-                top: { style: 'thin', color: { argb: 'FF000000' } },
-                left: { style: 'thin', color: { argb: 'FF000000' } },
-                bottom: { style: 'thin', color: { argb: 'FF000000' } },
-                right: { style: 'thin', color: { argb: 'FF000000' } }
-            };
+    ws1.mergeCells('A8:A9'); ws1.mergeCells('B8:B9'); ws1.mergeCells('C8:C9');
+    ws1.mergeCells('D8:D9'); ws1.mergeCells('E8:E9'); ws1.mergeCells('F8:F9');
+    ws1.mergeCells('G8:G9'); ws1.mergeCells('H8:H9'); ws1.mergeCells('I8:N9');
 
-            for (let c = 1; c <= 14; c++) {
-                const cell = headerRow1.getCell(c);
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
-                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
-                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-                cell.border = BORDER_STYLE;
-                headerRow2.getCell(c).border = BORDER_STYLE;
-            }
+    const BLUE_FILL = 'FFB7DEE8';
+    const BLUE_TEXT = 'FF0033CC';
+    const HIGHLIGHT_DAY_FILL = 'FFFCE4D6';
+    const BORDER_STYLE = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } }
+    };
 
-            for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + dayIdx);
-                const dateStr = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-                const dayName = daysOfWeek[dayIdx];
+    for (let c = 1; c <= 14; c++) {
+        const cell = headerRow1.getCell(c);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        cell.border = BORDER_STYLE;
+        headerRow2.getCell(c).border = BORDER_STYLE;
+    }
 
-                let hcList = [], ca1List = [], ca2List = [], ca3List = [], offList = [], leaveList = [];
+    // -------------------------------------------------------------
+    // XỬ LÝ DỮ LIỆU 7 NGÀY & TÌM DANH SÁCH DÀI NHẤT CHO CỘT GHI CHÚ
+    // -------------------------------------------------------------
+    const dailyShifts = [];
+    let maxCA1 = [], maxCA2 = [], maxCA3 = [], maxHC = [];
 
-                staffList.forEach(staff => {
-                    const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
-                    const shiftCode = shifts[dayIdx] || "";
-                    const shiftInfo = shiftList.find(s => s.code === shiftCode);
+    for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+        let hcList = [], ca1List = [], ca2List = [], ca3List = [], offList = [], leaveList = [];
 
-                    if (shiftCode) {
-                        const shortName = staff.name.split(' ').pop();
-                        
-                        // SỬA LỖI LOGIC: Kiểm tra chính xác mã ca thay vì kiểm tra chuỗi con chứa "C1"
-                        if (["OFF", "ROFF"].includes(shiftCode)) {
-                            offList.push(shortName);
-                        } else if (["AL", "SL"].includes(shiftCode) || (shiftInfo && shiftInfo.type === 'leave')) {
-                            leaveList.push(`${shortName}(${shiftCode})`);
-                        } else if (["HC", "C043"].includes(shiftCode)) {
-                            hcList.push(shortName);
-                        } else if (["C160", "C011", "CA1", "C1", "CA 1"].includes(shiftCode)) {
-                            ca1List.push(shortName);
-                        } else if (["C196", "C021", "CA2", "C2", "CA 2"].includes(shiftCode)) {
-                            ca2List.push(shortName);
-                        } else if (["C015", "C031", "CA3", "C3", "CA 3"].includes(shiftCode)) {
-                            ca3List.push(shortName);
-                        } else {
-                            ca1List.push(shortName);
-                        }
-                    }
-                });
+        staffList.forEach(staff => {
+            const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
+            const shiftCode = shifts[dayIdx] || "";
+            const shiftInfo = shiftList.find(s => s.code === shiftCode);
 
-                let ghiChuMain = "";
-                let ghiChuExtra = [];
-                if (dayIdx === 0) { ghiChuMain = "CA 1"; ghiChuExtra = ca1List.slice(0, 5); }
-                else if (dayIdx === 1) { ghiChuMain = "CA 2"; ghiChuExtra = ca2List.slice(0, 4); }
-                else if (dayIdx === 2) { ghiChuMain = "CA 3"; ghiChuExtra = ca3List.slice(0, 4); }
-                else if (dayIdx === 3) { ghiChuMain = "Ca thay thế"; }
-                else if (dayIdx === 4) { ghiChuMain = "Ca HC"; }
-                else if (dayIdx === 5) { ghiChuMain = "Thai sản"; }
-                else if (dayIdx === 6) { ghiChuMain = "Phép"; }
-
-                const rowValues = [
-                    dateStr, dayName, hcList.join(", "), ca1List.join(", "),
-                    ca2List.join(", "), ca3List.join(", "), offList.join(", "),
-                    leaveList.join(", "), ghiChuMain, ...ghiChuExtra
-                ];
-
-                while (rowValues.length < 14) rowValues.push("");
-                const row = ws.addRow(rowValues);
-
-                for (let c = 1; c <= 14; c++) {
-                    const cell = row.getCell(c);
-                    cell.border = BORDER_STYLE;
-                    cell.alignment = { vertical: 'middle', horizontal: (c <= 2 || c === 9) ? 'center' : 'left' };
-
-                    if (c === 1) {
-                        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
-                        if (dayIdx === 4) {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HIGHLIGHT_DAY_FILL } };
-                        }
-                    } else if (c === 2) {
-                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
-                        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
-                    } else if (c === 9) {
-                        cell.font = { name: 'Times New Roman', size: 11, bold: true };
-                    }
+            if (shiftCode) {
+                const shortName = staff.name.split(' ').pop();
+                
+                if (["OFF", "ROFF"].includes(shiftCode)) {
+                    offList.push(shortName);
+                } else if (["AL", "SL"].includes(shiftCode) || (shiftInfo && shiftInfo.type === 'leave')) {
+                    leaveList.push(`${shortName}(${shiftCode})`);
+                } else if (["HC", "C043"].includes(shiftCode)) {
+                    hcList.push(shortName);
+                } else if (["C160", "C011", "CA1", "C1", "CA 1"].includes(shiftCode)) {
+                    ca1List.push(shortName);
+                } else if (["C196", "C021", "CA2", "C2", "CA 2"].includes(shiftCode)) {
+                    ca2List.push(shortName);
+                } else if (["C015", "C031", "CA3", "C3", "CA 3"].includes(shiftCode)) {
+                    ca3List.push(shortName);
+                } else {
+                    ca1List.push(shortName);
                 }
             }
+        });
 
-            ws.addRow([]);
-            ws.addRow(["Ghi chú:"]);
+        dailyShifts.push({ hcList, ca1List, ca2List, ca3List, offList, leaveList });
 
-            const staffHeader = ws.addRow(["Số TT", "Họ Tên", "", "Điện thoại", "Email", "Ca Làm Việc", "Mã Ca LV", "Thời gian", "LƯU Ý"]);
-            const headerRowIdx = staffHeader.number;
+        // So sánh để lấy danh sách nhiều người nhất trong cả tuần
+        if (ca1List.length > maxCA1.length) maxCA1 = ca1List;
+        if (ca2List.length > maxCA2.length) maxCA2 = ca2List;
+        if (ca3List.length > maxCA3.length) maxCA3 = ca3List;
+        if (hcList.length > maxHC.length) maxHC = hcList;
+    }
 
-            ws.mergeCells(`B${headerRowIdx}:C${headerRowIdx}`);
-            ws.mergeCells(`I${headerRowIdx}:N${headerRowIdx}`);
+    // ĐƯA DỮ LIỆU VÀO CÁC DÒNG SANG EXCEL
+    for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + dayIdx);
+        const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        const dayName = daysOfWeek[dayIdx];
 
-            for (let c = 1; c <= 14; c++) {
-                const cell = staffHeader.getCell(c);
+        const { hcList, ca1List, ca2List, ca3List, offList, leaveList } = dailyShifts[dayIdx];
+
+        let ghiChuMain = "";
+        let ghiChuExtra = [];
+
+        if (dayIdx === 0) { 
+            ghiChuMain = "CA 1"; 
+            ghiChuExtra = maxCA1; 
+        } else if (dayIdx === 1) { 
+            ghiChuMain = "CA 2"; 
+            ghiChuExtra = maxCA2; // Lấy danh sách CA 2 dài nhất (gồm cả Nhân)
+        } else if (dayIdx === 2) { 
+            ghiChuMain = "CA 3"; 
+            ghiChuExtra = maxCA3; 
+        } else if (dayIdx === 3) { 
+            ghiChuMain = "Ca thay thế"; 
+        } else if (dayIdx === 4) { 
+            ghiChuMain = "Ca HC"; 
+            ghiChuExtra = maxHC;  // Lấy danh sách Ca HC dài nhất (gồm cả Huệ)
+        } else if (dayIdx === 5) { 
+            ghiChuMain = "Thai sản"; 
+        } else if (dayIdx === 6) { 
+            ghiChuMain = "Phép"; 
+        }
+
+        const rowValues = new Array(14).fill("");
+        rowValues[0] = dateStr;
+        rowValues[1] = dayName;
+        rowValues[2] = hcList.join(", ");
+        rowValues[3] = ca1List.join(", ");
+        rowValues[4] = ca2List.join(", ");
+        rowValues[5] = ca3List.join(", ");
+        rowValues[6] = offList.join(", ");
+        rowValues[7] = leaveList.join(", ");
+        rowValues[8] = ghiChuMain;
+
+        // Điền tên vào 5 ô Ghi chú phụ (Cột J -> N)
+        for (let k = 0; k < ghiChuExtra.length && k < 5; k++) {
+            rowValues[9 + k] = ghiChuExtra[k];
+        }
+
+        const row = ws1.addRow(rowValues);
+
+        for (let c = 1; c <= 14; c++) {
+            const cell = row.getCell(c);
+            cell.border = BORDER_STYLE;
+            cell.alignment = { vertical: 'middle', horizontal: (c <= 2 || c === 9) ? 'center' : 'left' };
+
+            if (c === 1) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
+                if (dayIdx === 4) {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HIGHLIGHT_DAY_FILL } };
+                }
+            } else if (c === 2) {
                 cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
-                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
-                cell.alignment = { vertical: 'middle', horizontal: 'center' };
-                cell.border = BORDER_STYLE;
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: (dayIdx === 6) ? 'FF0000CC' : 'FF000000' } };
+            } else if (c === 9) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true };
             }
+        }
+    }
+
+    ws1.addRow([]);
+    ws1.addRow(["Ghi chú:"]);
+
+    const staffHeader = ws1.addRow(["Số TT", "Họ Tên", "", "Điện thoại", "Email", "Ca Làm Việc", "Mã Ca LV", "Thời gian", "LƯU Ý"]);
+    const headerRowIdx = staffHeader.number;
+
+    ws1.mergeCells(`B${headerRowIdx}:C${headerRowIdx}`);
+    ws1.mergeCells(`I${headerRowIdx}:N${headerRowIdx}`);
+
+    for (let c = 1; c <= 14; c++) {
+        const cell = staffHeader.getCell(c);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
+        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = BORDER_STYLE;
+    }
 
     staffList.forEach((staff, index) => {
         let caLV = "", maCa = "", thoiGian = "";
@@ -1513,71 +1556,133 @@ function calculateMonthlyOffQuota() {
         else if (index === 2) { caLV = "CA 2"; maCa = "C196"; thoiGian = "09:30-17:30"; }
         else if (index === 3) { caLV = "CA 3"; maCa = "C015"; thoiGian = "17:30-01:30"; }
 
-                const row = ws.addRow([
-                    index + 1, 
-                    staff.name, 
-                    "",
-                    staff.phone || "",
-                    staff.email || "",
-                    caLV, 
-                    maCa, 
-                    thoiGian,
-                    ""
-                ]);
+        const row = ws1.addRow([
+            index + 1, 
+            staff.name, 
+            "",
+            staff.phone || "",
+            staff.email || "",
+            caLV, 
+            maCa, 
+            thoiGian,
+            ""
+        ]);
 
-                const rIndex = row.number;
+        const rIndex = row.number;
 
-                ws.mergeCells(`B${rIndex}:C${rIndex}`);
-                ws.mergeCells(`I${rIndex}:N${rIndex}`);
+        ws1.mergeCells(`B${rIndex}:C${rIndex}`);
+        ws1.mergeCells(`I${rIndex}:N${rIndex}`);
 
-                for (let c = 1; c <= 14; c++) {
-                    const cell = row.getCell(c);
-                    cell.border = BORDER_STYLE;
-                    cell.alignment = { vertical: 'middle', horizontal: (c === 1 || (c >= 6 && c <= 8)) ? 'center' : 'left' };
-                    
-                    if (c === 2) {
-                        cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
-                    }
-                    if (c === 9) {
-                        if (index === 0) {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BLUE_FILL } };
-                            cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
-                        } else if (index >= 1 && index <= 3) {
-                            cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
-                        } else {
-                            cell.font = { name: 'Times New Roman', size: 11, bold: true };
-                        }
-                    }
-                }
-            });
-
-            ws.addRow([]);
-            const signRow = ws.addRow(["", "Người lập bảng", "", "", "", "", "Người phê duyệt"]);
-            signRow.getCell(2).font = { name: 'Times New Roman', size: 11, bold: true };
-            signRow.getCell(7).font = { name: 'Times New Roman', size: 11, bold: true };
-
-            ws.columns = [
-                { width: 14 }, { width: 10 }, { width: 15 }, { width: 25 },
-                { width: 28 }, { width: 28 }, { width: 20 }, { width: 22 },
-                { width: 12 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }
-            ];
-
-            function getISOWeek(date) {
-                const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-                const dayNum = d.getUTCDay() || 7;
-                d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-                return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        for (let c = 1; c <= 14; c++) {
+            const cell = row.getCell(c);
+            cell.border = BORDER_STYLE;
+            cell.alignment = { vertical: 'middle', horizontal: (c === 1 || (c >= 6 && c <= 8)) ? 'center' : 'left' };
+            
+            if (c === 2) {
+                cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: BLUE_TEXT } };
             }
-
-            const weekNumber = getISOWeek(monday);
-            const year = monday.getFullYear();
-
-            const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `Lich_Truc_HTDVHK_Tuan_${weekNumber}_${year}.xlsx`);
-
-            showToast("Đã xuất file Excel!");
         }
+    });
+
+    ws1.addRow([]);
+    const signRow = ws1.addRow(["", "Người lập bảng", "", "", "", "", "Người phê duyệt"]);
+    signRow.getCell(2).font = { name: 'Times New Roman', size: 11, bold: true };
+    signRow.getCell(7).font = { name: 'Times New Roman', size: 11, bold: true };
+
+    ws1.columns = [
+        { width: 14 }, { width: 10 }, { width: 15 }, { width: 25 },
+        { width: 28 }, { width: 28 }, { width: 20 }, { width: 22 },
+        { width: 12 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }
+    ];
+
+    // ==========================================
+    // SHEET 2: CA LÀM VIỆC (FORM MẪU IMPORT SHIFT)
+    // ==========================================
+    const ws2 = workbook.addWorksheet('Ca làm việc', {
+        views: [{ showGridLines: true }]
+    });
+
+    const dateHeaders = [];
+    for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + dayIdx);
+        const dayStr = String(d.getDate()).padStart(2, '0');
+        const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+        dateHeaders.push(`${dayStr}/${monthStr}/${d.getFullYear()}`);
+    }
+
+    const sheet2HeaderRow = ws2.addRow(["MÁ NV", "Họ và tên NV", ...dateHeaders]);
+    sheet2HeaderRow.height = 24;
+
+    for (let c = 1; c <= 9; c++) {
+        const cell = sheet2HeaderRow.getCell(c);
+        cell.font = { name: 'Times New Roman', size: 11, bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = BORDER_STYLE;
+
+        if (c <= 2) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+        } else {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB7DEE8' } };
+        }
+    }
+
+    staffList.forEach(staff => {
+        const shifts = data[staff.id] || ["", "", "", "", "", "", ""];
+        
+        const row = ws2.addRow([
+            staff.id || staff.code || "",
+            staff.name,
+            ...shifts
+        ]);
+
+        row.height = 20;
+
+        for (let c = 1; c <= 9; c++) {
+            const cell = row.getCell(c);
+            cell.font = { name: 'Times New Roman', size: 11 };
+            cell.border = BORDER_STYLE;
+
+            if (c === 1) {
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                cell.font = { name: 'Times New Roman', size: 11, bold: true };
+            } else if (c === 2) {
+                cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                cell.font = { name: 'Times New Roman', size: 11, bold: true };
+            } else {
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            }
+        }
+    });
+
+    ws2.columns = [
+        { width: 14 },
+        { width: 28 },
+        { width: 14 }, { width: 14 }, { width: 14 },
+        { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }
+    ];
+
+    // ==========================================
+    // TẢI FILE EXCEL
+    // ==========================================
+    function getISOWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    const weekNumber = getISOWeek(monday);
+    const year = monday.getFullYear();
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `Lich_Truc_HTDVHK_Tuan_${weekNumber}_${year}.xlsx`);
+
+    if (typeof showToast === 'function') {
+        showToast("Đã xuất file Excel thành công!");
+    }
+}
     </script>
 </body>
 </html>
