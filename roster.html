@@ -501,7 +501,7 @@
         let storedPasscode = "1234";
 
         let isEditMode = false;
-        let currentStartDate = '2026-09-28';
+        let currentStartDate = getMondayOfCurrentWeek();
         let currentTab = 'schedule';
 
         function syncUrlState() {
@@ -599,24 +599,50 @@
                 showToast("Lỗi kết nối tới Google Sheet!", true);
             }
         }
+window.onload = async function() {
+    // 1. Tự động lấy ngày Thứ 2 của tuần hiện tại
+    currentStartDate = getMondayOfCurrentWeek();
 
-        window.onload = async function() {
-            loadStateFromUrl();
-            document.getElementById('week-start-date').value = currentStartDate;
-            switchTab(currentTab, false);
-            updateWeekDates();
-            
-            shiftList = DEFAULT_SHIFTS;
-            staffList = DEFAULT_STAFF;
+    // 2. Cập nhật giá trị vào ô chọn ngày
+    const weekInput = document.getElementById('week-start-date');
+    if (weekInput) weekInput.value = currentStartDate;
 
-            renderLegend();
-            renderScheduleTable();
-            renderStaffTable();
-            renderShiftsCards();
-            updateUIForMode();
+    // 3. Đọc trạng thái từ URL (nếu có tham số URL thì giữ lại, nếu không sẽ lấy tuần hiện tại)
+    loadStateFromUrl();
+    
+    switchTab(currentTab, false);
+    updateWeekDates();
+    
+    shiftList = DEFAULT_SHIFTS;
+    staffList = DEFAULT_STAFF;
 
-            await loadDataFromGoogleSheet();
-        };
+    renderLegend();
+    renderScheduleTable();
+    renderStaffTable();
+    renderShiftsCards();
+    updateUIForMode();
+
+    // 4. Tải dữ liệu từ Google Sheet về cho tuần hiện tại
+    await loadDataFromGoogleSheet();
+};
+// Hàm tính ngày Thứ 2 của tuần hiện tại (Định dạng YYYY-MM-DD)
+function getMondayOfCurrentWeek() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
+    
+    // Tính khoảng cách tới Thứ 2 gần nhất (Nếu là Chủ Nhật -> lùi 6 ngày)
+    const distanceToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + distanceToMonday);
+
+    // Định dạng YYYY-MM-DD
+    const year = monday.getFullYear();
+    const month = String(monday.getMonth() + 1).padStart(2, '0');
+    const day = String(monday.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
 
         function toggleEditMode() {
             if (isEditMode) {
@@ -1003,48 +1029,53 @@ function calculateMonthlyOffQuota() {
     }
 }
 
-        async function updateShift(staffId, dayIndex, shiftCode) {
-            if (!isEditMode) return;
-            const weekKey = currentStartDate;
-            if (!scheduleData[weekKey]) scheduleData[weekKey] = {};
-            if (!scheduleData[weekKey][staffId]) scheduleData[weekKey][staffId] = ["", "", "", "", "", "", ""];
+async function updateShift(staffId, dayIndex, shiftCode) {
+    if (!isEditMode) return;
 
-            scheduleData[weekKey][staffId][dayIndex] = shiftCode;
-            renderScheduleTable();
-            await saveToStorage();
+    const weekKey = currentStartDate; // Ngày bắt đầu tuần dạng "YYYY-MM-DD"
+
+    // 1. Cập nhật dữ liệu tạm thời trên giao diện (để UI đổi màu/hiển thị ngay)
+    if (!scheduleData[weekKey]) scheduleData[weekKey] = {};
+    if (!scheduleData[weekKey][staffId]) scheduleData[weekKey][staffId] = ["", "", "", "", "", "", ""];
+    
+    scheduleData[weekKey][staffId][dayIndex] = shiftCode;
+
+    // Lấy tên nhân viên để truyền lên GAS (phòng trường hợp nhân viên chưa có dòng trên Tab tuần)
+    const staffObj = staffList.find(s => s.id === staffId);
+    const staffName = staffObj ? staffObj.name : "";
+
+    // 2. Render lại bảng UI lập tức cho mượt
+    renderScheduleTable();
+
+    // 3. Gửi Yêu cầu cập nhật ĐÚNG 1 Ô lên Google Sheet
+    try {
+        showToast("Đang đồng bộ...");
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "updateSingleCell",
+                weekKey: weekKey,     // Ví dụ: "2026-09-28"
+                staffId: staffId,     // Mã NV
+                staffName: staffName, // Tên NV
+                dayIndex: dayIndex,   // Index từ 0 (T2) đến 6 (CN)
+                shiftCode: shiftCode  // Mã ca trực mới (ví dụ "C021" hoặc "")
+            })
+        });
+
+        const res = await response.json();
+        if (res.status === "success") {
+            showToast("Đã lưu ca trực!");
+        } else {
+            showToast("Lỗi đồng bộ Google Sheet: " + res.message, true);
         }
-
-        async function autoAssignShifts() {
-            if (!isEditMode) return;
-            if (!confirm("Hệ thống sẽ tự động phân ca ngẫu nhiên cho toàn bộ nhân viên và lưu trực tiếp lên Google Sheet. Bạn có muốn tiếp tục?")) return;
-
-            const weekKey = currentStartDate;
-            scheduleData[weekKey] = {};
-
-            const workShifts = shiftList.filter(s => s.type === 'work').map(s => s.code);
-            const offShifts = ["OFF", "ROFF"];
-
-            staffList.forEach(staff => {
-                const assigned = [];
-                const offDays = [];
-                while (offDays.length < 2) {
-                    const r = Math.floor(Math.random() * 7);
-                    if (!offDays.includes(r)) offDays.push(r);
-                }
-
-                for (let d = 0; d < 7; d++) {
-                    if (offDays.includes(d)) {
-                        assigned.push(offShifts[Math.floor(Math.random() * offShifts.length)]);
-                    } else {
-                        assigned.push(workShifts[Math.floor(Math.random() * workShifts.length)]);
-                    }
-                }
-                scheduleData[weekKey][staff.id] = assigned;
-            });
-
-            renderScheduleTable();
-            await saveToStorage();
-        }
+    } catch (error) {
+        console.error("Lỗi khi lưu ô:", error);
+        showToast("Lỗi kết nối tới Google Sheet!", true);
+    }
+}
 
         async function clearAllShifts() {
             if (!isEditMode) return;
@@ -1095,6 +1126,24 @@ function calculateMonthlyOffQuota() {
                 </tr>
             `).join('');
         }
+// Hàm lấy ngày Thứ 2 của tuần hiện tại (Định dạng YYYY-MM-DD)
+function getMondayOfCurrentWeek() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
+    
+    // Tính khoảng cách tới Thứ 2 gần nhất trước đó (Nếu là CN thì lùi 6 ngày)
+    const distanceToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + distanceToMonday);
+
+    // Định dạng thành YYYY-MM-DD
+    const year = monday.getFullYear();
+    const month = String(monday.getMonth() + 1).padStart(2, '0');
+    const day = String(monday.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
 
         function openStaffModal(id = null) {
             if (!isEditMode) return;
