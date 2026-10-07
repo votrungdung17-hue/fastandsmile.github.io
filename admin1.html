@@ -1319,8 +1319,7 @@ function upload() {
   <div class="modal-content">
     <div style="padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
       <h3 id="detailModalTitle" style="margin: 0; font-size: 16px;">🎫 BOOKING & MEAL & ONBOARD</h3>
-      <button type="button" onclick="closeDetailModal()" style="padding: 4px 12px; cursor: pointer;">Đóng</button>
-    </div>
+        </div>
     <div id="detailModalBody" class="modal-body">
       <!-- Dữ liệu bảng sẽ được render ở đây -->
     </div>
@@ -3761,11 +3760,11 @@ fetch(API,{
 });
 }
 ////// gọi AI
-// Khai báo URL Web App Apps Script ở đầu file (thay đúng URL của bạn vào)
+// Khai báo URL Web App Apps Script ở đầu file
 const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
 
 async function handleEyeClick(btnElement) {
-  // 1. Bật ngay màn hình Loading để người dùng biết hệ thống đang xử lý
+  // 1. Bật ngay màn hình Loading
   const loadingOverlay = document.getElementById("loadingOverlay");
   if (loadingOverlay) loadingOverlay.style.display = "flex";
 
@@ -3779,39 +3778,33 @@ async function handleEyeClick(btnElement) {
     const row = JSON.parse(decodeURIComponent(rawData));
     const flightId = row[0] || row.ID; 
 
-    // 2. Gửi yêu cầu lấy dữ liệu realtime từ Google Sheet (Chống cache bằng timestamp)
+    // 2. Gửi yêu cầu lấy dữ liệu realtime từ Google Sheet
     const requestUrl = `${SCRIPT_WEB_APP_URL}?action=getSingleRow&id=${encodeURIComponent(flightId)}&_t=${Date.now()}`;
     
     const response = await fetch(requestUrl);
     const result = await response.json();
 
     if (result && result.status === "success" && Array.isArray(result.data)) {
-      // Cập nhật lại attribute trên nút
       btnElement.setAttribute('data-row', encodeURIComponent(JSON.stringify(result.data)));
-      
-      // Mở Popup bằng dữ liệu mới
       openDetailModal(result.data);
     } else {
       openDetailModal(row);
     }
   } catch (error) {
     console.error("Lỗi Fetch Realtime:", error);
-    // Nếu lỗi kết nối thì vẫn mở modal bằng dữ liệu tĩnh hiện có
     const fallbackRow = JSON.parse(decodeURIComponent(btnElement.getAttribute('data-row')));
     openDetailModal(fallbackRow);
   } finally {
-    // 3. Tắt màn hình Loading sau khi đã xử lý xong (dù thành công hay thất bại)
     if (loadingOverlay) loadingOverlay.style.display = "none";
   }
 }
 
-// 2. Hàm khởi tạo giao diện và hiển thị Popup Detail Modal (Đầy đủ trường cũ + Sửa trực tiếp)
+// 2. Hàm mở Modal & hiển thị dữ liệu
 function openDetailModal(row) {
   try {
     const modal = document.getElementById("detailModal");
     if (!modal) return;
 
-    // Định dạng tiêu đề
     const dateStr = formatDateForInput(row[1]) || 'N/A';
     const arrFlight = (row[3] || '---').toUpperCase();
     const depFlight = (row[9] || '---').toUpperCase();
@@ -3819,11 +3812,10 @@ function openDetailModal(row) {
     
     document.getElementById("detailModalTitle").innerText = `✈️ CHI TIẾT CHUYẾN BAY: ${arrFlight} / ${depFlight} - NGÀY ${dateStr}`;
 
-    // Đổ dữ liệu vào Body - GIỮ NGUYÊN TOÀN BỘ CÁC TRƯỜNG DỮ LIỆU CŨ
     const modalBody = document.getElementById("detailModalBody");
     modalBody.innerHTML = `
       <div class="detail-grid">
-        <!-- 1. THÔNG TIN CHUNG (GIỮ NGUYÊN) -->
+        <!-- 1. THÔNG TIN CHUNG -->
         <div class="detail-card">
           <div class="detail-card-title">📌 THÔNG TIN CHUNG</div>
           <div class="detail-item"><span class="detail-label">DATE:</span> <span class="detail-value">${dateStr}</span></div>
@@ -3831,85 +3823,54 @@ function openDetailModal(row) {
           <div class="detail-item"><span class="detail-label">CONFIG:</span> <span class="detail-value">${row[25] || '---'}</span></div>
           <div class="detail-item"><span class="detail-label">RAMP INSPECTOR:</span> <span class="detail-value">${row[34] || '---'}</span></div>
         </div>
-<!-- 2. THÔNG TIN CHECK-IN & KHÁCH HÀNG (NHÓM MỚI) -->
-<div class="detail-card">
-  <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>💻 CHECK-IN & KHÁCH HÀNG</span>
-    <button type="button" id="btn-edit-ckin" class="btn-row-action btn-row-edit" onclick="toggleEditCkin('${flightId}')">✏️ Edit</button>
-  </div>
-  
-  <!-- Chế độ Xem (View Mode) -->
-  <div id="ckin-view-mode">
-    <div class="detail-item">
-      <span class="detail-label">CKIN ONLINE:</span> 
-      <span class="detail-value" id="val-ckin-online" style="color: #17a2b8; font-weight:bold;">${row[47] ?? 0}</span>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">SỐ QUẦY Y:</span> 
-      <span class="detail-value" id="val-quay-y" style="color: #6c757d;">${row[48] || '---'}</span>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">VIP / CIP:</span> 
-      <span class="detail-value" id="val-vip-cip" style="color: #dc3545; font-weight:bold;">${row[49] || '---'}</span>
-    </div>
-  </div>
 
-  <!-- Chế độ Sửa (Edit Mode) -->
-  <div id="ckin-edit-mode" style="display:none; margin-top:8px;">
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CKIN ONLINE:</div>
-    <input type="number" id="inp-ckin-online" value="${row[47] ?? 0}" style="width:100%; margin-bottom:6px;" class="form-control">
-    
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ QUẦY Y:</div>
-    <input type="number" id="inp-quay-y" value="${row[48] || ''}" placeholder="Ví dụ: 01-05..." style="width:100%; margin-bottom:6px;" class="form-control">
-    
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">VIP / CIP:</div>
-    <input type="text" id="inp-vip-cip" value="${row[49] || ''}" placeholder="Nhập thông tin VIP/CIP..." style="width:100%; margin-bottom:8px;" class="form-control">
+        <!-- 2. CHECK-IN & KHÁCH HÀNG -->
+        <div class="detail-card">
+          <div class="detail-card-title">💻 CHECK-IN & KHÁCH HÀNG</div>
+          
+          <div id="ckin-view-mode">
+            <div class="detail-item"><span class="detail-label">CKIN ONLINE:</span> <span class="detail-value" id="val-ckin-online" style="color: #17a2b8; font-weight:bold;">${row[47] ?? 0}</span></div>
+            <div class="detail-item"><span class="detail-label">SỐ QUẦY Y:</span> <span class="detail-value" id="val-quay-y" style="color: #6c757d;">${row[48] || '---'}</span></div>
+            <div class="detail-item"><span class="detail-label">VIP / CIP:</span> <span class="detail-value" id="val-vip-cip" style="color: #dc3545; font-weight:bold;">${row[49] || '---'}</span></div>
+          </div>
 
-    <div style="text-align:right;">
-      <button type="button" class="btn-row-action btn-row-save" onclick="saveCkinGroup('${flightId}')">💾 Save</button>
-      <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditCkin()">❌ Cancel</button>
-    </div>
-  </div>
-</div>
+          <div id="ckin-edit-mode" style="display:none; margin-top:8px;">
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CKIN ONLINE:</div>
+            <input type="number" id="inp-ckin-online" value="${row[47] ?? 0}" style="width:100%; margin-bottom:6px;" class="form-control">
+            
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ QUẦY Y:</div>
+            <input type="number" id="inp-quay-y" value="${row[48] || ''}" placeholder="Ví dụ: 01-05..." style="width:100%; margin-bottom:6px;" class="form-control">
+            
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">VIP / CIP:</div>
+            <input type="text" id="inp-vip-cip" value="${row[49] || ''}" placeholder="Nhập thông tin VIP/CIP..." style="width:100%; margin-bottom:8px;" class="form-control">
+          </div>
+        </div>
 
         <!-- 3. PIN & BAG WAIVED & UPGRADE -->
-<div class="detail-card">
-  <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>🎫 PIN & BAG WAIVED & UPGRADE</span>
-    <button type="button" id="btn-edit-pin" class="btn-row-action btn-row-edit" onclick="toggleEditPin('${flightId}')">✏️ Edit</button>
-  </div>
-  
-  <!-- Chế độ Xem (View Mode) -->
-  <div id="pin-view-mode">
-    <div class="detail-item"><span class="detail-label">PIN:</span> <span class="detail-value" id="val-pin" style="color: #007bff;">${row[44] || 0}</span></div>
-    <div class="detail-item"><span class="detail-label">BAG WAIVED:</span> <span class="detail-value" id="val-bag" style="color: #28a745;">${row[45] || 0}</span></div>
-    <div class="detail-item"><span class="detail-label">UPGRADE:</span> <span class="detail-value" id="val-upg" style="color: #dc3545;">${row[46] || '---'}</span></div>
-  </div>
-
-  <!-- Chế độ Sửa (Edit Mode) -->
-  <div id="pin-edit-mode" style="display:none; margin-top:8px;">
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">PIN:</div>
-    <input type="number" id="inp-pin" value="${row[44] || 0}" style="width:100%; margin-bottom:6px;">
-    
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">BAG WAIVED:</div>
-    <input type="number" id="inp-bag" value="${row[45] || 0}" style="width:100%; margin-bottom:6px;">
-    
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">UPGRADE:</div>
-    <input type="text" id="inp-upg" value="${row[46] || ''}" placeholder="Ghi chú upgrade..." style="width:100%; margin-bottom:8px;">
-
-    <div style="text-align:right;">
-      <button type="button" class="btn-row-action btn-row-save" onclick="savePinUpgrade('${flightId}')">💾 Save</button>
-      <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditPin()">❌ Cancel</button>
-    </div>
-  </div>
-</div>
-
-        <!-- 4. BOOKING & MEAL & ONBOARD (CÓ THÊM TÍNH NĂNG CHỈNH SỬA & LƯU) -->
         <div class="detail-card">
-          <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>🎫 BOOKING & MEAL & ONBOARD</span>
-            <button type="button" id="btn-edit-bm" class="btn-row-action btn-row-edit" onclick="toggleEditBookingMeal('${flightId}')">✏️ Edit</button>
+          <div class="detail-card-title">🎫 PIN & BAG WAIVED & UPGRADE</div>
+          
+          <div id="pin-view-mode">
+            <div class="detail-item"><span class="detail-label">PIN:</span> <span class="detail-value" id="val-pin" style="color: #007bff;">${row[44] || 0}</span></div>
+            <div class="detail-item"><span class="detail-label">BAG WAIVED:</span> <span class="detail-value" id="val-bag" style="color: #28a745;">${row[45] || 0}</span></div>
+            <div class="detail-item"><span class="detail-label">UPGRADE:</span> <span class="detail-value" id="val-upg" style="color: #dc3545;">${row[46] || '---'}</span></div>
           </div>
+
+          <div id="pin-edit-mode" style="display:none; margin-top:8px;">
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">PIN:</div>
+            <input type="number" id="inp-pin" value="${row[44] || 0}" style="width:100%; margin-bottom:6px;" class="form-control">
+            
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">BAG WAIVED:</div>
+            <input type="number" id="inp-bag" value="${row[45] || 0}" style="width:100%; margin-bottom:6px;" class="form-control">
+            
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">UPGRADE:</div>
+            <input type="text" id="inp-upg" value="${row[46] || ''}" placeholder="Ghi chú upgrade..." style="width:100%; margin-bottom:8px;" class="form-control">
+          </div>
+        </div>
+
+        <!-- 4. BOOKING & MEAL & ONBOARD -->
+        <div class="detail-card">
+          <div class="detail-card-title">🎫 BOOKING & MEAL & ONBOARD</div>
           
           <div id="bm-view-mode">
             <div class="detail-item"><span class="detail-label">Booking J / W / Y:</span> <span class="detail-value" id="val-bk" style="color: #007bff;">${row[35] || 0} / ${row[36] || 0} / ${row[37] || 0}</span></div>
@@ -3917,137 +3878,112 @@ function openDetailModal(row) {
             <div class="detail-item"><span class="detail-label">ONBOARD J / W / Y:</span> <span class="detail-value" id="val-ob">${row[41] || 0} / ${row[42] || 0} / ${row[43] || 0}</span></div>
           </div>
 
-          <!-- Khung nhập liệu khi bấm Edit -->
           <div id="bm-edit-mode" style="display:none; margin-top:8px;">
             <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">BOOKING (J / W / Y):</div>
             <div style="display:flex; gap:4px; margin-bottom:6px;">
-              <input type="number" id="inp-bk-j" value="${row[35] || 0}" style="width:33%;">
-              <input type="number" id="inp-bk-w" value="${row[36] || 0}" style="width:33%;">
-              <input type="number" id="inp-bk-y" value="${row[37] || 0}" style="width:33%;">
+              <input type="number" id="inp-bk-j" value="${row[35] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-bk-w" value="${row[36] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-bk-y" value="${row[37] || 0}" style="width:33%;" class="form-control">
             </div>
             <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">MEAL ORDERED (J / W / Y):</div>
             <div style="display:flex; gap:4px; margin-bottom:6px;">
-              <input type="number" id="inp-ml-j" value="${row[38] || 0}" style="width:33%;">
-              <input type="number" id="inp-ml-w" value="${row[39] || 0}" style="width:33%;">
-              <input type="number" id="inp-ml-y" value="${row[40] || 0}" style="width:33%;">
+              <input type="number" id="inp-ml-j" value="${row[38] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-ml-w" value="${row[39] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-ml-y" value="${row[40] || 0}" style="width:33%;" class="form-control">
             </div>
             <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">ONBOARD (J / W / Y):</div>
             <div style="display:flex; gap:4px; margin-bottom:8px;">
-              <input type="number" id="inp-ob-j" value="${row[41] || 0}" style="width:33%;">
-              <input type="number" id="inp-ob-w" value="${row[42] || 0}" style="width:33%;">
-              <input type="number" id="inp-ob-y" value="${row[43] || 0}" style="width:33%;">
-            </div>
-            <div style="text-align:right;">
-              <button type="button" class="btn-row-action btn-row-save" onclick="saveBookingMeal('${flightId}')">💾 Save</button>
-              <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditBookingMeal()">❌ Cancel</button>
+              <input type="number" id="inp-ob-j" value="${row[41] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-ob-w" value="${row[42] || 0}" style="width:33%;" class="form-control">
+              <input type="number" id="inp-ob-y" value="${row[43] || 0}" style="width:33%;" class="form-control">
             </div>
           </div>
         </div>
 
-    <!-- 5. IRREGULARITY & COST -->
-<div class="detail-card" style="margin-top: 12px;">
-  <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>⚠️ LỖI & BẤT THƯỜNG</span>
-    <button type="button" id="btn-edit-irreg" class="btn-row-action btn-row-edit" onclick="toggleEditIrregularity('${flightId}')">✏️ Edit</button>
-  </div>
-  
-  <!-- VIEW MODE -->
-  <div id="irreg-view-mode">
-    <div class="detail-item">
-      <span class="detail-label">LOẠI BẤT THƯỜNG:</span> 
-      <div class="detail-value" id="val-irreg-type" style="font-weight: bold; color: #d9534f; margin-top: 4px;">
-        ${row[50] || 'N/A'}
+        <!-- 5. LỖI & BẤT THƯỜNG -->
+        <div class="detail-card" style="margin-top: 12px;">
+          <div class="detail-card-title">⚠️ LỖI & BẤT THƯỜNG</div>
+          
+          <div id="irreg-view-mode">
+            <div class="detail-item">
+              <span class="detail-label">LOẠI BẤT THƯỜNG:</span> 
+              <div class="detail-value" id="val-irreg-type" style="font-weight: bold; color: #d9534f; margin-top: 4px;">
+                ${row[50] || 'N/A'}
+              </div>
+            </div>
+            <div class="detail-item"><span class="detail-label">CHI TIẾT:</span> <span class="detail-value" id="val-irreg-detail">${row[51] || 'Không có'}</span></div>
+            <div class="detail-item"><span class="detail-label">SỐ KHÁCH ẢNH HƯỜNG:</span> <span class="detail-value" id="val-irreg-pax">${row[52] || 0} pax</span></div>
+            <div class="detail-item">
+              <span class="detail-label">CHI PHÍ (VND):</span> 
+              <span class="detail-value" id="val-irreg-cost" style="color: #28a745; font-weight: bold;">
+                ${row[53] ? Number(row[53]).toLocaleString('vi-VN') + ' ₫' : '0 ₫'}
+              </span>
+            </div>
+          </div>
+
+          <div id="irreg-edit-mode" style="display:none; margin-top:8px;">
+            <div style="font-size:11px; margin-bottom:6px; font-weight:bold;">LOẠI BẤT THƯỜNG (Tích chọn nhiều mục):</div>
+            <div style="border: 1px solid #ccc; border-radius: 4px; padding: 8px; max-height: 150px; overflow-y: auto; background: #fff; margin-bottom: 8px;">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý đến chậm"> Bồi thường hành lý đến chậm</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý rách vỡ"> Bồi thường hành lý rách vỡ</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Giao Hành lý"> Giao Hành lý</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do ovb, offload"> Bồi thường thiện chí do ovb, offload</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do downgrade"> Bồi thường thiện chí do downgrade</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ uống do chuyến bay delay"> Phục vụ uống do chuyến bay delay</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn do chuyến bay delay"> Phục vụ ăn do chuyến bay delay</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn giftcard do phòng C quá tải"> Phục vụ ăn giftcard do phòng C quá tải</label>
+                <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bất thường khác"> Bất thường khác</label>
+              </div>
+            </div>
+
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI TIẾT:</div>
+            <textarea id="inp-irreg-detail" rows="2" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Mô tả nội dung sự cố..." class="form-control">${row[51] || ''}</textarea>
+
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <div style="width:50%;">
+                <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ KHÁCH ẢNH HƯỜNG:</div>
+                <input type="number" id="inp-irreg-pax" value="${row[52] || 0}" style="width:100%; padding:4px;" class="form-control">
+              </div>
+              <div style="width:50%;">
+                <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI PHÍ (VND):</div>
+                <input type="number" id="inp-irreg-cost" value="${row[53] || 0}" style="width:100%; padding:4px;" step="1000" class="form-control">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. DUTY STAFF -->
+        <div class="detail-card" style="margin-top: 12px;">
+          <div class="detail-card-title">👤 NHÂN SỰ TRỰC CA (DUTY STAFF)</div>
+          
+          <div id="duty-view-mode">
+            <div class="detail-item"><span class="detail-label">DUTY OFFICER:</span> <span class="detail-value" id="val-duty-main" style="font-weight: bold; color: #0d6efd;">${row[54] || 'Chưa phân công'}</span></div>
+            <div class="detail-item"><span class="detail-label">ASSISTANT DUTY OFFICER:</span> <span class="detail-value" id="val-duty-sub" style="font-weight: bold; color: #6c757d;">${row[55] || 'Chưa phân công'}</span></div>
+          </div>
+
+          <div id="duty-edit-mode" style="display:none; margin-top:8px;">
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">NGƯỜI TRỰC CHÍNH:</div>
+            <input type="text" id="inp-duty-main" value="${row[54] || ''}" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Nhập tên người trực chính..." class="form-control">
+
+            <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">NGƯỜI TRỰC PHỤ:</div>
+            <input type="text" id="inp-duty-sub" value="${row[55] || ''}" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Nhập tên người trực phụ..." class="form-control">
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">CHI TIẾT:</span> 
-      <span class="detail-value" id="val-irreg-detail">${row[51] || 'Không có'}</span>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">SỐ KHÁCH ẢNH HƯỞNG:</span> 
-      <span class="detail-value" id="val-irreg-pax">${row[52] || 0} pax</span>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">CHI PHÍ (VND):</span> 
-      <span class="detail-value" id="val-irreg-cost" style="color: #28a745; font-weight: bold;">
-        ${row[53] ? Number(row[53]).toLocaleString('vi-VN') + ' ₫' : '0 ₫'}
-      </span>
-    </div>
-  </div>
 
-  <!-- EDIT MODE -->
-  <div id="irreg-edit-mode" style="display:none; margin-top:8px;">
-    <div style="font-size:11px; margin-bottom:6px; font-weight:bold;">LOẠI BẤT THƯỜNG (Tích chọn nhiều mục):</div>
-    
-    <!-- KHUNG CHỌN CHECKBOX -->
-    <div style="border: 1px solid #ccc; border-radius: 4px; padding: 8px; max-height: 150px; overflow-y: auto; background: #fff; margin-bottom: 8px;">
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý đến chậm"> Bồi thường hành lý đến chậm</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường hành lý rách vỡ"> Bồi thường hành lý rách vỡ</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Giao Hành lý"> Giao Hành lý</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do ovb, offload"> Bồi thường thiện chí do ovb, offload</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bồi thường thiện chí do downgrade"> Bồi thường thiện chí do downgrade</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ uống do chuyến bay delay"> Phục vụ uống do chuyến bay delay</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn do chuyến bay delay"> Phục vụ ăn do chuyến bay delay</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Phục vụ ăn giftcard do phòng C quá tải"> Phục vụ ăn giftcard do phòng C quá tải</label>
-        <label style="font-size:12px; cursor:pointer;"><input type="checkbox" class="chk-irreg-item" value="Bất thường khác"> Bất thường khác</label>
+      <!-- KHU VỰC NÚT ĐIỀU HƯỚNG TẬP TRUNG TẠI CHÂN MODAL -->
+      <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+        <!-- Nút Edit ban đầu -->
+        <button type="button" id="btn-main-edit" class="btn-row-action btn-row-edit" onclick="enableGlobalEdit('${flightId}')">✏️ Edit</button>
+
+        <!-- Nút Save và Cancel (Ẩn mặc định) -->
+        <button type="button" id="btn-main-save" class="btn-row-action btn-row-save" style="display:none;" onclick="saveAllDetails('${flightId}', event)">💾 Save</button>
+        <button type="button" id="btn-main-cancel" class="btn-row-action btn-row-cancel" style="display:none;" onclick="cancelGlobalEdit()">❌ Cancel</button>
+
+        <!-- Nút Đóng Modal -->
+        <button type="button" class="btn-row-action btn-row-cancel" style="background-color: #6c757d; color: white;" onclick="closeDetailModal()">🚪 Đóng</button>
       </div>
-    </div>
-
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI TIẾT:</div>
-    <textarea id="inp-irreg-detail" rows="2" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Mô tả nội dung sự cố...">${row[51] || ''}</textarea>
-
-    <div style="display:flex; gap:8px; margin-bottom:8px;">
-      <div style="width:50%;">
-        <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">SỐ KHÁCH ẢNH HƯỜNG:</div>
-        <input type="number" id="inp-irreg-pax" value="${row[52] || 0}" style="width:100%; padding:4px;">
-      </div>
-      <div style="width:50%;">
-        <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">CHI PHÍ (VND):</div>
-        <input type="number" id="inp-irreg-cost" value="${row[53] || 0}" style="width:100%; padding:4px;" step="1000">
-      </div>
-    </div>
-
-    <div style="text-align:right;">
-      <button type="button" class="btn-row-action btn-row-save" onclick="saveIrregularity('${flightId}', event)">💾 Save</button>
-      <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditIrregularity()">❌ Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- 6. DUTY STAFF (TRỰC CA CHÍNH & PHỤ) -->
-<div class="detail-card" style="margin-top: 12px;">
-  <div class="detail-card-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>👤 NHÂN SỰ TRỰC CA (DUTY STAFF)</span>
-    <button type="button" id="btn-edit-duty" class="btn-row-action btn-row-edit" onclick="toggleEditDuty('${flightId}')">✏️ Edit</button>
-  </div>
-  
-  <!-- Khung hiển thị thông tin (View Mode) -->
-  <div id="duty-view-mode">
-    <div class="detail-item">
-      <span class="detail-label">DUTY OFFICER:</span> 
-      <span class="detail-value" id="val-duty-main" style="font-weight: bold; color: #0d6efd;">${row[54] || 'Chưa phân công'}</span>
-    </div>
-    <div class="detail-item">
-      <span class="detail-label">ASSISTANT DUTY OFFICER:</span> 
-      <span class="detail-value" id="val-duty-sub" style="font-weight: bold; color: #6c757d;">${row[55] || 'Chưa phân công'}</span>
-    </div>
-  </div>
-
-  <!-- Khung nhập liệu khi bấm Edit (Edit Mode) -->
-  <div id="duty-edit-mode" style="display:none; margin-top:8px;">
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">NGƯỜI TRỰC CHÍNH:</div>
-    <input type="text" id="inp-duty-main" value="${row[54] || ''}" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Nhập tên người trực chính...">
-
-    <div style="font-size:11px; margin-bottom:4px; font-weight:bold;">NGƯỜI TRỰC PHỤ:</div>
-    <input type="text" id="inp-duty-sub" value="${row[55] || ''}" style="width:100%; margin-bottom:8px; padding:4px;" placeholder="Nhập tên người trực phụ...">
-
-    <div style="text-align:right;">
-      <button type="button" class="btn-row-action btn-row-save" onclick="saveDutyStaff('${flightId}')">💾 Save</button>
-      <button type="button" class="btn-row-action btn-row-cancel" onclick="cancelEditDuty()">❌ Cancel</button>
-    </div>
-  </div>
-</div>
     `;
 
     modal.style.setProperty("display", "flex", "important");
@@ -4057,51 +3993,179 @@ function openDetailModal(row) {
   }
 }
 
-// 3. Các hàm xử lý ẩn/hiện & Lưu riêng cho thẻ Booking & Meal
-function toggleEditBookingMeal(flightId) {
-  document.getElementById("bm-view-mode").style.display = "none";
-  document.getElementById("bm-edit-mode").style.display = "block";
-  document.getElementById("btn-edit-bm").style.display = "none";
+// 3. Bật chế độ chỉnh sửa TOÀN BỘ
+function enableGlobalEdit(flightId) {
+  // Chuyển tất cả View mode sang Edit mode
+  const viewModes = ['ckin-view-mode', 'pin-view-mode', 'bm-view-mode', 'irreg-view-mode', 'duty-view-mode'];
+  const editModes = ['ckin-edit-mode', 'pin-edit-mode', 'bm-edit-mode', 'irreg-edit-mode', 'duty-edit-mode'];
+
+  viewModes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  editModes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  });
+
+  // Load lại các giá trị Checkbox của Bất thường
+  if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+    const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
+    if (row) {
+      const currentTypeStr = row[50] || '';
+      const currentTypes = currentTypeStr.split('/').map(s => s.trim());
+      document.querySelectorAll('.chk-irreg-item').forEach(chk => {
+        chk.checked = currentTypes.includes(chk.value.trim());
+      });
+    }
+  }
+
+  // Ẩn nút Edit, hiện nút Save và Cancel
+  document.getElementById('btn-main-edit').style.display = 'none';
+  document.getElementById('btn-main-save').style.display = 'inline-block';
+  document.getElementById('btn-main-cancel').style.display = 'inline-block';
 }
 
-function cancelEditBookingMeal() {
-  document.getElementById("bm-view-mode").style.display = "block";
-  document.getElementById("bm-edit-mode").style.display = "none";
-  document.getElementById("btn-edit-bm").style.display = "inline-block";
+// 4. Hủy chỉnh sửa TOÀN BỘ
+function cancelGlobalEdit() {
+  const viewModes = ['ckin-view-mode', 'pin-view-mode', 'bm-view-mode', 'irreg-view-mode', 'duty-view-mode'];
+  const editModes = ['ckin-edit-mode', 'pin-edit-mode', 'bm-edit-mode', 'irreg-edit-mode', 'duty-edit-mode'];
+
+  viewModes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  });
+
+  editModes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // Hiện lại nút Edit, ẩn Save & Cancel
+  document.getElementById('btn-main-edit').style.display = 'inline-block';
+  document.getElementById('btn-main-save').style.display = 'none';
+  document.getElementById('btn-main-cancel').style.display = 'none';
 }
 
-function saveBookingMeal(flightId) {
-  const bkJ = document.getElementById("inp-bk-j").value;
-  const bkW = document.getElementById("inp-bk-w").value;
-  const bkY = document.getElementById("inp-bk-y").value;
+// 5. Lưu TOÀN BỘ dữ liệu đã chỉnh sửa
+async function saveAllDetails(flightId, event) {
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
 
-  const mlJ = document.getElementById("inp-ml-j").value;
-  const mlW = document.getElementById("inp-ml-w").value;
-  const mlY = document.getElementById("inp-ml-y").value;
+  const btnSave = document.getElementById('btn-main-save');
+  if (btnSave) {
+    btnSave.innerText = "⏳ Saving...";
+    btnSave.disabled = true;
+  }
 
-  const obJ = document.getElementById("inp-ob-j").value;
-  const obW = document.getElementById("inp-ob-w").value;
-  const obY = document.getElementById("inp-ob-y").value;
+  try {
+    // A. Lấy dữ liệu Check-in
+    const ckinVal = parseInt(document.getElementById('inp-ckin-online').value, 10) || 0;
+    const quayVal = document.getElementById('inp-quay-y').value.trim();
+    const vipVal = document.getElementById('inp-vip-cip').value.trim();
 
-  // Cập nhật lên giao diện
-  document.getElementById("val-bk").innerText = `${bkJ} / ${bkW} / ${bkY}`;
-  document.getElementById("val-ml").innerText = `${mlJ} / ${mlW} / ${mlY}`;
-  document.getElementById("val-ob").innerText = `${obJ} / ${obW} / ${obY}`;
+    // B. Lấy dữ liệu Pin / Bag Waived / Upgrade
+    const pinVal = document.getElementById("inp-pin").value;
+    const bagVal = document.getElementById("inp-bag").value;
+    const upgVal = document.getElementById("inp-upg").value;
 
-  // Gửi API lưu dữ liệu
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "updateBookingMeal",
+    // C. Lấy dữ liệu Booking / Meal / Onboard
+    const bkJ = document.getElementById("inp-bk-j").value;
+    const bkW = document.getElementById("inp-bk-w").value;
+    const bkY = document.getElementById("inp-bk-y").value;
+    const mlJ = document.getElementById("inp-ml-j").value;
+    const mlW = document.getElementById("inp-ml-w").value;
+    const mlY = document.getElementById("inp-ml-y").value;
+    const obJ = document.getElementById("inp-ob-j").value;
+    const obW = document.getElementById("inp-ob-w").value;
+    const obY = document.getElementById("inp-ob-y").value;
+
+    // D. Lấy dữ liệu Bất thường (Irregularity)
+    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
+    const selectedList = Array.from(checkedBoxes).map(cb => cb.value.trim());
+    const typeVal = selectedList.join(' / ');
+    const detailVal = document.getElementById('inp-irreg-detail') ? document.getElementById('inp-irreg-detail').value.trim() : '';
+    const paxVal = document.getElementById('inp-irreg-pax') ? (parseInt(document.getElementById('inp-irreg-pax').value, 10) || 0) : 0;
+    const costVal = document.getElementById('inp-irreg-cost') ? (parseFloat(document.getElementById('inp-irreg-cost').value) || 0) : 0;
+
+    // E. Lấy dữ liệu Duty Staff
+    const mainVal = document.getElementById("inp-duty-main").value.trim();
+    const subVal = document.getElementById("inp-duty-sub").value.trim();
+
+    // Gom tất cả vào 1 Payload duy nhất
+    const payload = {
+      action: "updateFullFlightDetails",
       flightId: flightId,
+      ckinOnline: ckinVal,
+      quayY: quayVal,
+      vipCip: vipVal,
+      pin: pinVal,
+      bagWaived: bagVal,
+      upgrade: upgVal,
       booking: [bkJ, bkW, bkY],
       meal: [mlJ, mlW, mlY],
-      onboard: [obJ, obW, obY]
-    })
-  }).then(() => alert("✅ Lưu thành công!"))
-    .catch(() => alert("✅ Cập nhật trên giao diện thành công!"));
+      onboard: [obJ, obW, obY],
+      irregType: typeVal,
+      irregDetail: detailVal,
+      irregPax: paxVal,
+      irregCost: costVal,
+      dutyMain: mainVal,
+      dutySub: subVal
+    };
 
-  cancelEditBookingMeal();
+    const targetUrl = typeof SCRIPT_WEB_APP_URL !== 'undefined' ? SCRIPT_WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
+
+    const response = await fetch(targetUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    // Cập nhật lại Mảng dữ liệu bộ nhớ cục bộ (globalFlightsData)
+    let freshRow = null;
+    if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+      freshRow = globalFlightsData.find(r => String(r[0]) === String(flightId));
+      if (freshRow) {
+        freshRow[35] = bkJ; freshRow[36] = bkW; freshRow[37] = bkY;
+        freshRow[38] = mlJ; freshRow[39] = mlW; freshRow[40] = mlY;
+        freshRow[41] = obJ; freshRow[42] = obW; freshRow[43] = obY;
+        freshRow[44] = pinVal;
+        freshRow[45] = bagVal;
+        freshRow[46] = upgVal;
+        freshRow[47] = ckinVal;
+        freshRow[48] = quayVal;
+        freshRow[49] = vipVal;
+        freshRow[50] = typeVal;
+        freshRow[51] = detailVal;
+        freshRow[52] = paxVal;
+        freshRow[53] = costVal;
+        freshRow[54] = mainVal;
+        freshRow[55] = subVal;
+      }
+    }
+
+    if (typeof updateEyeButtonDataRow === 'function' && freshRow) {
+      updateEyeButtonDataRow(flightId, freshRow);
+    }
+
+    alert("✅ Lưu toàn bộ thông tin thành công!");
+
+    // Tải lại Modal với dữ liệu mới
+    if (freshRow) {
+      openDetailModal(freshRow);
+    } else {
+      cancelGlobalEdit();
+    }
+
+  } catch (err) {
+    console.error("Lỗi khi lưu tổng hợp:", err);
+    alert("❌ Lỗi kết nối khi gửi dữ liệu!");
+  } finally {
+    if (btnSave) {
+      btnSave.innerText = "💾 Save";
+      btnSave.disabled = false;
+    }
+  }
 }
 
 function closeDetailModal() {
@@ -4109,318 +4173,6 @@ function closeDetailModal() {
   if (modal) {
     modal.style.setProperty("display", "none", "important");
   }
-}
-// ===== XỬ LÝ RIÊNG CHO PIN, BAG WAIVED, UPGRADE =====
-
-function toggleEditPin(flightId) {
-  document.getElementById("pin-view-mode").style.display = "none";
-  document.getElementById("pin-edit-mode").style.display = "block";
-  document.getElementById("btn-edit-pin").style.display = "none";
-}
-
-function cancelEditPin() {
-  document.getElementById("pin-view-mode").style.display = "block";
-  document.getElementById("pin-edit-mode").style.display = "none";
-  document.getElementById("btn-edit-pin").style.display = "inline-block";
-}
-
-function savePinUpgrade(flightId) {
-  const pinVal = document.getElementById("inp-pin").value;
-  const bagVal = document.getElementById("inp-bag").value;
-  const upgVal = document.getElementById("inp-upg").value;
-
-  // Cập nhật giao diện lập tức
-  document.getElementById("val-pin").innerText = pinVal;
-  document.getElementById("val-bag").innerText = bagVal;
-  document.getElementById("val-upg").innerText = upgVal;
-
-  // Gửi API cập nhật dữ liệu về Apps Script
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "updatePinUpgrade",
-      flightId: flightId,
-      pin: pinVal,
-      bagWaived: bagVal,
-      upgrade: upgVal
-    })
-  })
-  .then(() => alert("✅ Lưu dữ liệu thành công!"))
-  .catch(() => alert("✅ Cập nhật trên giao diện thành công!"));
-
-  cancelEditPin();
-}
-///===== xu ly cho ccheckin online, vip cip , quay y
-// 1. Chuyển sang chế độ Chỉnh sửa
-function toggleEditCkin(flightId) {
-  document.getElementById("ckin-view-mode").style.display = "none";
-  document.getElementById("ckin-edit-mode").style.display = "block";
-  document.getElementById("btn-edit-ckin").style.display = "none";
-}
-
-// 2. Hủy chế độ Chỉnh sửa
-function cancelEditCkin() {
-  document.getElementById("ckin-view-mode").style.display = "block";
-  document.getElementById("ckin-edit-mode").style.display = "none";
-  document.getElementById("btn-edit-ckin").style.display = "inline-block";
-}
-
-// 3. Hàm Gửi API Lưu nhóm mới
-function saveCkinGroup(flightId) {
-  const ckinVal = parseInt(document.getElementById('inp-ckin-online').value, 10) || 0;
-  const quayVal = document.getElementById('inp-quay-y').value.trim();
-  const vipVal = document.getElementById('inp-vip-cip').value.trim();
-
-  const targetUrl = typeof API !== 'undefined' ? API : (typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : '');
-
-  fetch(targetUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      action: "updateCkinGroup",
-      flightId: flightId,
-      ckinOnline: ckinVal,
-      quayY: quayVal,
-      vipCip: vipVal
-    })
-  })
-  .then(res => res.text())
-  .then(text => {
-    // A. Cập nhật dữ liệu mới vào mảng bộ nhớ tạm globalFlightsData
-    let freshRow = null;
-    if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
-      freshRow = globalFlightsData.find(r => String(r[0]) === String(flightId));
-      if (freshRow) {
-        freshRow[47] = ckinVal;
-        freshRow[48] = quayVal;
-        freshRow[49] = vipVal;
-      }
-    }
-
-    // B. Cập nhật thuộc tính data-row ngoài bảng
-    if (typeof updateEyeButtonDataRow === 'function') {
-      updateEyeButtonDataRow(flightId, freshRow);
-    }
-
-    alert("✅ Lưu thông tin Check-in thành công!");
-
-    // C. Refresh lại Popup tại chỗ
-    if (freshRow && typeof openDetailModal === 'function') {
-      openDetailModal(freshRow);
-    }
-  })
-  .catch(err => {
-    console.error("Lỗi Save Ckin Group:", err);
-    alert("❌ Lỗi kết nối khi lưu dữ liệu Check-in!");
-  });
-}
-// ===== XỬ LÝ RIÊNG CHO LỖI & BẤT THƯỜNG (IRREGULARITY) =====
-
-// 1. Hàm Bật/Tắt chỉnh sửa & Nạp dữ liệu vào Checkbox
-function toggleEditIrregularity(flightId) {
-  const viewMode = document.getElementById('irreg-view-mode');
-  const editMode = document.getElementById('irreg-edit-mode');
-  const btnEdit = document.getElementById('btn-edit-irreg');
-
-  if (!viewMode || !editMode) return;
-
-  const isHidden = editMode.style.display === 'none' || editMode.style.display === '';
-
-  if (isHidden) {
-    if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
-      const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
-      if (row) {
-        // Lấy chuỗi loại bất thường hiện tại (Ví dụ: "Giao Hành lý / Bồi thường hành lý rách vỡ")
-        const currentTypeStr = row[50] || '';
-        const currentTypes = currentTypeStr.split('/').map(s => s.trim());
-
-        // Đánh dấu tích vào các checkbox tương ứng
-        document.querySelectorAll('.chk-irreg-item').forEach(chk => {
-          chk.checked = currentTypes.includes(chk.value.trim());
-        });
-
-        if (document.getElementById('inp-irreg-detail')) document.getElementById('inp-irreg-detail').value = row[51] || '';
-        if (document.getElementById('inp-irreg-pax')) document.getElementById('inp-irreg-pax').value = row[52] || 0;
-        if (document.getElementById('inp-irreg-cost')) document.getElementById('inp-irreg-cost').value = row[53] || 0;
-      }
-    }
-    editMode.style.display = 'block';
-    viewMode.style.display = 'none';
-    if (btnEdit) btnEdit.style.display = 'none';
-  } else {
-    cancelEditIrregularity();
-  }
-}
-
-// 2. Hàm Hủy chỉnh sửa
-function cancelEditIrregularity() {
-  if (document.getElementById('irreg-edit-mode')) document.getElementById('irreg-edit-mode').style.display = 'none';
-  if (document.getElementById('irreg-view-mode')) document.getElementById('irreg-view-mode').style.display = 'block';
-  const btnEdit = document.getElementById('btn-edit-irreg');
-  if (btnEdit) btnEdit.style.display = 'inline-block';
-}
-
-// 3. Hàm Lưu dữ liệu từ Checkbox lên Sheet & Cập nhật UI
-function saveIrregularity(flightId, event) {
-  if (event && typeof event.preventDefault === 'function') {
-    event.preventDefault();
-  }
-
-  const btnSave = document.querySelector('#irreg-edit-mode .btn-row-save');
-  if (btnSave) {
-    btnSave.innerText = "⏳ Saving...";
-    btnSave.disabled = true;
-  }
-
-  try {
-    // Lấy tất cả các checkbox được tích chọn và nối lại bằng " / "
-    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
-    const selectedList = Array.from(checkedBoxes).map(cb => cb.value.trim());
-    const typeVal = selectedList.join(' / ');
-
-    const elDetail = document.getElementById('inp-irreg-detail');
-    const elPax = document.getElementById('inp-irreg-pax');
-    const elCost = document.getElementById('inp-irreg-cost');
-
-    const detailVal = elDetail ? elDetail.value.trim() : '';
-    const paxVal = elPax ? (parseInt(elPax.value, 10) || 0) : 0;
-    const costVal = elCost ? (parseFloat(elCost.value) || 0) : 0;
-
-    const payload = {
-      action: "updateIrregularity",
-      flightId: flightId,
-      irregType: typeVal,
-      irregDetail: detailVal,
-      irregPax: paxVal,
-      irregCost: costVal
-    };
-
-    const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : '');
-
-    if (!targetUrl) {
-      alert("❌ Chưa khai báo URL Web App!");
-      if (btnSave) { btnSave.innerText = "💾 Save"; btnSave.disabled = false; }
-      return;
-    }
-
-    fetch(targetUrl, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === "success") {
-        // Cập nhật bộ nhớ toàn cục (Index 50, 51, 52, 53)
-        if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
-          const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
-          if (row) {
-            row[50] = typeVal;
-            row[51] = detailVal;
-            row[52] = paxVal;
-            row[53] = costVal;
-          }
-        }
-
-        // Cập nhật View Mode lập tức
-        if (document.getElementById('val-irreg-type')) document.getElementById('val-irreg-type').innerText = typeVal || 'N/A';
-        if (document.getElementById('val-irreg-detail')) document.getElementById('val-irreg-detail').innerText = detailVal || 'Không có';
-        if (document.getElementById('val-irreg-pax')) document.getElementById('val-irreg-pax').innerText = paxVal + ' pax';
-        if (document.getElementById('val-irreg-cost')) document.getElementById('val-irreg-cost').innerText = costVal ? Number(costVal).toLocaleString('vi-VN') + ' ₫' : '0 ₫';
-
-        // Render lại bảng chính ngoài màn hình
-        if (typeof renderTable === 'function') renderTable(globalFlightsData);
-        else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
-
-        alert("Lưu thông tin Bất thường thành công!");
-        cancelEditIrregularity();
-      } else {
-        alert("Lỗi từ máy chủ: " + (data.message || data.error));
-      }
-    })
-    .catch(err => {
-      console.error("Lỗi khi lưu Bất thường:", err);
-      alert("Lỗi kết nối khi gửi dữ liệu!");
-    })
-    .finally(() => {
-      if (btnSave) {
-        btnSave.innerText = "💾 Save";
-        btnSave.disabled = false;
-      }
-    });
-
-  } catch (error) {
-    console.error("Lỗi JS saveIrregularity:", error);
-    alert("Lỗi JavaScript: " + error.message);
-    if (btnSave) {
-      btnSave.innerText = "💾 Save";
-      btnSave.disabled = false;
-    }
-  }
-}
-// ===== XỬ LÝ RIÊNG CHO TRỰC CA (DUTY STAFF) =====
-
-// 1. Chuyển sang chế độ Chỉnh sửa
-function toggleEditDuty(flightId) {
-  document.getElementById("duty-view-mode").style.display = "none";
-  document.getElementById("duty-edit-mode").style.display = "block";
-  document.getElementById("btn-edit-duty").style.display = "none";
-}
-
-// 2. Hủy chế độ Chỉnh sửa
-function cancelEditDuty() {
-  document.getElementById("duty-view-mode").style.display = "block";
-  document.getElementById("duty-edit-mode").style.display = "none";
-  document.getElementById("btn-edit-duty").style.display = "inline-block";
-}
-
-// 3. Hàm Gửi API Lưu dữ liệu Nhân sự trực ca
-function saveDutyStaff(flightId) {
-  const mainVal = document.getElementById("inp-duty-main").value.trim();
-  const subVal = document.getElementById("inp-duty-sub").value.trim();
-
-  const targetUrl = typeof API !== "undefined" ? API : (typeof WEB_APP_URL !== "undefined" ? WEB_APP_URL : "");
-
-  fetch(targetUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      action: "updateDutyStaff",
-      flightId: flightId,
-      dutyMain: mainVal,
-      dutySub: subVal
-    })
-  })
-  .then(res => res.text())
-  .then(text => {
-    // A. Cập nhật dữ liệu mới vào mảng bộ nhớ tạm globalFlightsData
-    let freshRow = null;
-    if (typeof globalFlightsData !== "undefined" && Array.isArray(globalFlightsData)) {
-      freshRow = globalFlightsData.find(r => String(r[0]) === String(flightId));
-      if (freshRow) {
-        freshRow[54] = mainVal; // Trực chính (Cột 55 trong Sheet)
-        freshRow[55] = subVal;  // Trực phụ (Cột 56 trong Sheet)
-      }
-    }
-
-    // B. Cập nhật thuộc tính data-row ngoài bảng
-    if (typeof updateEyeButtonDataRow === "function") {
-      updateEyeButtonDataRow(flightId, freshRow);
-    }
-
-    alert("✅ Lưu thông tin Trực ca thành công!");
-
-    // C. Refresh lại Popup tại chỗ
-    if (freshRow && typeof openDetailModal === "function") {
-      openDetailModal(freshRow);
-    } else {
-      cancelEditDuty();
-    }
-  })
-  .catch(err => {
-    console.error("Lỗi Save Duty Staff:", err);
-    alert("❌ Lỗi kết nối khi lưu dữ liệu Trực ca!");
-  });
 }
   </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6282,6 +6034,160 @@ function saveCkinGroup(flightId) {
   .finally(() => {
     if (btnSave) btnSave.innerText = "💾 Save";
   });
+}
+// ==========================================
+// 4.5 HÀM XỬ LÝ LƯU TỔNG DỮ LIỆU TẤT CẢ CÁC THẺ (SAVE ALL)
+// ==========================================
+async function saveAllDetails(flightId, event) {
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
+
+  const btnSave = document.getElementById('btn-main-save');
+  if (btnSave) {
+    btnSave.innerText = "⏳ Saving...";
+    btnSave.disabled = true;
+  }
+
+  try {
+    // 1. LẤY DỮ LIỆU TỪ TẤT CẢ CÁC KHUNG NHẬP LIỆU
+    // A. Check-in & Khách hàng
+    const ckinVal = parseInt(document.getElementById('inp-ckin-online')?.value, 10) || 0;
+    const quayVal = document.getElementById('inp-quay-y')?.value.trim() || '';
+    const vipVal = document.getElementById('inp-vip-cip')?.value.trim() || '';
+
+    // B. PIN & Bag Waived & Upgrade
+    const pinVal = parseInt(document.getElementById('inp-pin')?.value, 10) || 0;
+    const bagVal = parseInt(document.getElementById('inp-bag')?.value, 10) || 0;
+    const upgVal = document.getElementById('inp-upg')?.value.trim() || '';
+
+    // C. Booking, Meal, Onboard
+    const bkJ = parseInt(document.getElementById('inp-bk-j')?.value, 10) || 0;
+    const bkW = parseInt(document.getElementById('inp-bk-w')?.value, 10) || 0;
+    const bkY = parseInt(document.getElementById('inp-bk-y')?.value, 10) || 0;
+
+    const mlJ = parseInt(document.getElementById('inp-ml-j')?.value, 10) || 0;
+    const mlW = parseInt(document.getElementById('inp-ml-w')?.value, 10) || 0;
+    const mlY = parseInt(document.getElementById('inp-ml-y')?.value, 10) || 0;
+
+    const obJ = parseInt(document.getElementById('inp-ob-j')?.value, 10) || 0;
+    const obW = parseInt(document.getElementById('inp-ob-w')?.value, 10) || 0;
+    const obY = parseInt(document.getElementById('inp-ob-y')?.value, 10) || 0;
+
+    // D. Bất thường (Irregularity)
+    const checkedBoxes = document.querySelectorAll('.chk-irreg-item:checked');
+    const selectedList = Array.from(checkedBoxes).map(cb => cb.value.trim());
+    const typeVal = selectedList.join(' / ');
+    const detailVal = document.getElementById('inp-irreg-detail')?.value.trim() || '';
+    const paxVal = parseInt(document.getElementById('inp-irreg-pax')?.value, 10) || 0;
+    const costVal = parseFloat(document.getElementById('inp-irreg-cost')?.value) || 0;
+
+    // E. Duty Staff
+    const mainVal = document.getElementById('inp-duty-main')?.value.trim() || '';
+    const subVal = document.getElementById('inp-duty-sub')?.value.trim() || '';
+
+    // 2. GOM DỮ LIỆU THÀNH 1 PAYLOAD TỔNG
+    const payload = {
+      action: "updateFullFlightDetails",
+      flightId: flightId,
+      ckinOnline: ckinVal,
+      quayY: quayVal,
+      vipCip: vipVal,
+      pin: pinVal,
+      bagWaived: bagVal,
+      upgrade: upgVal,
+      booking: [bkJ, bkW, bkY],
+      meal: [mlJ, mlW, mlY],
+      onboard: [obJ, obW, obY],
+      irregType: typeVal,
+      irregDetail: detailVal,
+      irregPax: paxVal,
+      irregCost: costVal,
+      dutyMain: mainVal,
+      dutySub: subVal
+    };
+
+    const targetUrl = typeof WEB_APP_URL !== 'undefined' ? WEB_APP_URL : (typeof API !== 'undefined' ? API : (typeof SCRIPT_WEB_APP_URL !== 'undefined' ? SCRIPT_WEB_APP_URL : ''));
+
+    if (!targetUrl) {
+      alert("❌ Chưa khai báo URL Web App!");
+      if (btnSave) { btnSave.innerText = "💾 Save"; btnSave.disabled = false; }
+      return;
+    }
+
+    // 3. GỬI API LÊN APPS SCRIPT
+    const response = await fetch(targetUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    if (data.status === "success") {
+      // 4. CẬP NHẬT MẢNG BỘ NHỚ CỤC BỘ (globalFlightsData)
+      if (typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+        const row = globalFlightsData.find(r => String(r[0]) === String(flightId));
+        if (row) {
+          row[35] = bkJ; row[36] = bkW; row[37] = bkY;
+          row[38] = mlJ; row[39] = mlW; row[40] = mlY;
+          row[41] = obJ; row[42] = obW; row[43] = obY;
+          row[44] = pinVal;
+          row[45] = bagVal;
+          row[46] = upgVal;
+          row[47] = ckinVal;
+          row[48] = quayVal;
+          row[49] = vipVal;
+          row[50] = typeVal;
+          row[51] = detailVal;
+          row[52] = paxVal;
+          row[53] = costVal;
+          row[54] = mainVal;
+          row[55] = subVal;
+        }
+      }
+
+      // 5. CẬP NHẬT LẠI CÁC THẺ HIỂN THỊ (VIEW MODE)
+      if (document.getElementById('val-ckin-online')) document.getElementById('val-ckin-online').innerText = ckinVal;
+      if (document.getElementById('val-quay-y')) document.getElementById('val-quay-y').innerText = quayVal || '---';
+      if (document.getElementById('val-vip-cip')) document.getElementById('val-vip-cip').innerText = vipVal || '---';
+
+      if (document.getElementById('val-pin')) document.getElementById('val-pin').innerText = pinVal;
+      if (document.getElementById('val-bag')) document.getElementById('val-bag').innerText = bagVal;
+      if (document.getElementById('val-upg')) document.getElementById('val-upg').innerText = upgVal || '---';
+
+      if (document.getElementById('val-bk')) document.getElementById('val-bk').innerText = `${bkJ} / ${bkW} / ${bkY}`;
+      if (document.getElementById('val-ml')) document.getElementById('val-ml').innerText = `${mlJ} / ${mlW} / ${mlY}`;
+      if (document.getElementById('val-ob')) document.getElementById('val-ob').innerText = `${obJ} / ${obW} / ${obY}`;
+
+      if (document.getElementById('val-irreg-type')) document.getElementById('val-irreg-type').innerText = typeVal || 'N/A';
+      if (document.getElementById('val-irreg-detail')) document.getElementById('val-irreg-detail').innerText = detailVal || 'Không có';
+      if (document.getElementById('val-irreg-pax')) document.getElementById('val-irreg-pax').innerText = paxVal + ' pax';
+      if (document.getElementById('val-irreg-cost')) document.getElementById('val-irreg-cost').innerText = costVal ? Number(costVal).toLocaleString('vi-VN') + ' ₫' : '0 ₫';
+
+      if (document.getElementById('val-duty-main')) document.getElementById('val-duty-main').innerText = mainVal || 'Chưa phân công';
+      if (document.getElementById('val-duty-sub')) document.getElementById('val-duty-sub').innerText = subVal || 'Chưa phân công';
+
+      // Render lại bảng bên ngoài màn hình
+      if (typeof renderTable === 'function') renderTable(globalFlightsData);
+      else if (typeof renderFlightsData === 'function') renderFlightsData(globalFlightsData);
+
+      alert("✅ Lưu toàn bộ thông tin chuyến bay thành công!");
+
+      // Tắt chế độ Edit tổng
+      if (typeof cancelGlobalEdit === 'function') cancelGlobalEdit();
+    } else {
+      alert("❌ Lỗi từ máy chủ: " + (data.message || data.error));
+    }
+
+  } catch (err) {
+    console.error("Save all error:", err);
+    alert("❌ Lỗi kết nối khi lưu toàn bộ dữ liệu!");
+  } finally {
+    if (btnSave) {
+      btnSave.innerText = "💾 Save";
+      btnSave.disabled = false;
+    }
+  }
 }
 </script>
 <script>
