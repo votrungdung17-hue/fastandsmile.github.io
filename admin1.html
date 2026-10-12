@@ -1000,6 +1000,18 @@ button:disabled{
       <input id="time2" class="uppercase">
     </div>
   </div>
+<!-- HÀNG 4: CODE3 + TIME3 -->
+  <div class="doc-row-2">
+    <div>
+      <label>CODE3</label>
+      <input id="code3" class="uppercase">
+    </div>
+
+    <div>
+      <label>TIME3</label>
+      <input id="time3" class="uppercase">
+    </div>
+  </div>
          <label for="details">DETAILS</label>
    <textarea id="details" class="uppercase"></textarea>
 
@@ -1181,7 +1193,7 @@ function upload() {
 
 </form>
 
-<table id="table"><tbody><tr><th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th><th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th><th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&amp;B</th><th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr></tbody></table>
+<table id="table"><tbody><tr><th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th><th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th><th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>CODE3</th><th>TIME3</th><th>COOR</th><th>W&amp;B</th><th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr></tbody></table>
 <button type="button" id="mvaBtn">MVA</button>
 <button type="button" id="mvdBtn">MVD</button>
 <button type="button" id="occBtn">OCC</button>
@@ -2553,7 +2565,7 @@ function loadData(){
       let html = "<tr>";
       html += "<th>DATE</th><th>A/C REG</th><th>ARR FLIGHT</th><th>FROM</th><th>STA</th><th>ETA</th><th>LANDING</th><th>ATA</th>";
       html += "<th>DEP FLIGHT</th><th>TO</th><th>STD</th><th>ETD</th><th>ATD</th><th>FHT</th><th>PUSHBACK</th><th>TAKEOFF</th>";
-      html += "<th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>COOR</th><th>W&B</th>";
+      html += "<th>GT</th><th>DELAY TIME</th><th>CODE1</th><th>TIME1</th><th>CODE2</th><th>TIME2</th><th>CODE3</th><th>TIME3</th><th>COOR</th><th>W&B</th>";
       html += "<th>CONFIG</th><th>LOTUS</th><th>MOPLUS</th></tr>";
 
       data.slice(1).forEach(row=>{
@@ -2601,12 +2613,15 @@ if(atdStr && etdStr){
     delay = formatMinutes(diff);
   }
 }
+console.log("Dữ liệu dòng row:", row);
 html += `<td>${delay}</td>`;
 
         html += `<td>${(row[19]||"").toUpperCase()}</td>`;  // Delay code1
         html += `<td>${(row[20]||"").toUpperCase()}</td>`;  // Delay TIME1	
         html += `<td>${(row[21]||"").toUpperCase()}</td>`;  // Delay CODE2
         html += `<td>${(row[22]||"").toUpperCase()}</td>`;  // Delay time2
+	html += `<td>${(row[56]||"").toUpperCase()}</td>`; // Delay CODE3
+	html += `<td>${(row[57]||"").toUpperCase()}</td>`; // Delay TIME3
         html += `<td>${(row[23]||"").toUpperCase()}</td>`;  // COOR
         html += `<td>${(row[24]||"").toUpperCase()}</td>`;  // W&B
         html += `<td>${row[25] || ""}</td>`; // CONFIG
@@ -2752,10 +2767,12 @@ function selectRow(row){
   ldmPaxBaby = row[43] || "";
 
   // Các trường text
-  code1.value = row[19] || "";
+ code1.value = row[19] || "";
  time1.value = row[20] || "";
  code2.value = row[21] || "";
  time2.value = row[22] || "";
+ code3.value = row[56] || ""; // Giả định vị trí cột tiếp theo
+ time3.value = row[57] || "";
   coor.value = row[23] || "";
   wnb.value = row[24] || "";
   config.value = row[25] || "";
@@ -2819,6 +2836,8 @@ form.onsubmit = function(e){
 time1: time1.value,
 code2: code2.value,
 time2: time2.value,
+code3: code3.value,
+    time3: time3.value,
     coor: coor.value,
     wnb: wnb.value,
   config: config.value,
@@ -2878,6 +2897,8 @@ document.getElementById("btnUpdate").onclick = function(){
     time1: time1.value,
     code2: code2.value,
     time2: time2.value,
+    code3: code3.value,
+    time3: time3.value,
     coor: coor.value,
     wnb: wnb.value,
     config: config.value,
@@ -3242,6 +3263,11 @@ function showOCC(row){
   const time1 = (row[20] || "").toUpperCase();
   const code2 = (row[21] || "").toUpperCase();
   const time2 = (row[22] || "").toUpperCase();
+  
+  // 👉 LẤY THÊM CODE3 VÀ TIME3 Ở INDEX 56 VÀ 57
+  const code3 = (row[56] || "").toUpperCase();
+  const time3 = (row[57] || "").toUpperCase();
+
   const config = (row[25] || "").toUpperCase();
   const details = (row[28] || "").toUpperCase();
 
@@ -3282,11 +3308,6 @@ function showOCC(row){
     return delayCauseMap[(code || "").trim()] || "UNKNOWN";
   }
 
-  function toMinutes(t){
-    if(!t) return 0;
-    return parseInt(t,10) || 0;
-  }
-
   // ===== FORMAT DATE =====
   let dateFormatted = "";
   if(dateStr){
@@ -3302,33 +3323,45 @@ function showOCC(row){
   let delayMinutes = 0;
   const t1 = Number(time1) || 0;
   const t2 = Number(time2) || 0;
-  let delayMin = t1 + t2;
+  const t3 = Number(time3) || 0;
+  let delayMin = t1 + t2 + t3;
+
   if(etd && pushback){
     delayMinutes = parseTime(pushback) - parseTime(etd);
     if(delayMinutes < 0) delayMinutes = 0;
   }
 
   let delayText = delayMinutes ? delayMinutes + " phút" : "";
-  let delayFinal = delayMinutes - delayMin
-  // ===== DELAY CODE =====
-  let delayCode = "";
-  let causeText = "";
+  let delayFinal = delayMinutes - delayMin;
 
-  if(code1 && !code2 && delayFinal > 0){
-    delayCode = `${code1}${time1} + AM${delayFinal}`;
-    causeText = `${getCause(code1)} + ATC`;
-  } else if(code1 && !code2 && delayFinal <= 0){
-    delayCode = `${code1}${time1}`;
-    causeText = `${getCause(code1)}`;
-  } else if(code1 && code2 && delayFinal > 0){
-    delayCode = `${code1}${time1} + ${code2}${time2} + AM${delayFinal}`;
-    causeText = `${getCause(code1)} + ${getCause(code2)} + ATC`;
-  } else if(code1 && code2 && delayFinal <= 0){
-    delayCode = `${code1}${time1} + ${code2}${time2}`;
-    causeText = `${getCause(code1)} + ${getCause(code2)}`;
-  } else if (!code1 && !code2 && delayMinutes>0 ) {
+  // ===== DELAY CODE & CAUSE (HỖ TRỢ ĐẾN 3 MÃ) =====
+  let codesArr = [];
+  let causesArr = [];
+
+  if (code1 && t1 > 0) {
+    codesArr.push(`${code1}${time1}`);
+    causesArr.push(getCause(code1));
+  }
+  if (code2 && t2 > 0) {
+    codesArr.push(`${code2}${time2}`);
+    causesArr.push(getCause(code2));
+  }
+  if (code3 && t3 > 0) {
+    codesArr.push(`${code3}${time3}`);
+    causesArr.push(getCause(code3));
+  }
+
+  if (delayFinal > 0) {
+    codesArr.push(`AM${delayFinal}`);
+    causesArr.push("ATC");
+  }
+
+  let delayCode = codesArr.join(" + ");
+  let causeText = causesArr.join(" + ");
+
+  if (!delayCode && delayMinutes > 0) {
     delayCode = `AM${delayMinutes}`;
-    causeText = 'ATC'; 
+    causeText = "ATC";  
   }
 
   // ===== OUTPUT =====
@@ -3348,7 +3381,7 @@ Details :${details}`;
 
   document.getElementById("occOutput").textContent = text;
 
-  // 👉 THÊM VÀO ĐÂY: Tự động copy toàn bộ đoạn text trên vào Clipboard
+  // Tự động copy toàn bộ đoạn text trên vào Clipboard
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text)
       .then(() => {
@@ -3510,6 +3543,8 @@ document.addEventListener("DOMContentLoaded", () => {
         TIME1: row[20],
         CODE2: row[21],
         TIME2: row[22],
+        CODE3: row[56],
+        TIME3: row[57],
         COOR: row[23],
         WB: row[24],
         CONFIG: row[25],
@@ -3733,6 +3768,8 @@ async function importToSheet(rows){
   time1: r[19],
   code2: r[20],
   time2: r[21],
+  code3: r[56],
+  time3: r[57],
   coor: r[22],
   wnb: r[23],
   config: getConfigFromAcreg(r[0]) || config.value,
