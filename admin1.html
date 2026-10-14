@@ -6,6 +6,68 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Flight Manager</title>
 <style>
+/* Style cho nút BM_CNVN_043A */
+.btn-row-bm {
+  background: #6f42c1;
+  color: #fff;
+  margin-right: 5px;
+}
+.btn-row-bm:hover {
+  background: #5a3298;
+}
+
+/* Modal giao diện biểu mẫu BM_CNVN_043A */
+#bmModal {
+  display: none;
+  position: fixed;
+  z-index: 100000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+.bm-modal-content {
+  background-color: #fff;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+.bm-header {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bm-body {
+  padding: 20px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+.bm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.bm-table th, .bm-table td {
+  border: 1px solid #000;
+  padding: 6px 8px;
+  text-align: left;
+}
+.bm-table th {
+  background-color: #f2f2f2;
+  text-align: center;
+}
 /* Style cho bảng Booking/Meal/Onboard Editable trong Popup */
 .booking-edit-table {
   width: 100%;
@@ -2437,7 +2499,7 @@ const configMap = {
   "622":"203/32N","623":"203/32N","624":"203/32N","625":"203/32N",
 
   // K
-  "513":"184/32K","514":"184/32K","515":"184/32K",
+  "513":"184/32K","514":"184/32K","515":"184/32K","389":"180/32K",
 
   // ATR
   "223":"72/AT7",
@@ -2913,6 +2975,10 @@ document.getElementById("btnUpdate").onclick = function(){
     paxAdult: ldmPaxAdult,
     paxChildren: ldmPaxChildren,
     paxBaby: ldmPaxBaby,
+
+    // BỔ SUNG LDM MỚI VÀO ĐÂY (Cột BG và BH):
+    ldmClassC: ldmClassC,
+    ldmBagDetails: ldmBagDetails,
 
     fuel: fuel.value,
     payload: payload.value,
@@ -3438,10 +3504,12 @@ function fillConfig(){
     configInput.value = "";
   }
 }
-// Khai báo biến lưu PAX LDM ở đầu script
+// Khai báo biến lưu thông tin mới ở đầu script
 let ldmPaxAdult = "";
 let ldmPaxChildren = "";
 let ldmPaxBaby = "";
+let ldmClassC = "";      // Lưu số lượng ghế class C (ví dụ: 380) hoặc theo nhãn tương ứng
+let ldmBagDetails = "";  // Lưu chuỗi thông tin hành lý/tải trọng (ví dụ: 137/    1846)
 
 document.getElementById("upload").onclick = function () {
   const ldmText = document.getElementById("ldm").value;
@@ -3454,12 +3522,20 @@ document.getElementById("upload").onclick = function () {
     document.getElementById("babyCount").value = paxMatch[3];
   }
 
-  // 2. TÁCH PAX LDM MỚI (PAX/7/3/102)
-  const paxLdmMatch = ldmText.match(/PAX\/(\d+)\/(\d+)\/(\d+)/i);
+  // 2. TÁCH PAX LDM MỚI (Hỗ trợ linh hoạt 2 số W/Y hoặc 3 số J/W/Y)
+  const paxLdmMatch = ldmText.match(/PAX\/(\d+)\/(\d+)(?:\/(\d+))?/i);
   if (paxLdmMatch) {
-    ldmPaxAdult = paxLdmMatch[1];    // 7
-    ldmPaxChildren = paxLdmMatch[2]; // 3
-    ldmPaxBaby = paxLdmMatch[3];     // 102
+    if (paxLdmMatch[3] !== undefined) {
+      // Trường hợp đủ 3 số: PAX/J/W/Y
+      ldmPaxAdult = paxLdmMatch[1];    // J
+      ldmPaxChildren = paxLdmMatch[2]; // W
+      ldmPaxBaby = paxLdmMatch[3];     // Y
+    } else {
+      // Trường hợp chỉ có 2 số (Dạng PAX/9/149 -> J=0, W=9, Y=149)
+      ldmPaxAdult = "0";               // J = 0
+      ldmPaxChildren = paxLdmMatch[1]; // W (9)
+      ldmPaxBaby = paxLdmMatch[2];     // Y (149)
+    }
   }
 
   // 3. TÁCH ACREG
@@ -3468,6 +3544,19 @@ document.getElementById("upload").onclick = function () {
     const acReg = acMatch[0].replace(/\./g, "");
     document.getElementById("soDangKy").value = acReg;
     fillConfig();
+  }
+
+  // 4. TÁCH THÔNG TIN TỪ DÒNG: SGN C     151 M       0 B   136/    2082 O       0 T       0
+  // Lấy số đứng sau chữ C (ví dụ: 151 hoặc 380) lưu vào cột BG
+  const classCMatch = ldmText.match(/[A-Z]{3}\s+C\s+(\d+)/i);
+  if (classCMatch) {
+    ldmClassC = classCMatch[1]; 
+  }
+
+  // Lấy cụm dữ liệu sau chữ B cho đến trước chữ O (ví dụ: 136/    2082) lưu vào cột BH
+  const bagMatch = ldmText.match(/B\s+([0-9\/\s]+?)(?=\s+[A-Z]\s+\d|$)/i);
+  if (bagMatch) {
+    ldmBagDetails = bagMatch[1].trim(); 
   }
 
   document.getElementById("ldm").value = "";
@@ -3800,8 +3889,10 @@ fetch(API,{
 // Khai báo URL Web App Apps Script ở đầu file
 const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
 
+// Khai báo một biến toàn cục lưu chuyến bay đang xem chi tiết
+let currentModalFlightRow = null;
+
 async function handleEyeClick(btnElement) {
-  // 1. Bật ngay màn hình Loading
   const loadingOverlay = document.getElementById("loadingOverlay");
   if (loadingOverlay) loadingOverlay.style.display = "flex";
 
@@ -3813,16 +3904,21 @@ async function handleEyeClick(btnElement) {
     }
     
     const row = JSON.parse(decodeURIComponent(rawData));
+    
+    // 🔥 TỰ ĐỘNG LƯU TRỮ ROW NÀY LÀM DỮ LIỆU HIỆN TẠI
+    currentModalFlightRow = row;
+    selectedRowData = row; // Đồng bộ luôn với biến chọn row chính
+
     const flightId = row[0] || row.ID; 
 
-    // 2. Gửi yêu cầu lấy dữ liệu realtime từ Google Sheet
     const requestUrl = `${SCRIPT_WEB_APP_URL}?action=getSingleRow&id=${encodeURIComponent(flightId)}&_t=${Date.now()}`;
     
     const response = await fetch(requestUrl);
     const result = await response.json();
 
     if (result && result.status === "success" && Array.isArray(result.data)) {
-      btnElement.setAttribute('data-row', encodeURIComponent(JSON.stringify(result.data)));
+      currentModalFlightRow = result.data; // Cập nhật dữ liệu mới nhất từ sheet
+      selectedRowData = result.data;
       openDetailModal(result.data);
     } else {
       openDetailModal(row);
@@ -3830,12 +3926,13 @@ async function handleEyeClick(btnElement) {
   } catch (error) {
     console.error("Lỗi Fetch Realtime:", error);
     const fallbackRow = JSON.parse(decodeURIComponent(btnElement.getAttribute('data-row')));
+    currentModalFlightRow = fallbackRow;
+    selectedRowData = fallbackRow;
     openDetailModal(fallbackRow);
   } finally {
     if (loadingOverlay) loadingOverlay.style.display = "none";
   }
 }
-
 // 2. Hàm mở Modal & hiển thị dữ liệu
 function openDetailModal(row) {
   try {
@@ -4010,9 +4107,12 @@ function openDetailModal(row) {
       </div>
 
       <!-- KHU VỰC NÚT ĐIỀU HƯỚNG TẬP TRUNG TẠI CHÂN MODAL -->
+
       <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
         <!-- Nút Edit ban đầu -->
+	<button type="button" class="btn-row-action btn-row-bm" onclick="openBMForm('${flightId}')">BM_CNVN_043A</button>
         <button type="button" id="btn-main-edit" class="btn-row-action btn-row-edit" onclick="enableGlobalEdit('${flightId}')">✏️ Edit</button>
+	
 
         <!-- Nút Save và Cancel (Ẩn mặc định) -->
         <button type="button" id="btn-main-save" class="btn-row-action btn-row-save" style="display:none;" onclick="saveAllDetails('${flightId}', event)">💾 Save</button>
@@ -7041,64 +7141,343 @@ async function thongKePBB() {
 }
 </script>
 <script>
-function showDReportPopup() {
-  document.getElementById("dReportPopup").style.display = "flex";
-  // Tự động set ngày mặc định là hôm nay
-  const today = new Date().toISOString().split('T')[0];
-  if(!document.getElementById("dReportFromDate").value) document.getElementById("dReportFromDate").value = today;
-  if(!document.getElementById("dReportToDate").value) document.getElementById("dReportToDate").value = today;
-}
+function openBMForm(flightId) {
+  let row = currentModalFlightRow;
 
-function closeDReportPopup() {
-  document.getElementById("dReportPopup").style.display = "none";
-}
-
-function exportDReport() {
-  const fromDate = document.getElementById("dReportFromDate").value;
-  const toDate = document.getElementById("dReportToDate").value;
-
-  if (!fromDate || !toDate) {
-    alert("Vui lòng chọn đầy đủ Từ ngày và Đến ngày!");
-    return;
+  if (!row && typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+    row = globalFlightsData.find(r => String(r[0]) === String(flightId)) || globalFlightsData[0];
   }
 
-  // 1. Bật màn hình LoadingOverlay
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  if (loadingOverlay) {
-    // Thay đổi thông báo loading riêng cho việc xuất báo cáo (nếu muốn)
-    const loadingText = loadingOverlay.querySelector("div > div:last-child");
-    if (loadingText) loadingText.innerText = "Đang khởi tạo báo cáo D-REPORT, vui lòng chờ...";
-    loadingOverlay.style.display = "flex";
-  }
+  // Khai báo giá trị mặc định chuẩn
+  let depFlight = "";
+  let formattedDate = "";
+  let route = "";
+  let stdEtd = "09:00/09:35";
+  let regCfg = "";
+  let bookingStr = "";
+  let mealStr = "Nil";
+  let paxOnboardedStr = "Chưa có điện văn";
+  let bagCargoStr = "Chưa có điện văn"; // Giá trị mặc định của BAG/CARGO
+  let noteStr = "NIL";
+  let dutyOfficer = "";
+  let supPvcb = "";
+  let vipCipMmStr = "Nil";
 
-  const exportUrl = `${API}?action=exportDReport&fromDate=${fromDate}&toDate=${toDate}`;
+  // Biến cờ kiểm tra thay đổi để đổi màu (true = xanh lá, false = đỏ)
+  let isRouteChanged = false;
+  let isStdChanged = false;
+  let isRegCfgChanged = false;
+  let isBookingChanged = false;
+  let isMealChanged = false;
+  let isPaxChanged = false;
+  let isBagCargoChanged = false;
+  let isNoteChanged = false;
+  let isVipCipChanged = false;
 
-  fetch(exportUrl)
-    .then(response => response.json())
-    .then(data => {
-      // 2. Tắt màn hình Loading sau khi nhận phản hồi
-      if (loadingOverlay) loadingOverlay.style.display = "none";
+  if (row) {
+    // 1. Xử lý FLT/DT/ROUTE với điểm đi mặc định luôn là PQC
+    const rawDep = (row[9] || "").toUpperCase() || "VN1822";
+    depFlight = rawDep;
+    if (rawDep !== "VN1822") isRouteChanged = true;
 
-      if (data.success) {
-        // Tạo thẻ <a> ẩn để kích hoạt tải file
-        const link = document.createElement("a");
-        link.href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + data.base64;
-        link.download = data.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        if (typeof closeDReportPopup === "function") closeDReportPopup();
-      } else {
-        alert("Có lỗi khi tạo báo cáo: " + data.message);
+    let rawDate = row[1] ? String(row[1]).slice(0, 10) : "";
+    if (rawDate) {
+      const parts = rawDate.split("-");
+      if (parts.length === 3) {
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const mText = months[parseInt(parts[1], 10) - 1] || "SEP";
+        formattedDate = `${parts[2]}${mText}${parts[0]}`;
       }
-    })
-    .catch(err => {
-      console.error(err);
-      // 3. Tắt màn hình Loading nếu xảy ra lỗi mạng/máy chủ
-      if (loadingOverlay) loadingOverlay.style.display = "none";
-      alert("Lỗi kết nối máy chủ khi xuất báo cáo!");
-    });
+    }
+    if (formattedDate !== "27SEP2026") isRouteChanged = true;
+
+    // Cố định điểm đi là PQC, điểm đến lấy từ row[10] hoặc mặc định là SGN
+    const fromPort = "PQC";
+    const toPort = (row[10] || "").toUpperCase() || "SGN";
+    
+    route = `${fromPort}-${toPort}`;
+    if (route !== "PQC-SGN") isRouteChanged = true;
+
+    // 2. Xử lý STD/ETD (Cột 11 và 12)
+    const stdVal = formatTimeForInput ? formatTimeForInput(row[11]) : (row[11] || "");
+    const etdVal = formatTimeForInput ? formatTimeForInput(row[12]) : (row[12] || "");
+    if (stdVal || etdVal) {
+      stdEtd = `${stdVal || '---'}/${etdVal || '---'}`;
+    }
+    if (stdEtd !== "09:35/09:50") isStdChanged = true;
+
+    // 3. Xử lý REG/CFG (Cột 2 và 25)
+    const acReg = (row[2] || "").toUpperCase();
+    const rawConfig = String(row[25] || "");
+    const prefix3 = rawConfig.substring(0, 3);
+    
+    let configJValue = 0;
+    let configWValue = 0;
+    let configYValue = 0;
+
+    if (prefix3 === "203") {
+      configJValue = 8; configWValue = 18; configYValue = 177;
+    } else if (prefix3 === "184") {
+      configJValue = 16; configWValue = 18; configYValue = 150;
+    } else if (prefix3 === "178") {
+      configJValue = 16; configWValue = 12; configYValue = 150;
+    } else if (prefix3 === "209") {
+      configJValue = 8; configWValue = 18; configYValue = 183;
+    } else if (prefix3 === "186") {
+      configJValue = 0; configWValue = 18; configYValue = 168;
+    } else if (prefix3 === "180") {
+      configJValue = 0; configWValue = 18; configYValue = 162;
+    } else {
+      configJValue = rawConfig;
+    }
+
+    let formattedConfig = (configJValue !== rawConfig) ? `${configJValue}/${configWValue}/${configYValue}` : rawConfig;
+    if (acReg || formattedConfig) {
+      regCfg = `${acReg} ${formattedConfig}`.trim();
+    }
+    if (regCfg !== "VNA609 16/18/150") isRegCfgChanged = true;
+
+    // 4. Xử lý BOOKING từ cột 35, 36, 37
+    const bJ = row[35] !== undefined && row[35] !== "" ? row[35] : "";
+    const bW = row[36] !== undefined && row[36] !== "" ? row[36] : "";
+    const bY = row[37] !== undefined && row[37] !== "" ? row[37] : "";
+    
+    if (bJ !== "" || bW !== "" || bY !== "") {
+      bookingStr = `${bJ}J ${bW}W ${bY}Y `;
+    }
+    if (bookingStr !== "7J 1W 107Y 0INF") isBookingChanged = true;
+
+    // 5. Xử lý MEAL từ cột 38, 39, 40 (J, W, Y)
+    const mJ = row[38] !== undefined && row[38] !== "" ? row[38] : "";
+    const mW = row[39] !== undefined && row[39] !== "" ? row[39] : "";
+    const mY = row[40] !== undefined && row[40] !== "" ? row[40] : "";
+
+    if (mJ !== "" || mW !== "" || mY !== "") {
+      mealStr = `${mJ}J ${mW}W ${mY}Y`;
+      isMealChanged = true;
+    } else {
+      mealStr = "Nil";
+      isMealChanged = false;
+    }
+
+    // 6. Xử lý VIP/CIP/MM từ cột 49 (Index 49 của mảng row)
+    const rawVipCip49 = row[49] !== undefined && row[49] !== "" ? String(row[49]).trim() : "";
+    if (rawVipCip49 !== "") {
+      vipCipMmStr = rawVipCip49;
+      isVipCipChanged = true;
+    }
+
+    // 7. Xử lý PAX ONBOARDED từ cột 41, 42, 43 (J, W, Y)
+    const pJ = row[41] !== undefined && row[41] !== "" ? row[41] : "";
+    const pW = row[42] !== undefined && row[42] !== "" ? row[42] : "";
+    const pY = row[43] !== undefined && row[43] !== "" ? row[43] : "";
+
+    if (pJ !== "" || pW !== "" || pY !== "") {
+      paxOnboardedStr = `${pJ}J ${pW}W ${pY}Y `;
+      isPaxChanged = true;
+    }
+
+    // 8. Xử lý BAG/CARGO: Lấy trực tiếp từ cột BH (BAG) và cột BG (CGO)
+    const bagValBH = row[59] !== undefined && row[59] !== "" ? String(row[59]).trim() : (row[60] !== undefined ? String(row[60]).trim() : "");
+    const cgoValBG = row[58] !== undefined && row[58] !== "" ? String(row[58]).trim() : (row[59] !== undefined ? String(row[59]).trim() : "");
+
+    let rawBag = bagValBH;
+    let rawCgo = cgoValBG;
+
+    for (let idx = 57; idx <= 61; idx++) {
+      let val = String(row[idx] || "").trim();
+      if (val.includes("/")) rawBag = val; 
+      if (val && !val.includes("/") && /^\d+$/.test(val) && Number(val) > 0 && Number(val) < 5000) {
+        rawCgo = val; 
+      }
+    }
+
+    if (rawBag !== "" || rawCgo !== "") {
+      let formattedBag = rawBag;
+      if (rawBag.includes("/")) {
+        const parts = rawBag.split("/");
+        if (parts.length >= 2) {
+          formattedBag = `${parts[0].trim()}Pcs/${parts[1].trim()}Kgs`;
+        }
+      }
+
+      const formattedCgo = rawCgo ? `${rawCgo}Kgs` : "";
+
+      if (formattedBag && formattedCgo) {
+        bagCargoStr = `${formattedBag} - ${formattedCgo}`;
+      } else {
+        bagCargoStr = formattedBag || formattedCgo;
+      }
+      isBagCargoChanged = true;
+    }
+
+    // 9. Xử lý NOTE lấy từ cột 46 và cột 49, ngăn cách bằng dấu "/"
+    const note46 = row[46] !== undefined && row[46] !== "" ? String(row[46]).trim() : "";
+    const note49 = row[49] !== undefined && row[49] !== "" ? String(row[49]).trim() : "";
+
+    if (note46 !== "" || note49 !== "") {
+      const formatted46 = note46 ? `UPG: ${note46}` : "";
+      const formatted49 = note49 ? `VIP⭐CIP: ${note49}` : "";
+
+      if (formatted46 && formatted49) {
+        noteStr = `${formatted46} / ${formatted49}`;
+      } else {
+        noteStr = formatted46 || formatted49;
+      }
+      isNoteChanged = true;
+    }
+
+    dutyOfficer = row[54] || (typeof selectedRep !== 'undefined' ? selectedRep : "Lý Minh Sang");
+    supPvcb = row[55] || "Trương Thị Xuân";
+  }
+
+  const fltDtRoute = `${depFlight}/${formattedDate}/${route}`;
+
+  // Định nghĩa màu sắc (Xanh lá nếu thay đổi, Đỏ nếu giữ nguyên mặc định)
+  const colorRoute = isRouteChanged ? "#28a745" : "#dc3545";
+  const colorStd = isStdChanged ? "#28a745" : "#dc3545";
+  const colorReg = isRegCfgChanged ? "#28a745" : "#dc3545";
+  const colorBooking = isBookingChanged ? "#28a745" : "#dc3545";
+  const colorMeal = isMealChanged ? "#28a745" : "#dc3545";
+  const colorVipCip = isVipCipChanged ? "#28a745" : "#dc3545";
+  const colorPaxOnboarded = isPaxChanged ? "#28a745" : "#dc3545";
+  const colorBagCargo = isBagCargoChanged ? "#28a745" : "#dc3545";
+  const colorNote = isNoteChanged ? "#28a745" : "#dc3545";
+
+ const modalBody = document.getElementById("bmModalBody");
+  if (!modalBody) return;
+
+  modalBody.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: Arial, sans-serif;">
+      <div>
+        <div style="font-weight: bold; font-size: 13px;">TCT HÀNG KHÔNG VIỆT NAM</div>
+        <div style="font-weight: bold; font-size: 13px;">CHI NHÁNH KHU VỰC VIỆT NAM</div>
+      </div>
+      <div style="text-align: right; font-size: 11px;">
+        <div><span style="color: red; font-style: italic;">Mã số:</span> <b>BM-CNVN-043A</b></div>
+        <div><span style="color: red; font-style: italic;">Lần ban hành:</span> <b>02</b></div>
+      </div>
+    </div>
+
+    <div style="text-align: center; font-weight: bold; margin: 15px 0; font-size: 14px; text-decoration: underline;">
+      THÔNG TIN CHUYẾN BAY ĐI
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif;">
+  <thead>
+    <tr>
+      <th style="border: 1px solid #000; padding: 5px; width: 32%; text-align: center; background: #f2f2f2;">DEPARTURE ITEMS</th>
+      <th style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">DETAIL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>STD/ETD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorStd};">${stdEtd}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GATE/PARKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">2/10</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>BOOKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBooking};">${bookingStr}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IFE DEFECT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OB</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-size: 11px; line-height: 1.4;">2HKG, 5KUL, 1DAD<br>SGN-HKG: pp JPN còn hạn 6 tháng, 1 trang trống, vé đi tiếp, ok ckin HKG<br>SGN-KUL: pp MYS còn hạn ckin KUL, pp AUS còn hạn 6 tháng, 1 trang trống, vé đi tiếp, khai Malaysia Digital Arrival Card, ok ckin KUL<br>OB hãng khác/transit quá 5 tiếng: Ckin đến SGN</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IB/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>MEAL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorMeal};">${mealStr}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>VIP/CIP/MM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorVipCip};">${vipCipMmStr}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>ID/AD/FOC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GLP/SKYTEAM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">4PLA ,3GLD</td></tr>
+    
+          <!-- SPCL PX -->
+    <tr>
+      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0; border: none;">
+          <tr>
+            <td rowspan="5" style="width: 32%; border-right: 1px solid #000; padding: 4px; text-align: left; vertical-align: middle;">
+              <b>SPCL<br>PX</b>
+            </td>
+            <td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;"><b>UM</b></td>
+          </tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;"><b>WCH</b></td></tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;"><b>SC</b></td></tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;"><b>SR</b></td></tr>
+          <tr><td style="padding: 5px; text-align: left;"><b>OTHER</b></td></tr>
+        </table>
+      </td>
+      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0; border: none;">
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">N/A</td></tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">N/A</td></tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">N/A</td></tr>
+          <tr><td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">N/A</td></tr>
+          <tr><td style="padding: 5px; text-align: left;">N/A</td></tr>
+        </table>
+      </td>
+    </tr>
+
+        <!-- SPCL BAG/CGO: GỘP Ô BÊN TRÁI, GỒM 2 DÒNG EMDA VÀ OTHER -->
+    <tr>
+      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0;">
+          <tr>
+            <td rowspan="2" style="width: 32%; border-right: 1px solid #000; padding: 4px; text-align: left; vertical-align: middle;">
+              <b>SPCL<br>BAG/CGO</b>
+            </td>
+            <td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">EMDA</td>
+          </tr>
+          <tr>
+            <td style="padding: 5px; text-align: left;">OTHER</td>
+          </tr>
+        </table>
+      </td>
+      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0;">
+          <tr>
+            <td style="padding: 5px; text-align: left; border-bottom: 1px solid #000;">N/A</td>
+          </tr>
+          <tr>
+            <td style="padding: 5px; text-align: left;">N/A</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>PAID SEAT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IRREGULAR TICKET</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>SUPPLEMENT INFO</b></td>
+      <td style="border: 1px solid #000; padding: 5px; text-align: left; font-size: 11px; line-height: 1.4;">
+        ** KIỂM TRA KỸ VÀ KÝ MTTN ĐỐI VỚI HLKG DỄ HƯ HỎNG, NHỰA MỎNG HOẶC ĐÃ HỎNG<br>
+        VÉ STAFF: KHÔNG CHECKIN<br>
+        LƯU Ý GIỮ CHỖ TRƯỚC CHO KHÁCH THẺ/VIP/CIP/INF/CHD/WCH<br>
+        KHÁCH CÓ PIN TRONG HLXT ADD SERVICE CODE "LITH"<br>
+        LƯU Ý GẮN TAG HLXT TOÀN BỘ KHÁCH CỦA CB, GATE GẮN TAG HLXT BỔ SUNG CHO KHÁCH CKIN ONLINE
+      </td>
+    </tr>
+    <tr><th colspan="2" style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">AFTER FLT</th></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>PAX ONBOARDED</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorPaxOnboarded};">${paxOnboardedStr}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>BAG/CARGO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBagCargo};">${bagCargoStr}</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOREC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>INVOL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OFFLD</b></td><td style="border: 1px; padding: 5px; text-align: left;">N/A</td></tr>
+    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorNote};">${noteStr}</td></tr>
+  </tbody>
+</table>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 25px; text-align: center; font-weight: bold; font-size: 12px; font-family: Arial, sans-serif;">
+      <div style="width: 40%;">
+        ĐẠI DIỆN VNA<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(trực chuyến)</span><br><br><br><br><b>${dutyOfficer}</b>
+      </div>
+      <div style="width: 40%;">
+        CTY PVMĐ<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Sup pvcb)</span><br><br><br><br><b>${supPvcb}</b>
+      </div>
+    </div>
+  `;
+  document.getElementById("bmModal").style.display = "flex";
+}
+// Đảm bảo hàm đóng popup được viết chính xác thế này
+function closeBMModal() {
+  const modal = document.getElementById("bmModal");
+  if (modal) {
+    modal.style.setProperty("display", "none", "important");
+  }
 }
 </script>
 <script>
@@ -8040,6 +8419,18 @@ document.addEventListener("DOMContentLoaded", loadOSPOTPData);
     <button class="btn btn-secondary" onclick="closeMVAPopup()">
       Hủy
     </button>
+  </div>
+</div>
+<!-- POPUP BIỂU MẪU BM_CNVN_043A -->
+<div id="bmModal">
+  <div class="bm-modal-content">
+    <div class="bm-header">
+      <h3 style="margin: 0; font-size: 15px;">Mã số: BM-CNVN-043A | Lần ban hành: 02</h3>
+      <button type="button" onclick="closeBMModal()" style="background:#dc3545; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">✕ Đóng</button>
+    </div>
+    <div class="bm-body" id="bmModalBody">
+      <!-- Nội dung bảng sẽ được điền tự động bằng JavaScript -->
+    </div>
   </div>
 </div>
 </body>
