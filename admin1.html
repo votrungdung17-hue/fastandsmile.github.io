@@ -7141,8 +7141,80 @@ async function thongKePBB() {
 }
 </script>
 <script>
+function showDReportPopup() {
+  document.getElementById("dReportPopup").style.display = "flex";
+  // Tự động set ngày mặc định là hôm nay
+  const today = new Date().toISOString().split('T')[0];
+  if(!document.getElementById("dReportFromDate").value) document.getElementById("dReportFromDate").value = today;
+  if(!document.getElementById("dReportToDate").value) document.getElementById("dReportToDate").value = today;
+}
+
+function closeDReportPopup() {
+  document.getElementById("dReportPopup").style.display = "none";
+}
+
+function exportDReport() {
+  const fromDate = document.getElementById("dReportFromDate").value;
+  const toDate = document.getElementById("dReportToDate").value;
+
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ Từ ngày và Đến ngày!");
+    return;
+  }
+
+  // 1. Bật màn hình LoadingOverlay
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  if (loadingOverlay) {
+    // Thay đổi thông báo loading riêng cho việc xuất báo cáo (nếu muốn)
+    const loadingText = loadingOverlay.querySelector("div > div:last-child");
+    if (loadingText) loadingText.innerText = "Đang khởi tạo báo cáo D-REPORT, vui lòng chờ...";
+    loadingOverlay.style.display = "flex";
+  }
+
+  const exportUrl = `${API}?action=exportDReport&fromDate=${fromDate}&toDate=${toDate}`;
+
+  fetch(exportUrl)
+    .then(response => response.json())
+    .then(data => {
+      // 2. Tắt màn hình Loading sau khi nhận phản hồi
+      if (loadingOverlay) loadingOverlay.style.display = "none";
+
+      if (data.success) {
+        // Tạo thẻ <a> ẩn để kích hoạt tải file
+        const link = document.createElement("a");
+        link.href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + data.base64;
+        link.download = data.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        if (typeof closeDReportPopup === "function") closeDReportPopup();
+      } else {
+        alert("Có lỗi khi tạo báo cáo: " + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      // 3. Tắt màn hình Loading nếu xảy ra lỗi mạng/máy chủ
+      if (loadingOverlay) loadingOverlay.style.display = "none";
+      alert("Lỗi kết nối máy chủ khi xuất báo cáo!");
+    });
+}
+</script>
+<script>
+// Danh sách định nghĩa các trường dữ liệu có thể chỉnh sửa
+const FORM_EDIT_FIELDS = [
+  'gateParking', 'ifeDefect', 'ob', 'ibBag', 'idAdFoc', 'glpSkyteam',
+  'spclUm', 'spclWch', 'spclSc', 'spclSr', 'spclOther',
+  'spclEmda', 'spclBagOther', 'paidSeat', 'irregTicket', 'suppInfo',
+  'gosho', 'nosho', 'norec', 'invol', 'offld', 'supNameInput'
+];
+
+let isDrawing = false;
+let activeCanvasCtx = null;
+
 function openBMForm(flightId) {
-  let row = currentModalFlightRow;
+  let row = typeof currentModalFlightRow !== 'undefined' ? currentModalFlightRow : null;
 
   if (!row && typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
     row = globalFlightsData.find(r => String(r[0]) === String(flightId)) || globalFlightsData[0];
@@ -7155,15 +7227,15 @@ function openBMForm(flightId) {
   let stdEtd = "09:00/09:35";
   let regCfg = "";
   let bookingStr = "";
-  let mealStr = "Nil";
+  let mealStr = "NIL";
   let paxOnboardedStr = "Chưa có điện văn";
-  let bagCargoStr = "Chưa có điện văn"; // Giá trị mặc định của BAG/CARGO
+  let bagCargoStr = "Chưa có điện văn"; 
   let noteStr = "NIL";
   let dutyOfficer = "";
-  let supPvcb = "";
-  let vipCipMmStr = "Nil";
+  let supPvcb = "Ghi rõ Họ và Tên";
+  let vipCipMmStr = "NIL";
 
-  // Biến cờ kiểm tra thay đổi để đổi màu (true = xanh lá, false = đỏ)
+  // Biến cờ kiểm tra thay đổi để đổi màu
   let isRouteChanged = false;
   let isStdChanged = false;
   let isRegCfgChanged = false;
@@ -7174,8 +7246,52 @@ function openBMForm(flightId) {
   let isNoteChanged = false;
   let isVipCipChanged = false;
 
+  // Lấy dữ liệu các trường Form chi tiết từ mảng row
+  const valGate       = (row && row[60] !== undefined && row[60] !== "") ? String(row[60]).trim() : "NIL";
+  const valIfe        = (row && row[61] !== undefined && row[61] !== "") ? String(row[61]).trim() : "NIL";
+  const valOb         = (row && row[62] !== undefined && row[62] !== "") ? String(row[62]).trim() : "NIL";
+  const valIbBag      = (row && row[63] !== undefined && row[63] !== "") ? String(row[63]).trim() : "NIL";
+  const valIdAdFoc    = (row && row[64] !== undefined && row[64] !== "") ? String(row[64]).trim() : "NIL";
+  const valGlp        = (row && row[65] !== undefined && row[65] !== "") ? String(row[65]).trim() : "NIL";
+
+  const valUm         = (row && row[66] !== undefined && row[66] !== "") ? String(row[66]).trim() : "NIL";
+  const valWch        = (row && row[67] !== undefined && row[67] !== "") ? String(row[67]).trim() : "NIL";
+  const valSc         = (row && row[68] !== undefined && row[68] !== "") ? String(row[68]).trim() : "NIL";
+  const valSr         = (row && row[69] !== undefined && row[69] !== "") ? String(row[69]).trim() : "NIL";
+  const valSpclOther  = (row && row[70] !== undefined && row[70] !== "") ? String(row[70]).trim() : "NIL";
+
+  const valEmda       = (row && row[71] !== undefined && row[71] !== "") ? String(row[71]).trim() : "NIL";
+  const valBagOther   = (row && row[72] !== undefined && row[72] !== "") ? String(row[72]).trim() : "NIL";
+
+  const valPaidSeat   = (row && row[73] !== undefined && row[73] !== "") ? String(row[73]).trim() : "NIL";
+  const valIrregTkt   = (row && row[74] !== undefined && row[74] !== "") ? String(row[74]).trim() : "NIL";
+  const valSuppInfo   = (row && row[75] !== undefined && row[75] !== "") ? String(row[75]).trim() : "NIL";
+
+  const valGosho      = (row && row[76] !== undefined && row[76] !== "") ? String(row[76]).trim() : "NIL";
+  const valNosho      = (row && row[77] !== undefined && row[77] !== "") ? String(row[77]).trim() : "NIL";
+  const valNorec      = (row && row[78] !== undefined && row[78] !== "") ? String(row[78]).trim() : "NIL";
+  const valInvol      = (row && row[79] !== undefined && row[79] !== "") ? String(row[79]).trim() : "NIL";
+  const valOffld      = (row && row[80] !== undefined && row[80] !== "") ? String(row[80]).trim() : "NIL";
+
+  const valSupName    = (row && row[81] !== undefined && row[81] !== "") ? String(row[81]).trim() : supPvcb;
+
+  const getFieldColor = (val) => (val && val.toUpperCase() !== "NIL") ? "#28a745" : "#000000";
+
+  const renderCell = (fieldId, val, isTextarea = false) => {
+    const color = getFieldColor(val);
+    if (isTextarea) {
+      return `
+        <span id="disp_${fieldId}" style="white-space: pre-wrap; font-weight: bold; color: ${color};">${val}</span>
+        <textarea id="edit_${fieldId}" class="bm-edit-input" style="display: none; width: 98%; height: 60px; font-size: 11px; font-family: Arial, sans-serif;">${val}</textarea>
+      `;
+    }
+    return `
+      <span id="disp_${fieldId}" style="font-weight: bold; color: ${color};">${val}</span>
+      <input type="text" id="edit_${fieldId}" class="bm-edit-input" value="${val}" style="display: none; width: 95%; font-size: 11px; font-weight: bold; padding: 2px 4px;" />
+    `;
+  };
+
   if (row) {
-    // 1. Xử lý FLT/DT/ROUTE với điểm đi mặc định luôn là PQC
     const rawDep = (row[9] || "").toUpperCase() || "VN1822";
     depFlight = rawDep;
     if (rawDep !== "VN1822") isRouteChanged = true;
@@ -7191,45 +7307,31 @@ function openBMForm(flightId) {
     }
     if (formattedDate !== "27SEP2026") isRouteChanged = true;
 
-    // Cố định điểm đi là PQC, điểm đến lấy từ row[10] hoặc mặc định là SGN
     const fromPort = "PQC";
     const toPort = (row[10] || "").toUpperCase() || "SGN";
-    
     route = `${fromPort}-${toPort}`;
     if (route !== "PQC-SGN") isRouteChanged = true;
 
-    // 2. Xử lý STD/ETD (Cột 11 và 12)
-    const stdVal = formatTimeForInput ? formatTimeForInput(row[11]) : (row[11] || "");
-    const etdVal = formatTimeForInput ? formatTimeForInput(row[12]) : (row[12] || "");
+    const stdVal = typeof formatTimeForInput === "function" ? formatTimeForInput(row[11]) : (row[11] || "");
+    const etdVal = typeof formatTimeForInput === "function" ? formatTimeForInput(row[12]) : (row[12] || "");
     if (stdVal || etdVal) {
       stdEtd = `${stdVal || '---'}/${etdVal || '---'}`;
     }
     if (stdEtd !== "09:35/09:50") isStdChanged = true;
 
-    // 3. Xử lý REG/CFG (Cột 2 và 25)
     const acReg = (row[2] || "").toUpperCase();
     const rawConfig = String(row[25] || "");
     const prefix3 = rawConfig.substring(0, 3);
     
-    let configJValue = 0;
-    let configWValue = 0;
-    let configYValue = 0;
+    let configJValue = 0, configWValue = 0, configYValue = 0;
 
-    if (prefix3 === "203") {
-      configJValue = 8; configWValue = 18; configYValue = 177;
-    } else if (prefix3 === "184") {
-      configJValue = 16; configWValue = 18; configYValue = 150;
-    } else if (prefix3 === "178") {
-      configJValue = 16; configWValue = 12; configYValue = 150;
-    } else if (prefix3 === "209") {
-      configJValue = 8; configWValue = 18; configYValue = 183;
-    } else if (prefix3 === "186") {
-      configJValue = 0; configWValue = 18; configYValue = 168;
-    } else if (prefix3 === "180") {
-      configJValue = 0; configWValue = 18; configYValue = 162;
-    } else {
-      configJValue = rawConfig;
-    }
+    if (prefix3 === "203") { configJValue = 8; configWValue = 18; configYValue = 177; }
+    else if (prefix3 === "184") { configJValue = 16; configWValue = 18; configYValue = 150; }
+    else if (prefix3 === "178") { configJValue = 16; configWValue = 12; configYValue = 150; }
+    else if (prefix3 === "209") { configJValue = 8; configWValue = 18; configYValue = 183; }
+    else if (prefix3 === "186") { configJValue = 0; configWValue = 18; configYValue = 168; }
+    else if (prefix3 === "180") { configJValue = 0; configWValue = 18; configYValue = 162; }
+    else { configJValue = rawConfig; }
 
     let formattedConfig = (configJValue !== rawConfig) ? `${configJValue}/${configWValue}/${configYValue}` : rawConfig;
     if (acReg || formattedConfig) {
@@ -7237,7 +7339,6 @@ function openBMForm(flightId) {
     }
     if (regCfg !== "VNA609 16/18/150") isRegCfgChanged = true;
 
-    // 4. Xử lý BOOKING từ cột 35, 36, 37
     const bJ = row[35] !== undefined && row[35] !== "" ? row[35] : "";
     const bW = row[36] !== undefined && row[36] !== "" ? row[36] : "";
     const bY = row[37] !== undefined && row[37] !== "" ? row[37] : "";
@@ -7247,7 +7348,6 @@ function openBMForm(flightId) {
     }
     if (bookingStr !== "7J 1W 107Y 0INF") isBookingChanged = true;
 
-    // 5. Xử lý MEAL từ cột 38, 39, 40 (J, W, Y)
     const mJ = row[38] !== undefined && row[38] !== "" ? row[38] : "";
     const mW = row[39] !== undefined && row[39] !== "" ? row[39] : "";
     const mY = row[40] !== undefined && row[40] !== "" ? row[40] : "";
@@ -7260,14 +7360,12 @@ function openBMForm(flightId) {
       isMealChanged = false;
     }
 
-    // 6. Xử lý VIP/CIP/MM từ cột 49 (Index 49 của mảng row)
     const rawVipCip49 = row[49] !== undefined && row[49] !== "" ? String(row[49]).trim() : "";
     if (rawVipCip49 !== "") {
       vipCipMmStr = rawVipCip49;
       isVipCipChanged = true;
     }
 
-    // 7. Xử lý PAX ONBOARDED từ cột 41, 42, 43 (J, W, Y)
     const pJ = row[41] !== undefined && row[41] !== "" ? row[41] : "";
     const pW = row[42] !== undefined && row[42] !== "" ? row[42] : "";
     const pY = row[43] !== undefined && row[43] !== "" ? row[43] : "";
@@ -7277,20 +7375,11 @@ function openBMForm(flightId) {
       isPaxChanged = true;
     }
 
-    // 8. Xử lý BAG/CARGO: Lấy trực tiếp từ cột BH (BAG) và cột BG (CGO)
-    const bagValBH = row[59] !== undefined && row[59] !== "" ? String(row[59]).trim() : (row[60] !== undefined ? String(row[60]).trim() : "");
-    const cgoValBG = row[58] !== undefined && row[58] !== "" ? String(row[58]).trim() : (row[59] !== undefined ? String(row[59]).trim() : "");
+    const cgoValBG = (row && row[58] !== undefined && row[58] !== "") ? String(row[58]).trim() : "";
+    const bagValBH = (row && row[59] !== undefined && row[59] !== "") ? String(row[59]).trim() : "";
 
     let rawBag = bagValBH;
     let rawCgo = cgoValBG;
-
-    for (let idx = 57; idx <= 61; idx++) {
-      let val = String(row[idx] || "").trim();
-      if (val.includes("/")) rawBag = val; 
-      if (val && !val.includes("/") && /^\d+$/.test(val) && Number(val) > 0 && Number(val) < 5000) {
-        rawCgo = val; 
-      }
-    }
 
     if (rawBag !== "" || rawCgo !== "") {
       let formattedBag = rawBag;
@@ -7299,6 +7388,8 @@ function openBMForm(flightId) {
         if (parts.length >= 2) {
           formattedBag = `${parts[0].trim()}Pcs/${parts[1].trim()}Kgs`;
         }
+      } else if (/^\d+$/.test(rawBag) && Number(rawBag) > 0) {
+        formattedBag = `${rawBag}Pcs`;
       }
 
       const formattedCgo = rawCgo ? `${rawCgo}Kgs` : "";
@@ -7309,9 +7400,11 @@ function openBMForm(flightId) {
         bagCargoStr = formattedBag || formattedCgo;
       }
       isBagCargoChanged = true;
+    } else {
+      bagCargoStr = "Chưa có điện văn";
+      isBagCargoChanged = false;
     }
 
-    // 9. Xử lý NOTE lấy từ cột 46 và cột 49, ngăn cách bằng dấu "/"
     const note46 = row[46] !== undefined && row[46] !== "" ? String(row[46]).trim() : "";
     const note49 = row[49] !== undefined && row[49] !== "" ? String(row[49]).trim() : "";
 
@@ -7328,12 +7421,10 @@ function openBMForm(flightId) {
     }
 
     dutyOfficer = row[54] || (typeof selectedRep !== 'undefined' ? selectedRep : "Lý Minh Sang");
-    supPvcb = row[55] || "Trương Thị Xuân";
   }
 
   const fltDtRoute = `${depFlight}/${formattedDate}/${route}`;
 
-  // Định nghĩa màu sắc (Xanh lá nếu thay đổi, Đỏ nếu giữ nguyên mặc định)
   const colorRoute = isRouteChanged ? "#28a745" : "#dc3545";
   const colorStd = isStdChanged ? "#28a745" : "#dc3545";
   const colorReg = isRegCfgChanged ? "#28a745" : "#dc3545";
@@ -7344,16 +7435,26 @@ function openBMForm(flightId) {
   const colorBagCargo = isBagCargoChanged ? "#28a745" : "#dc3545";
   const colorNote = isNoteChanged ? "#28a745" : "#dc3545";
 
- const modalBody = document.getElementById("bmModalBody");
+  const modalBody = document.getElementById("bmModalBody");
   if (!modalBody) return;
 
   modalBody.innerHTML = `
+    <!-- HEADER VỚI NHÓM NÚT PDF / EDIT / SAVE CẠNH NÚT ĐÓNG -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: Arial, sans-serif;">
       <div>
         <div style="font-weight: bold; font-size: 13px;">TCT HÀNG KHÔNG VIỆT NAM</div>
         <div style="font-weight: bold; font-size: 13px;">CHI NHÁNH KHU VỰC VIỆT NAM</div>
       </div>
       <div style="text-align: right; font-size: 11px;">
+        <div style="margin-bottom: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 4px;">
+          <!-- NÚT EXPORT PDF KẾ BÊN NÚT EDIT -->
+          <button type="button" id="btnMainPdf" onclick="exportBMToPDF()" style="padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #17a2b8; color: white; border: none; border-radius: 3px;">📄 Xuất PDF</button>
+          
+          <button type="button" id="btnMainEdit" onclick="enableMainEdit()" style="padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 3px;">Edit Form</button>
+          <button type="button" id="btnMainSave" onclick="saveMainForm('${flightId}')" style="display: none; padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 3px;">Save Form</button>
+          <button type="button" id="btnMainCancel" onclick="cancelMainEdit()" style="display: none; padding: 3px 6px; font-size: 11px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 3px;">✕</button>
+          <button type="button" onclick="closeBMModal()" style="padding: 3px 8px; font-size: 11px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 3px; margin-left: 3px;">✕ Đóng</button>
+        </div>
         <div><span style="color: red; font-style: italic;">Mã số:</span> <b>BM-CNVN-043A</b></div>
         <div><span style="color: red; font-style: italic;">Lần ban hành:</span> <b>02</b></div>
       </div>
@@ -7364,188 +7465,458 @@ function openBMForm(flightId) {
     </div>
 
     <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif;">
-  <thead>
-    <tr>
-      <th style="border: 1px solid #000; padding: 5px; width: 32%; text-align: center; background: #f2f2f2;">DEPARTURE ITEMS</th>
-      <th style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">DETAIL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>STD/ETD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorStd};">${stdEtd}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GATE/PARKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">2/10</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>BOOKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBooking};">${bookingStr}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IFE DEFECT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OB</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-size: 11px; line-height: 1.4;">2HKG, 5KUL, 1DAD<br>SGN-HKG: pp JPN còn hạn 6 tháng, 1 trang trống, vé đi tiếp, ok ckin HKG<br>SGN-KUL: pp MYS còn hạn ckin KUL, pp AUS còn hạn 6 tháng, 1 trang trống, vé đi tiếp, khai Malaysia Digital Arrival Card, ok ckin KUL<br>OB hãng khác/transit quá 5 tiếng: Ckin đến SGN</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IB/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>MEAL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorMeal};">${mealStr}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>VIP/CIP/MM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorVipCip};">${vipCipMmStr}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>ID/AD/FOC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GLP/SKYTEAM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    
-          <!-- SPCL PX -->
-    <tr>
-      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
-        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0; border: none;">
-          <tr>
-            <td rowspan="5" style="width: 32%; padding: 4px; text-align: left; vertical-align: middle; border-style: solid; border-width: 1px; border-color: transparent #000 transparent transparent;">
-  <b>SPCL<br>PX</b>
-</td>
-            <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 #000;"><b>UM</b></td>
-          </tr>
-          <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 #000;"><b>WCH</b></td>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 #000;"><b>SC</b></td></tr>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 #000;"><b>SR</b></td></tr>
-          <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: #000 transparent transparent #000;"><b>OTHER</b></td>
-        </table>
-      </td>
-      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
-        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0; border: none;">
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;">N/A</td></tr>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;">N/A</td></tr>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;">N/A</td></tr>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;">N/A</td></tr>
-          <tr><td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent;">N/A</td></tr>
-        </table>
-      </td>
-    </tr>
+      <thead>
+        <tr>
+          <th style="border: 1px solid #000; padding: 5px; width: 32%; text-align: center; background: #f2f2f2;" colspan="2">DEPARTURE ITEMS</th>
+          <th style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">DETAIL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STD/ETD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorStd};">${stdEtd}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>GATE/PARKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('gateParking', valGate)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>BOOKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBooking};">${bookingStr}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>IFE DEFECT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('ifeDefect', valIfe)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>OB</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('ob', valOb, true)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>IB/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('ibBag', valIbBag)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>MEAL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorMeal};">${mealStr}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>VIP/CIP/MM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorVipCip};">${vipCipMmStr}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>ID/AD/FOC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('idAdFoc', valIdAdFoc)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>GLP/SKYTEAM</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('glpSkyteam', valGlp)}</td></tr>
 
-        <!-- SPCL BAG/CGO: GỘP Ô BÊN TRÁI, GỒM 2 DÒNG EMDA VÀ OTHER -->
-    <tr>
-      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
-        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0;">
-          <tr>
-            <td rowspan="2" style="width: 32%; padding: 4px; text-align: left; vertical-align: middle; border-style: solid; border-width: 1px; border-color: transparent #000 transparent transparent;">
-              <b>SPCL<br>BAG/CGO</b>
-            </td>
-            <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;"><b>EMDA</b></td>
-          </tr>
-          <tr>
-            <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent;"><b>OTHER</b></td>
-          </tr>
-        </table>
-      </td>
-      <td style="border: 1px solid #000; padding: 0; vertical-align: top;">
-        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0;">
-          <tr>
-            <td style="padding: 5px; text-align: left; border-style: solid; border-width: 1px; border-color: transparent transparent #000 transparent;">N/A</td>
-          </tr>
-          <tr>
-            <td style="padding: 5px; text-align: left;border-style: solid; border-width: 1px; border-color: transparent;">N/A</td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>PAID SEAT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>IRREGULAR TICKET</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr>
-      <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>SUPPLEMENT INFO</b></td>
-      <td style="border: 1px solid #000; padding: 5px; text-align: left; font-size: 11px; line-height: 1.4;">
-        ** KIỂM TRA KỸ VÀ KÝ MTTN ĐỐI VỚI HLKG DỄ HƯ HỎNG, NHỰA MỎNG HOẶC ĐÃ HỎNG<br>
-        VÉ STAFF: KHÔNG CHECKIN<br>
-        LƯU Ý GIỮ CHỖ TRƯỚC CHO KHÁCH THẺ/VIP/CIP/INF/CHD/WCH<br>
-        KHÁCH CÓ PIN TRONG HLXT ADD SERVICE CODE "LITH"<br>
-        LƯU Ý GẮN TAG HLXT TOÀN BỘ KHÁCH CỦA CB, GATE GẮN TAG HLXT BỔ SUNG CHO KHÁCH CKIN ONLINE
-      </td>
-    </tr>
-    <tr><th colspan="2" style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">AFTER FLT</th></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>PAX ONBOARDED</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorPaxOnboarded};">${paxOnboardedStr}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>BAG/CARGO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBagCargo};">${bagCargoStr}</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>GOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOREC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>INVOL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OFFLD</b></td><td style="border: 1px; padding: 5px; text-align: left;">N/A</td></tr>
-    <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>NOTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorNote};">${noteStr}</td></tr>
-  </tbody>
-</table>
+        <!-- SPCL PX -->
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; width: 15%; font-weight: bold;" rowspan="5">SPCL<br>PX</td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left; width: 17%;"><b>UM</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclUm', valUm)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>WCH</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclWch', valWch)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>SC</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclSc', valSc)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>SR</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclSr', valSr)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OTHER</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclOther', valSpclOther)}</td>
+        </tr>
 
+        <!-- SPCL BAG/CGO -->
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold;" rowspan="2">SPCL<br>BAG/CGO</td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>EMDA</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclEmda', valEmda)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OTHER</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclBagOther', valBagOther)}</td>
+        </tr>
+
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>PAID SEAT</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('paidSeat', valPaidSeat)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>IRREGULAR TICKET</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('irregTicket', valIrregTkt)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>SUPPLEMENT INFO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('suppInfo', valSuppInfo, true)}</td></tr>
+
+        <tr><th colspan="3" style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">AFTER FLT</th></tr>
+        
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>PAX ONBOARDED</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorPaxOnboarded};">${paxOnboardedStr}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>BAG/CARGO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBagCargo};">${bagCargoStr}</td></tr>
+        
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>GOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('gosho', valGosho)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOSHO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('nosho', valNosho)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOREC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('norec', valNorec)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>INVOL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('invol', valInvol)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>OFFLD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('offld', valOffld)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorNote};">${noteStr}</td></tr>
+      </tbody>
+    </table>
+
+    <!-- KHUNG KÝ TÊN SỐNG CHO 2 BÊN -->
     <div style="display: flex; justify-content: space-between; margin-top: 25px; text-align: center; font-weight: bold; font-size: 12px; font-family: Arial, sans-serif;">
+      
+      <!-- Cột Đại diện VNA -->
       <div style="width: 40%;">
-        ĐẠI DIỆN VNA<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(trực chuyến)</span><br><br><br><br><b>${dutyOfficer}</b>
+        ĐẠI DIỆN VNA<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(trực chuyến)</span><br><br>
+        <div style="border: 1px dashed #999; display: inline-block; background: #fff; position: relative; min-height: 70px;">
+          <img id="disp_dutySignature" style="height: 60px; display: none; margin: 0 auto;" />
+          <span id="disp_dutySignature_text" style="font-size: 10px; color: #888; display: block; padding: 20px 10px;">Chưa có chữ ký</span>
+          <canvas id="edit_dutySignature" width="180" height="70" style="display: none; cursor: crosshair; background: #fafafa;"></canvas>
+        </div>
+        <br>
+        <button type="button" id="btnClearDutySign" onclick="clearSignatureCanvas('edit_dutySignature')" style="display: none; font-size: 10px; padding: 1px 5px; margin-top: 2px; cursor: pointer;">Ký lại</button>
+        <br>
+        <b>${dutyOfficer}</b>
       </div>
+
+      <!-- Cột Sup PVCB (Dùng placeholder hướng dẫn nhập) -->
       <div style="width: 40%;">
-        CTY PVMĐ<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Sup pvcb)</span><br><br><br><br><b>${supPvcb}</b>
+        CTY PVMĐ<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Sup pvcb)</span><br><br>
+        <div style="border: 1px dashed #999; display: inline-block; background: #fff; position: relative; min-height: 70px;">
+          <img id="disp_supSignature" style="height: 60px; display: none; margin: 0 auto;" />
+          <span id="disp_supSignature_text" style="font-size: 10px; color: #888; display: block; padding: 20px 10px;">Chưa có chữ ký</span>
+          <canvas id="edit_supSignature" width="180" height="70" style="display: none; cursor: crosshair; background: #fafafa;"></canvas>
+        </div>
+        <br>
+        <button type="button" id="btnClearSupSign" onclick="clearSignatureCanvas('edit_supSignature')" style="display: none; font-size: 10px; padding: 1px 5px; margin-top: 2px; cursor: pointer;">Ký lại</button>
+        <br>
+        <span id="disp_supNameInput" style="font-weight: bold;">${(valSupName && valSupName !== "Ghi rõ Họ và Tên") ? valSupName : "Ghi rõ Họ và Tên"}</span>
+        <input type="text" id="edit_supNameInput" class="bm-edit-input" value="${(valSupName && valSupName !== "Ghi rõ Họ và Tên") ? valSupName : ""}" placeholder="Ghi rõ Họ và Tên" style="display: none; width: 95%; font-size: 11px; font-weight: bold; padding: 2px 4px; text-align: center; margin: 0 auto;" />
       </div>
     </div>
   `;
-  document.getElementById("bmModal").style.display = "flex";
+
+  const modal = document.getElementById("bmModal");
+  if (modal) {
+    modal.style.setProperty("display", "flex", "important");
+  }
 }
-// Đảm bảo hàm đóng popup được viết chính xác thế này
+
+// Hàm đóng Modal
 function closeBMModal() {
   const modal = document.getElementById("bmModal");
   if (modal) {
     modal.style.setProperty("display", "none", "important");
   }
 }
-</script>
-<script>
-// Hiển thị Popup CAAV (Tự động gán mặc định Từ ngày & Đến ngày = Ngày hiện tại trên Form)
-function showCaavPopup() {
-  const currentDate = document.getElementById("ngay").value || new Date().toISOString().split('T')[0];
-  document.getElementById("caavFromDate").value = currentDate;
-  document.getElementById("caavToDate").value = currentDate;
-  document.getElementById("caavPopup").style.display = "flex";
-}
 
-function closeCaavPopup() {
-  document.getElementById("caavPopup").style.display = "none";
-}
+// Khởi tạo bảng vẽ Chữ ký (Canvas)
+function initSignaturePad(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
 
-// Gửi Request Xuất CAAV theo khoảng thời gian
-function exportCAAV() {
-  const fromDate = document.getElementById("caavFromDate").value;
-  const toDate = document.getElementById("caavToDate").value;
-  const isVN = document.getElementById("caavVN").checked;
-  const isBL = document.getElementById("caavBL").checked;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#000080';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
 
-  if (!fromDate || !toDate) {
-    alert("Vui lòng chọn đầy đủ 'Từ ngày' và 'Đến ngày'!");
-    return;
-  }
-  
-  if (fromDate > toDate) {
-    alert("'Từ ngày' không được lớn hơn 'Đến ngày'!");
-    return;
-  }
-
-  if (!isVN && !isBL) {
-    alert("Vui lòng chọn ít nhất một hãng (VN hoặc BL)!");
-    return;
-  }
-
-  // Hiển thị Overlay Loading
-  const loading = document.getElementById("loadingOverlay") || document.getElementById("loading");
-  if (loading) loading.style.display = "flex";
-
-  const payload = {
-    action: "exportCAAV",
-    fromDate: fromDate,
-    toDate: toDate,
-    exportVN: isVN,
-    exportBL: isBL
+  canvas.onmousedown = (e) => {
+    isDrawing = true;
+    const rect = canvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
 
-  fetch(GAS_URL, {
+  canvas.onmousemove = (e) => {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  };
+
+  canvas.onmouseup = () => { isDrawing = false; };
+  canvas.onmouseleave = () => { isDrawing = false; };
+
+  canvas.ontouchstart = (e) => {
+    e.preventDefault();
+    isDrawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  };
+
+  canvas.ontouchmove = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.stroke();
+  };
+
+  canvas.ontouchend = () => { isDrawing = false; };
+}
+
+// Hàm xóa bảng vẽ để ký lại
+function clearSignatureCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// Bật chế độ Edit
+function enableMainEdit() {
+  FORM_EDIT_FIELDS.forEach(id => {
+    const dispEl = document.getElementById(`disp_${id}`);
+    const editEl = document.getElementById(`edit_${id}`);
+    if (dispEl) dispEl.style.display = "none";
+    if (editEl) editEl.style.display = "block";
+  });
+
+  document.getElementById('disp_dutySignature').style.display = 'none';
+  document.getElementById('disp_dutySignature_text').style.display = 'none';
+  document.getElementById('edit_dutySignature').style.display = 'block';
+  document.getElementById('btnClearDutySign').style.display = 'inline-block';
+  initSignaturePad('edit_dutySignature');
+
+  document.getElementById('disp_supSignature').style.display = 'none';
+  document.getElementById('disp_supSignature_text').style.display = 'none';
+  document.getElementById('edit_supSignature').style.display = 'block';
+  document.getElementById('btnClearSupSign').style.display = 'inline-block';
+  initSignaturePad('edit_supSignature');
+
+  document.getElementById("btnMainEdit").style.display = "none";
+  document.getElementById("btnMainSave").style.display = "inline-block";
+  document.getElementById("btnMainCancel").style.display = "inline-block";
+}
+
+// Hủy chế độ Edit
+function cancelMainEdit() {
+  FORM_EDIT_FIELDS.forEach(id => {
+    const dispEl = document.getElementById(`disp_${id}`);
+    const editEl = document.getElementById(`edit_${id}`);
+    if (dispEl) dispEl.style.display = "inline";
+    if (editEl) editEl.style.display = "none";
+  });
+
+  const hasDutySign = document.getElementById('disp_dutySignature').getAttribute('src');
+  document.getElementById('disp_dutySignature').style.display = hasDutySign ? 'block' : 'none';
+  document.getElementById('disp_dutySignature_text').style.display = hasDutySign ? 'none' : 'block';
+  document.getElementById('edit_dutySignature').style.display = 'none';
+  document.getElementById('btnClearDutySign').style.display = 'none';
+
+  const hasSupSign = document.getElementById('disp_supSignature').getAttribute('src');
+  document.getElementById('disp_supSignature').style.display = hasSupSign ? 'block' : 'none';
+  document.getElementById('disp_supSignature_text').style.display = hasSupSign ? 'none' : 'block';
+  document.getElementById('edit_supSignature').style.display = 'none';
+  document.getElementById('btnClearSupSign').style.display = 'none';
+
+  document.getElementById("btnMainEdit").style.display = "inline-block";
+  document.getElementById("btnMainSave").style.display = "none";
+  document.getElementById("btnMainCancel").style.display = "none";
+}
+
+// Hàm Save
+function saveMainForm(flightId) {
+  const btnSave = document.getElementById("btnMainSave");
+  btnSave.disabled = true;
+  btnSave.innerText = "Saving...";
+
+  const payload = {
+    action: "updateFormDetails",
+    flightId: flightId
+  };
+
+  FORM_EDIT_FIELDS.forEach(id => {
+    const editEl = document.getElementById(`edit_${id}`);
+    if (editEl) {
+      payload[id] = editEl.value.trim();
+    }
+  });
+
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+  fetch(SCRIPT_URL, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
   })
   .then(res => res.json())
-  .then(res => {
-    if (loading) loading.style.display = "none";
-    if (res.status === "success" && res.url) {
-      window.open(res.url, "_blank");
-      closeCaavPopup();
+  .then(data => {
+    btnSave.disabled = false;
+    btnSave.innerText = "Save Form";
+
+    if (data.status === "success") {
+      if (typeof currentModalFlightRow !== 'undefined' && currentModalFlightRow) {
+        currentModalFlightRow[60] = payload.gateParking;
+        currentModalFlightRow[61] = payload.ifeDefect;
+        currentModalFlightRow[62] = payload.ob;
+        currentModalFlightRow[63] = payload.ibBag;
+        currentModalFlightRow[64] = payload.idAdFoc;
+        currentModalFlightRow[65] = payload.glpSkyteam;
+        currentModalFlightRow[66] = payload.spclUm;
+        currentModalFlightRow[67] = payload.spclWch;
+        currentModalFlightRow[68] = payload.spclSc;
+        currentModalFlightRow[69] = payload.spclSr;
+        currentModalFlightRow[70] = payload.spclOther;
+        currentModalFlightRow[71] = payload.spclEmda;
+        currentModalFlightRow[72] = payload.spclBagOther;
+        currentModalFlightRow[73] = payload.paidSeat;
+        currentModalFlightRow[74] = payload.irregTicket;
+        currentModalFlightRow[75] = payload.suppInfo;
+        currentModalFlightRow[76] = payload.gosho;
+        currentModalFlightRow[77] = payload.nosho;
+        currentModalFlightRow[78] = payload.norec;
+        currentModalFlightRow[79] = payload.invol;
+        currentModalFlightRow[80] = payload.offld;
+        currentModalFlightRow[81] = payload.supNameInput;
+      }
+
+      const dutyCanvas = document.getElementById('edit_dutySignature');
+      if (dutyCanvas) {
+        const url = dutyCanvas.toDataURL('image/png');
+        const dispImg = document.getElementById('disp_dutySignature');
+        dispImg.src = url;
+        dispImg.style.display = "block";
+        document.getElementById('disp_dutySignature_text').style.display = "none";
+      }
+
+      const supCanvas = document.getElementById('edit_supSignature');
+      if (supCanvas) {
+        const url = supCanvas.toDataURL('image/png');
+        const dispImg = document.getElementById('disp_supSignature');
+        dispImg.src = url;
+        dispImg.style.display = "block";
+        document.getElementById('disp_supSignature_text').style.display = "none";
+      }
+
+      const editSupName = document.getElementById('edit_supNameInput');
+      const dispSupName = document.getElementById('disp_supNameInput');
+      if (editSupName && dispSupName) {
+        dispSupName.innerText = editSupName.value.trim() || "Ghi rõ Họ và Tên";
+      }
+
+      FORM_EDIT_FIELDS.forEach(id => {
+        if (id !== 'supNameInput') {
+          const dispEl = document.getElementById(`disp_${id}`);
+          const editEl = document.getElementById(`edit_${id}`);
+          if (dispEl && editEl) {
+            const newVal = editEl.value.trim();
+            dispEl.innerText = newVal;
+            dispEl.style.color = (newVal && newVal.toUpperCase() !== "NIL") ? "#28a745" : "#000000";
+          }
+        }
+      });
+
+      cancelMainEdit();
+      alert("Đã cập nhật toàn bộ thông tin Form thành công!");
     } else {
-      alert("Lỗi xuất CAAV: " + (res.error || "Không lấy được liên kết tải file."));
+      alert("Lỗi từ server: " + data.message);
     }
   })
   .catch(err => {
-    if (loading) loading.style.display = "none";
-    alert("Có lỗi kết nối: " + err.message);
+    btnSave.disabled = false;
+    btnSave.innerText = "Save Form";
+    alert("Lỗi kết nối server: " + (err.message || err));
   });
 }
+
+// =========================================================================
+// HÀM XUẤT FORM RA PDF CHUẨN TRÊN 1 TRANG A4 (THU GỌN FONT & XÓA VIỀN CHỮ KÝ)
+// =========================================================================
+function exportBMToPDF() {
+  const modalBody = document.getElementById("bmModalBody");
+  if (!modalBody) return;
+
+  // Tạo một bản sao cloned để ẩn đi các nút bấm
+  const clone = modalBody.cloneNode(true);
+
+  // Xóa nhóm nút điều hướng top right trong clone
+  const btnGroup = clone.querySelector('div[style*="justify-content: flex-end"]');
+  if (btnGroup) btnGroup.remove();
+
+  // Xóa các input/textarea và nút bấm ký trong clone
+  clone.querySelectorAll('input, textarea, button').forEach(el => el.remove());
+
+  // XÓA VIỀN ĐỨT NÉT (DASHED BORDER) Ở KHUNG CHỮ KÝ KHI XUẤT PDF
+  clone.querySelectorAll('div[style*="border: 1px dashed"]').forEach(el => {
+    el.style.border = "none";
+    el.style.background = "transparent";
+  });
+
+  // Đảm bảo hiển thị chữ ký dưới dạng ảnh trong bản in
+  const dutyImg = clone.querySelector('#disp_dutySignature');
+  const dutyCanvas = document.getElementById('edit_dutySignature');
+  if (dutyCanvas && dutyImg) {
+    const dataUrl = dutyCanvas.toDataURL('image/png');
+    if (dataUrl && dataUrl !== "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAB2CAYAAAB2bM6iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAXSURBVHheI3tX38AAAAABJRU5ErkJggg==") {
+      dutyImg.src = dataUrl;
+      dutyImg.style.display = "block";
+      const textNoSign = clone.querySelector('#disp_dutySignature_text');
+      if (textNoSign) textNoSign.style.display = "none";
+    }
+  }
+
+  const supImg = clone.querySelector('#disp_supSignature');
+  const supCanvas = document.getElementById('edit_supSignature');
+  if (supCanvas && supImg) {
+    const dataUrl = supCanvas.toDataURL('image/png');
+    if (dataUrl && dataUrl !== "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAB2CAYAAAB2bM6iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAXSURBVHheI3tX38AAAAABJRU5ErkJggg==") {
+      supImg.src = dataUrl;
+      supImg.style.display = "block";
+      const textNoSign = clone.querySelector('#disp_supSignature_text');
+      if (textNoSign) textNoSign.style.display = "none";
+    }
+  }
+
+  // Chuyển màu chữ đen thuần túy cho bản in chuyên nghiệp
+  clone.querySelectorAll('span, td, th').forEach(el => {
+    el.style.color = "#000000";
+  });
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>BM-CNVN-043A Export</title>
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 6mm 10mm; /* Thu hẹp lề trang giấy để form vừa vặn tuyệt đối */
+        }
+        body {
+          font-family: "Times New Roman", Times, serif;
+          font-size: 9.5pt; /* Thu nhỏ cỡ chữ tổng thể một chút */
+          color: #000;
+          background: #fff;
+          margin: 0;
+          padding: 0;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 3px;
+        }
+        th, td {
+          border: 1px solid #000 !important;
+          padding: 2px 5px !important; /* Thu hẹp khoảng cách trong ô bảng */
+          font-size: 9pt !important;   /* Thu nhỏ cỡ chữ trong bảng cho gọn */
+        }
+        th {
+          background-color: #f2f2f2 !important;
+          -webkit-print-color-adjust: exact;
+        }
+        img {
+          max-height: 50px;
+          object-fit: contain;
+        }
+        @media print {
+          body { -webkit-print-color-adjust: exact; }
+        }
+      </style>
+    </head>
+    <body>
+      ${clone.innerHTML}
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+}
+
+// Khai báo phạm vi toàn cục
+window.openBMForm = openBMForm;
+window.closeBMModal = closeBMModal;
+window.enableMainEdit = enableMainEdit;
+window.cancelMainEdit = cancelMainEdit;
+window.saveMainForm = saveMainForm;
+window.clearSignatureCanvas = clearSignatureCanvas;
+window.exportBMToPDF = exportBMToPDF;
 </script>
 <script>
 // Hàm tính tổng ngày công trong tháng hiện tại từ bảng #rosterTable
@@ -8426,7 +8797,6 @@ document.addEventListener("DOMContentLoaded", loadOSPOTPData);
   <div class="bm-modal-content">
     <div class="bm-header">
       <h3 style="margin: 0; font-size: 15px;">Mã số: BM-CNVN-043A | Lần ban hành: 02</h3>
-      <button type="button" onclick="closeBMModal()" style="background:#dc3545; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">✕ Đóng</button>
     </div>
     <div class="bm-body" id="bmModalBody">
       <!-- Nội dung bảng sẽ được điền tự động bằng JavaScript -->
