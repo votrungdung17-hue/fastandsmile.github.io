@@ -4108,19 +4108,22 @@ function openDetailModal(row) {
 
       <!-- KHU VỰC NÚT ĐIỀU HƯỚNG TẬP TRUNG TẠI CHÂN MODAL -->
 
-      <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
-        <!-- Nút Edit ban đầu -->
-	<button type="button" class="btn-row-action btn-row-bm" onclick="openBMForm('${flightId}')">BM_CNVN_043A</button>
-        <button type="button" id="btn-main-edit" class="btn-row-action btn-row-edit" onclick="enableGlobalEdit('${flightId}')">✏️ Edit</button>
-	
+     <!-- KHU VỰC NÚT ĐIỀU HƯỚNG TẬP TRUNG TẠI CHÂN MODAL -->
 
-        <!-- Nút Save và Cancel (Ẩn mặc định) -->
-        <button type="button" id="btn-main-save" class="btn-row-action btn-row-save" style="display:none;" onclick="saveAllDetails('${flightId}', event)">💾 Save</button>
-        <button type="button" id="btn-main-cancel" class="btn-row-action btn-row-cancel" style="display:none;" onclick="cancelGlobalEdit()">❌ Cancel</button>
+<div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+  <!-- Hai nút gọi biểu mẫu đi và đến nằm liền kề nhau -->
+  <button type="button" class="btn-row-action btn-row-bm" onclick="openBMForm('${flightId}')">BM-CNVN-043A</button>
+  <button type="button" class="btn-row-action btn-row-bm" onclick="openBMArrForm('${flightId}')" style="background-color: #17a2b8; color: white;">BM-CNVN-043B</button>
+  
+  <button type="button" id="btn-main-edit" class="btn-row-action btn-row-edit" onclick="enableGlobalEdit('${flightId}')">✏️ Edit</button>
 
-        <!-- Nút Đóng Modal -->
-        <button type="button" class="btn-row-action btn-row-cancel" style="background-color: #6c757d; color: white;" onclick="closeDetailModal()">🚪 Đóng</button>
-      </div>
+  <!-- Nút Save và Cancel (Ẩn mặc định) -->
+  <button type="button" id="btn-main-save" class="btn-row-action btn-row-save" style="display:none;" onclick="saveAllDetails('${flightId}', event)">💾 Save</button>
+  <button type="button" id="btn-main-cancel" class="btn-row-action btn-row-cancel" style="display:none;" onclick="cancelGlobalEdit()">❌ Cancel</button>
+
+  <!-- Nút Đóng Modal -->
+  <button type="button" class="btn-row-action btn-row-cancel" style="background-color: #6c757d; color: white;" onclick="closeDetailModal()">🚪 Đóng</button>
+</div>
     `;
 
     modal.style.setProperty("display", "flex", "important");
@@ -7202,6 +7205,486 @@ function exportDReport() {
 }
 </script>
 <script>
+// Danh sách định nghĩa các trường dữ liệu có thể chỉnh sửa cho Form Chuyến Đến (BM-CNVN-043B)
+const FORM_ARR_EDIT_FIELDS = [
+  'ibBagArr', 'parkingConveyor', 'vipCipBagArr',
+  'spclUmArr', 'spclWchArr', 'spclOtherArr',
+  'spclAvihArr', 'spclHumArr', 'spclBagOtherArr',
+  'suppInfoArr', 'afterFltSummaryArr', 'noteArr',
+  'supNameInputArr', 'paxOnboardedStr'
+];
+
+let isArrDrawing = false;
+
+function openBMArrForm(flightId) {
+  let row = typeof currentModalFlightRow !== 'undefined' ? currentModalFlightRow : null;
+
+  if (!row && typeof globalFlightsData !== 'undefined' && Array.isArray(globalFlightsData)) {
+    row = globalFlightsData.find(r => String(r[0]) === String(flightId)) || globalFlightsData[0];
+  }
+
+  // Khai báo giá trị mặc định
+  let arrFlight = "NIL";
+  let formattedDate = "NIL";
+  let route = "NIL";
+  let staEta = "00:00/00:01";
+  let regCfg = "NIL";
+  let dutyOfficer = "";
+  let supPvcb = "Ghi rõ Họ và Tên";
+
+  // Cờ kiểm tra thay đổi màu chữ
+  let isRouteChanged = false;
+  let isStaChanged = false;
+  let isRegCfgChanged = false;
+  let isPaxChanged = false;
+
+  // Lấy dữ liệu các trường Form chi tiết từ mảng row (Nếu có)
+  const valIbBag       = (row && row[82] !== undefined && row[82] !== "") ? String(row[82]).trim() : "NIL";
+  const valParkingConv = (row && row[83] !== undefined && row[83] !== "") ? String(row[83]).trim() : "NIL";
+  const valVipCipBag   = (row && row[84] !== undefined && row[84] !== "") ? String(row[84]).trim() : "NIL";
+
+  const valUm          = (row && row[85] !== undefined && row[85] !== "") ? String(row[85]).trim() : "NIL";
+  const valWch         = (row && row[86] !== undefined && row[86] !== "") ? String(row[86]).trim() : "NIL";
+  const valSpclOther   = (row && row[87] !== undefined && row[87] !== "") ? String(row[87]).trim() : "NIL";
+
+  const valAvih        = (row && row[88] !== undefined && row[88] !== "") ? String(row[88]).trim() : "NIL";
+  const valHum         = (row && row[89] !== undefined && row[89] !== "") ? String(row[89]).trim() : "NIL";
+  const valBagOther    = (row && row[90] !== undefined && row[90] !== "") ? String(row[90]).trim() : "NIL";
+
+  const valSuppInfo    = (row && row[91] !== undefined && row[91] !== "") ? String(row[91]).trim() : "NIL";
+  const valAfterSummary= (row && row[92] !== undefined && row[92] !== "") ? String(row[92]).trim() : "NIL";
+  const valNote        = (row && row[93] !== undefined && row[93] !== "") ? String(row[93]).trim() : "NIL";
+
+  const valSupName     = (row && row[94] !== undefined && row[94] !== "") ? String(row[94]).trim() : supPvcb;
+  let paxOnboardedStr  = (row && row[95] !== undefined && row[95] !== "") ? String(row[95]).trim() : "NIL";
+
+  const getFieldColor = (val) => (val && val.toUpperCase() !== "NIL") ? "#28a745" : "#000000";
+
+  const renderCell = (fieldId, val, isTextarea = false) => {
+    const color = getFieldColor(val);
+    if (isTextarea) {
+      return `
+        <span id="disp_${fieldId}" style="white-space: pre-wrap; font-weight: bold; color: ${color};">${val}</span>
+        <textarea id="edit_${fieldId}" class="bm-edit-input" style="display: none; width: 98%; height: 50px; font-size: 11px; font-family: Arial, sans-serif;">${val}</textarea>
+      `;
+    }
+    return `
+      <span id="disp_${fieldId}" style="font-weight: bold; color: ${color};">${val}</span>
+      <input type="text" id="edit_${fieldId}" class="bm-edit-input" value="${val}" style="display: none; width: 95%; font-size: 11px; font-weight: bold; padding: 2px 4px;" />
+    `;
+  };
+
+  if (row) {
+    const rawArr = (row[3] || "").toUpperCase() || "NIL";
+    arrFlight = rawArr;
+    if (rawArr !== "NIL") isRouteChanged = true;
+
+    let rawDate = row[1] ? String(row[1]).slice(0, 10) : "";
+    if (rawDate) {
+      const parts = rawDate.split("-");
+      if (parts.length === 3) {
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const mText = months[parseInt(parts[1], 10) - 1] || "SEP";
+        formattedDate = `${parts[2]}${mText}${parts[0]}`;
+      }
+    }
+
+    const fromPort = (row[4] || "").toUpperCase() || "SGN";
+    const toPort = "PQC";
+    route = `${fromPort}-${toPort}`;
+
+    // Hàm phụ trợ xử lý chuẩn hóa thời gian an toàn không bị mất số 0
+    const parseFlightTime = (rawVal) => {
+      if (rawVal === undefined || rawVal === null || rawVal === "") return "";
+      
+      if (rawVal instanceof Date) {
+        const h = String(rawVal.getHours()).padStart(2, '0');
+        const m = String(rawVal.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+      }
+
+      let str = String(rawVal).trim();
+      
+      if (/^\d{3,4}$/.test(str)) {
+        str = str.padStart(4, '0');
+        return `${str.substring(0, 2)}:${str.substring(2, 4)}`;
+      }
+      
+      if (str.includes(':')) {
+        const parts = str.split(':');
+        if (parts.length >= 2) {
+          return `${parts[0].trim().padStart(2, '0')}:${parts[1].trim().padStart(2, '0')}`;
+        }
+      }
+
+      return str;
+    };
+
+    const staVal = parseFlightTime(row[5]);
+    const etaVal = parseFlightTime(row[6]);
+    
+    if (staVal || etaVal) {
+      staEta = `${staVal || '---'}/${etaVal || '---'}`;
+      isStaChanged = true;
+    }
+
+    const acReg = (row[2] || "").toUpperCase();
+    const rawConfig = String(row[25] || "");
+    const prefix3 = rawConfig.substring(0, 3);
+    
+    let configJValue = 0, configWValue = 0, configYValue = 0;
+
+    if (prefix3 === "203") { configJValue = 8; configWValue = 18; configYValue = 177; }
+    else if (prefix3 === "184") { configJValue = 16; configWValue = 18; configYValue = 150; }
+    else if (prefix3 === "178") { configJValue = 16; configWValue = 12; configYValue = 150; }
+    else if (prefix3 === "209") { configJValue = 8; configWValue = 18; configYValue = 183; }
+    else if (prefix3 === "186") { configJValue = 0; configWValue = 18; configYValue = 168; }
+    else if (prefix3 === "180") { configJValue = 0; configWValue = 18; configYValue = 162; }
+    else { configJValue = rawConfig; }
+
+    let formattedConfig = (configJValue !== rawConfig) ? `${configJValue}/${configWValue}/${configYValue}` : rawConfig;
+    if (acReg || formattedConfig) {
+      regCfg = `${acReg} ${formattedConfig}`.trim();
+    }
+    if (regCfg !== "NIL") isRegCfgChanged = true;
+
+    dutyOfficer = row[54] || (typeof selectedRep !== 'undefined' ? selectedRep : "Lý Minh Sang");
+  }
+
+  const fltDtRoute = `${arrFlight}/${formattedDate}/${route}`;
+
+  const colorRoute = isRouteChanged ? "#28a745" : "#000000";
+  const colorSta = isStaChanged ? "#28a745" : "#000000";
+  const colorReg = isRegCfgChanged ? "#28a745" : "#000000";
+
+  const modalBody = document.getElementById("bmModalBody");
+  if (!modalBody) return;
+
+  modalBody.innerHTML = `
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: Arial, sans-serif;">
+      <div>
+        <div style="font-weight: bold; font-size: 13px;">TCT HÀNG KHÔNG VIỆT NAM</div>
+        <div style="font-weight: bold; font-size: 13px;">CHI NHÁNH KHU VỰC VIỆT NAM</div>
+      </div>
+      <div style="text-align: right; font-size: 11px;">
+        <div style="margin-bottom: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 4px;">
+          <button type="button" id="btnMainPdf" onclick="exportBMArrToPDF()" style="padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #17a2b8; color: white; border: none; border-radius: 3px;">📄 Xuất PDF</button>
+          
+          <button type="button" id="btnMainEdit" onclick="enableMainArrEdit()" style="padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 3px;">Edit Form</button>
+          <button type="button" id="btnMainSave" onclick="saveMainArrForm('${flightId}')" style="display: none; padding: 3px 8px; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 3px;">Save Form</button>
+          <button type="button" id="btnMainCancel" onclick="cancelMainArrEdit()" style="display: none; padding: 3px 6px; font-size: 11px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 3px;">✕</button>
+          <button type="button" onclick="closeBMModal()" style="padding: 3px 8px; font-size: 11px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 3px; margin-left: 3px;">✕ Đóng</button>
+        </div>
+        <div><span style="color: red; font-style: italic;">Mã số:</span> <b>BM-CNVN-043b</b></div>
+        <div><span style="color: red; font-style: italic;">Lần ban hành:</span> <b>01</b></div>
+      </div>
+    </div>
+
+    <div style="text-align: center; font-weight: bold; margin: 15px 0; font-size: 14px; text-decoration: underline;">
+      THÔNG TIN CHUYẾN BAY ĐẾN
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif;">
+      <thead>
+        <tr>
+          <th style="border: 1px solid #000; padding: 5px; width: 35%; text-align: center; background: #f2f2f2;" colspan="2">ARRIVAL ITEMS</th>
+          <th style="border: 1px solid #000; padding: 5px; text-align: center; background: #f2f2f2;">DETAIL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STA/ETA</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorSta};">${staEta}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>PAX ONBOARDED</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('paxOnboardedStr', paxOnboardedStr)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>IB/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('ibBagArr', valIbBag)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>PARKING/CONVEYOR</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('parkingConveyor', valParkingConv)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>VIP/CIP/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('vipCipBagArr', valVipCipBag)}</td></tr>
+
+        <!-- SPCL PX -->
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; width: 15%; font-weight: bold;" rowspan="3">SPCL<br>PX</td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left; width: 20%;"><b>UM</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclUmArr', valUm)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>WCH</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclWchArr', valWch)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OTHER</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclOtherArr', valSpclOther)}</td>
+        </tr>
+
+        <!-- SPCL BAG/CGO -->
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold;" rowspan="3">SPCL<br>BAG/CGO</td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>AVIH</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclAvihArr', valAvih)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>HUM</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclHumArr', valHum)}</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;"><b>OTHER</b></td>
+          <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('spclBagOtherArr', valBagOther)}</td>
+        </tr>
+
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>SUPPLEMENT INFO</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('suppInfoArr', valSuppInfo, true)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>AFTER FLT SUMMARY</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('afterFltSummaryArr', valAfterSummary, true)}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('noteArr', valNote, true)}</td></tr>
+      </tbody>
+    </table>
+
+    <!-- CHỮ KÝ -->
+    <div style="display: flex; justify-content: space-between; margin-top: 25px; text-align: center; font-weight: bold; font-size: 12px; font-family: Arial, sans-serif;">
+      
+      <!-- Cột Đại diện VNA -->
+      <div style="width: 40%;">
+        ĐẠI DIỆN VNA<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(trực chuyến)</span><br><br>
+        <div style="border: 1px dashed #999; display: inline-block; background: #fff; position: relative; min-height: 70px;">
+          <img id="disp_dutySignatureArr" style="height: 60px; display: none; margin: 0 auto;" />
+          <span id="disp_dutySignatureArr_text" style="font-size: 10px; color: #888; display: block; padding: 20px 10px;">Chưa có chữ ký</span>
+          <canvas id="edit_dutySignatureArr" width="180" height="70" style="display: none; cursor: crosshair; background: #fafafa;"></canvas>
+        </div>
+        <br>
+        <button type="button" id="btnClearDutySignArr" onclick="clearSignatureCanvas('edit_dutySignatureArr')" style="display: none; font-size: 10px; padding: 1px 5px; margin-top: 2px; cursor: pointer;">Ký lại</button>
+        <br>
+        <b>${dutyOfficer}</b>
+      </div>
+
+      <!-- Cột Sup PVCB -->
+      <div style="width: 40%;">
+        CTY PVMĐ<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Sup pvcb)</span><br><br>
+        <div style="border: 1px dashed #999; display: inline-block; background: #fff; position: relative; min-height: 70px;">
+          <img id="disp_supSignatureArr" style="height: 60px; display: none; margin: 0 auto;" />
+          <span id="disp_supSignatureArr_text" style="font-size: 10px; color: #888; display: block; padding: 20px 10px;">Chưa có chữ ký</span>
+          <canvas id="edit_supSignatureArr" width="180" height="70" style="display: none; cursor: crosshair; background: #fafafa;"></canvas>
+        </div>
+        <br>
+        <button type="button" id="btnClearSupSignArr" onclick="clearSignatureCanvas('edit_supSignatureArr')" style="display: none; font-size: 10px; padding: 1px 5px; margin-top: 2px; cursor: pointer;">Ký lại</button>
+        <br>
+        <span id="disp_supNameInputArr" style="font-weight: bold;">${valSupName}</span>
+        <input type="text" id="edit_supNameInputArr" class="bm-edit-input" value="${valSupName}" placeholder="Ghi rõ Họ và Tên" style="display: none; width: 95%; font-size: 11px; font-weight: bold; padding: 2px 4px; text-align: center; margin: 0 auto;" />
+      </div>
+    </div>
+  `;
+
+  const modal = document.getElementById("bmModal");
+  if (modal) {
+    modal.style.setProperty("display", "flex", "important");
+  }
+}
+
+// Bật / Tắt chế độ chỉnh sửa Form Đến
+function enableMainArrEdit() {
+  FORM_ARR_EDIT_FIELDS.forEach(id => {
+    const dispEl = document.getElementById(`disp_${id}`);
+    const editEl = document.getElementById(`edit_${id}`);
+    if (dispEl) dispEl.style.display = "none";
+    if (editEl) editEl.style.display = "block";
+  });
+
+  document.getElementById('disp_dutySignatureArr').style.display = 'none';
+  document.getElementById('disp_dutySignatureArr_text').style.display = 'none';
+  document.getElementById('edit_dutySignatureArr').style.display = 'block';
+  document.getElementById('btnClearDutySignArr').style.display = 'inline-block';
+  initSignaturePad('edit_dutySignatureArr');
+
+  document.getElementById('disp_supSignatureArr').style.display = 'none';
+  document.getElementById('disp_supSignatureArr_text').style.display = 'none';
+  document.getElementById('edit_supSignatureArr').style.display = 'block';
+  document.getElementById('btnClearSupSignArr').style.display = 'inline-block';
+  initSignaturePad('edit_supSignatureArr');
+
+  document.getElementById("btnMainEdit").style.display = "none";
+  document.getElementById("btnMainSave").style.display = "inline-block";
+  document.getElementById("btnMainCancel").style.display = "inline-block";
+}
+
+function cancelMainArrEdit() {
+  FORM_ARR_EDIT_FIELDS.forEach(id => {
+    const dispEl = document.getElementById(`disp_${id}`);
+    const editEl = document.getElementById(`edit_${id}`);
+    if (dispEl) dispEl.style.display = "inline";
+    if (editEl) editEl.style.display = "none";
+  });
+
+  document.getElementById('edit_dutySignatureArr').style.display = 'none';
+  document.getElementById('btnClearDutySignArr').style.display = 'none';
+  document.getElementById('edit_supSignatureArr').style.display = 'none';
+  document.getElementById('btnClearSupSignArr').style.display = 'none';
+
+  document.getElementById("btnMainEdit").style.display = "inline-block";
+  document.getElementById("btnMainSave").style.display = "none";
+  document.getElementById("btnMainCancel").style.display = "none";
+}
+
+// Lưu dữ liệu Form Đến
+function saveMainArrForm(flightId) {
+  const btnSave = document.getElementById("btnMainSave");
+  btnSave.disabled = true;
+  btnSave.innerText = "Saving...";
+
+  const payload = {
+    action: "updateArrFormDetails",
+    flightId: flightId
+  };
+
+  FORM_ARR_EDIT_FIELDS.forEach(id => {
+    const editEl = document.getElementById(`edit_${id}`);
+    if (editEl) {
+      payload[id] = editEl.value.trim();
+    }
+  });
+
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    btnSave.disabled = false;
+    btnSave.innerText = "Save Form";
+
+    if (data.status === "success") {
+      const dutyCanvas = document.getElementById('edit_dutySignatureArr');
+      if (dutyCanvas) {
+        const url = dutyCanvas.toDataURL('image/png');
+        const dispImg = document.getElementById('disp_dutySignatureArr');
+        dispImg.src = url;
+        dispImg.style.display = "block";
+        document.getElementById('disp_dutySignatureArr_text').style.display = "none";
+      }
+
+      const supCanvas = document.getElementById('edit_supSignatureArr');
+      if (supCanvas) {
+        const url = supCanvas.toDataURL('image/png');
+        const dispImg = document.getElementById('disp_supSignatureArr');
+        dispImg.src = url;
+        dispImg.style.display = "block";
+        document.getElementById('disp_supSignatureArr_text').style.display = "none";
+      }
+
+      FORM_ARR_EDIT_FIELDS.forEach(id => {
+        const dispEl = document.getElementById(`disp_${id}`);
+        const editEl = document.getElementById(`edit_${id}`);
+        if (dispEl && editEl) {
+          const newVal = editEl.value.trim();
+          dispEl.innerText = newVal;
+          dispEl.style.color = (newVal && newVal.toUpperCase() !== "NIL") ? "#28a745" : "#000000";
+        }
+      });
+
+      cancelMainArrEdit();
+      alert("Đã cập nhật biểu mẫu Chuyến đến (BM-CNVN-043b) thành công!");
+    } else {
+      alert("Lỗi từ server: " + data.message);
+    }
+  })
+  .catch(err => {
+    btnSave.disabled = false;
+    btnSave.innerText = "Save Form";
+    alert("Lỗi kết nối server: " + (err.message || err));
+  });
+}
+
+// Xuất Form Đến ra PDF
+function exportBMArrToPDF() {
+  const modalBody = document.getElementById("bmModalBody");
+  if (!modalBody) return;
+
+  const clone = modalBody.cloneNode(true);
+
+  const btnGroup = clone.querySelector('div[style*="justify-content: flex-end"]');
+  if (btnGroup) btnGroup.remove();
+
+  clone.querySelectorAll('input, textarea, button').forEach(el => el.remove());
+
+  clone.querySelectorAll('div[style*="border: 1px dashed"]').forEach(el => {
+    el.style.border = "none";
+    el.style.background = "transparent";
+  });
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>BM-CNVN-043B Export</title>
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 6mm 10mm;
+        }
+        body {
+          font-family: "Times New Roman", Times, serif;
+          font-size: 10pt;
+          color: #000 !important;
+          background: #fff;
+          margin: 0;
+          padding: 0;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 5px;
+        }
+        th, td {
+          border: 1px solid #000 !important;
+          padding: 4px 6px !important;
+          font-size: 9.5pt !important;
+          color: #000 !important;
+        }
+        th {
+          background-color: #f2f2f2 !important;
+          -webkit-print-color-adjust: exact;
+        }
+        /* Ép tất cả các thẻ span, div hoặc chữ có màu xanh chuyển về màu đen khi xuất PDF */
+        span, b, td, div {
+          color: #000 !important;
+        }
+        img {
+          max-height: 50px;
+          object-fit: contain;
+        }
+        @media print {
+          body { 
+            -webkit-print-color-adjust: exact; 
+            color: #000 !important;
+          }
+          span, b, td, div {
+            color: #000 !important;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${clone.innerHTML}
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+}
+
+// Đăng ký các hàm toàn cục
+window.openBMArrForm = openBMArrForm;
+window.enableMainArrEdit = enableMainArrEdit;
+window.cancelMainArrEdit = cancelMainArrEdit;
+window.saveMainArrForm = saveMainArrForm;
+window.exportBMArrToPDF = exportBMArrToPDF;
+</script>
+<script>
 // Danh sách định nghĩa các trường dữ liệu có thể chỉnh sửa
 const FORM_EDIT_FIELDS = [
   'gateParking', 'ifeDefect', 'ob', 'ibBag', 'idAdFoc', 'glpSkyteam',
@@ -7311,14 +7794,41 @@ function openBMForm(flightId) {
     const toPort = (row[10] || "").toUpperCase() || "SGN";
     route = `${fromPort}-${toPort}`;
     if (route !== "PQC-SGN") isRouteChanged = true;
-
-    const stdVal = typeof formatTimeForInput === "function" ? formatTimeForInput(row[11]) : (row[11] || "");
-    const etdVal = typeof formatTimeForInput === "function" ? formatTimeForInput(row[12]) : (row[12] || "");
-    if (stdVal || etdVal) {
-      stdEtd = `${stdVal || '---'}/${etdVal || '---'}`;
+const parseFlightTime = (rawVal) => {
+    if (rawVal === undefined || rawVal === null || rawVal === "") return "";
+    
+    // Nếu là dạng đối tượng Date của JavaScript / Google Sheets
+    if (rawVal instanceof Date) {
+      const h = String(rawVal.getHours()).padStart(2, '0');
+      const m = String(rawVal.getMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
     }
-    if (stdEtd !== "09:35/09:50") isStdChanged = true;
 
+    let str = String(rawVal).trim();
+    
+    // Nếu thời gian ở dạng số nguyên hoặc chuỗi 4 số sát nhau (VD: "920", "0920", 920)
+    if (/^\d{3,4}$/.test(str)) {
+      str = str.padStart(4, '0');
+      return `${str.substring(0, 2)}:${str.substring(2, 4)}`;
+    }
+    
+    // Nếu đã có sẵn dấu hai chấm (VD: "9:20", "09:20")
+    if (str.includes(':')) {
+      const parts = str.split(':');
+      if (parts.length >= 2) {
+        return `${parts[0].trim().padStart(2, '0')}:${parts[1].trim().padStart(2, '0')}`;
+      }
+    }
+
+    return str;
+  };
+
+   const stdVal = parseFlightTime(row[11]);
+  const etdVal = parseFlightTime(row[12]);
+  if (stdVal || etdVal) {
+    stdEtd = `${stdVal || '---'}/${etdVal || '---'}`;
+  }
+  if (stdEtd !== "09:35/09:50") isStdChanged = true;
     const acReg = (row[2] || "").toUpperCase();
     const rawConfig = String(row[25] || "");
     const prefix3 = rawConfig.substring(0, 3);
