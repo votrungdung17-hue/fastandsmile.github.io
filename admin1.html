@@ -7690,7 +7690,7 @@ const FORM_EDIT_FIELDS = [
   'gateParking', 'ifeDefect', 'ob', 'ibBag', 'idAdFoc', 'glpSkyteam',
   'spclUm', 'spclWch', 'spclSc', 'spclSr', 'spclOther',
   'spclEmda', 'spclBagOther', 'paidSeat', 'irregTicket', 'suppInfo',
-  'gosho', 'nosho', 'norec', 'invol', 'offld', 'supNameInput'
+  'gosho', 'nosho', 'norec', 'invol', 'offld', 'note', 'supNameInput'
 ];
 
 let isDrawing = false;
@@ -7757,6 +7757,7 @@ function openBMForm(flightId) {
   const valOffld      = (row && row[80] !== undefined && row[80] !== "") ? String(row[80]).trim() : "NIL";
 
   const valSupName    = (row && row[81] !== undefined && row[81] !== "") ? String(row[81]).trim() : supPvcb;
+  const valNote	      = (row && row[96] !== undefined && row[96] !== "") ? String(row[96]).trim() : "NIL";
 
   const getFieldColor = (val) => (val && val.toUpperCase() !== "NIL") ? "#28a745" : "#000000";
 
@@ -7915,20 +7916,8 @@ const parseFlightTime = (rawVal) => {
       isBagCargoChanged = false;
     }
 
-    const note46 = row[46] !== undefined && row[46] !== "" ? String(row[46]).trim() : "";
-    const note49 = row[49] !== undefined && row[49] !== "" ? String(row[49]).trim() : "";
-
-    if (note46 !== "" || note49 !== "") {
-      const formatted46 = note46 ? `UPG: ${note46}` : "";
-      const formatted49 = note49 ? `VIP⭐CIP: ${note49}` : "";
-
-      if (formatted46 && formatted49) {
-        noteStr = `${formatted46} / ${formatted49}`;
-      } else {
-        noteStr = formatted46 || formatted49;
-      }
-      isNoteChanged = true;
-    }
+    noteStr = valNote;
+    isNoteChanged = (valNote && valNote.toUpperCase() !== "NIL");
 
     dutyOfficer = row[54] || (typeof selectedRep !== 'undefined' ? selectedRep : "Lý Minh Sang");
   }
@@ -8043,7 +8032,10 @@ const parseFlightTime = (rawVal) => {
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOREC</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('norec', valNorec)}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>INVOL</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('invol', valInvol)}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>OFFLD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('offld', valOffld)}</td></tr>
-        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorNote};">${noteStr}</td></tr>
+        <tr>
+  <td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>NOTE</b></td>
+  <td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('note', valNote, true)}</td>
+</tr>
       </tbody>
     </table>
 
@@ -8259,6 +8251,7 @@ function saveMainForm(flightId) {
         currentModalFlightRow[79] = payload.invol;
         currentModalFlightRow[80] = payload.offld;
         currentModalFlightRow[81] = payload.supNameInput;
+	currentModalFlightRow[96] = payload.note;
       }
 
       const dutyCanvas = document.getElementById('edit_dutySignature');
