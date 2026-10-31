@@ -1436,8 +1436,8 @@ function getMondayOfCurrentWeek() {
     ws1.getCell('A6').alignment = { horizontal: 'center' };
 
     const headerRow1 = ws1.addRow([
-        "Ngày", "Thứ", "HÀNH CHÍNH", "CA 1\n05:30-13:30", 
-        "CA 2\n09:30-17:30", "CA 3\n17:30-01:30", "OFF Tuần", 
+        "Ngày", "Thứ", "HÀNH CHÍNH", "CA 1\n06:00-14:00", 
+        "CA 2\n14:00-22:00", "CA 3\n22:00-06:00", "OFF Tuần", 
         "Nghỉ Phép,\nTS, Đi Học…", "Ghi Chú", "", "", "", "", ""
     ]);
     const headerRow2 = ws1.addRow([]);
@@ -1491,11 +1491,11 @@ function getMondayOfCurrentWeek() {
                     leaveList.push(`${shortName}(${shiftCode})`);
                 } else if (["HC", "C043"].includes(shiftCode)) {
                     hcList.push(shortName);
-                } else if (["C160", "C011", "CA1", "C1", "CA 1"].includes(shiftCode)) {
+                } else if (["C026", "C011", "CA1", "C1", "CA 1"].includes(shiftCode)) {
                     ca1List.push(shortName);
-                } else if (["C196", "C021", "CA2", "C2", "CA 2"].includes(shiftCode)) {
+                } else if (["C009", "C021", "CA2", "C2", "CA 2"].includes(shiftCode)) {
                     ca2List.push(shortName);
-                } else if (["C015", "C031", "CA3", "C3", "CA 3"].includes(shiftCode)) {
+                } else if (["C023", "C031", "CA3", "C3", "CA 3"].includes(shiftCode)) {
                     ca3List.push(shortName);
                 } else {
                     ca1List.push(shortName);
@@ -1601,9 +1601,9 @@ function getMondayOfCurrentWeek() {
     staffList.forEach((staff, index) => {
         let caLV = "", maCa = "", thoiGian = "";
         if (index === 0) { caLV = "Ca HC"; maCa = "C043"; thoiGian = "08h00-16h00"; }
-        else if (index === 1) { caLV = "CA 1"; maCa = "C160"; thoiGian = "05:30-13:30"; }
-        else if (index === 2) { caLV = "CA 2"; maCa = "C196"; thoiGian = "09:30-17:30"; }
-        else if (index === 3) { caLV = "CA 3"; maCa = "C015"; thoiGian = "17:30-01:30"; }
+        else if (index === 1) { caLV = "CA 1"; maCa = "C026"; thoiGian = "06:00-14:00"; }
+        else if (index === 2) { caLV = "CA 2"; maCa = "C009"; thoiGian = "14:00-22:00"; }
+        else if (index === 3) { caLV = "CA 3"; maCa = "C023"; thoiGian = "22:00-06:00"; }
 
         const row = ws1.addRow([
             index + 1, 
