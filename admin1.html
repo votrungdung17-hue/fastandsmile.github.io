@@ -7321,7 +7321,7 @@ function openBMArrForm(flightId) {
     };
 
     const staVal = parseFlightTime(row[5]);
-    const etaVal = parseFlightTime(row[6]);
+    const etaVal = parseFlightTime(row[8]);
     
     if (staVal || etaVal) {
       staEta = `${staVal || '---'}/${etaVal || '---'}`;
@@ -7376,7 +7376,7 @@ function openBMArrForm(flightId) {
           <button type="button" id="btnMainCancel" onclick="cancelMainArrEdit()" style="display: none; padding: 3px 6px; font-size: 11px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 3px;">✕</button>
           <button type="button" onclick="closeBMModal()" style="padding: 3px 8px; font-size: 11px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 3px; margin-left: 3px;">✕ Đóng</button>
         </div>
-        <div><span style="color: red; font-style: italic;">Mã số:</span> <b>BM-CNVN-043b</b></div>
+        <div><span style="color: red; font-style: italic;">Mã số:</span> <b>BM-CNVN-043B</b></div>
         <div><span style="color: red; font-style: italic;">Lần ban hành:</span> <b>01</b></div>
       </div>
     </div>
@@ -7394,7 +7394,7 @@ function openBMArrForm(flightId) {
       </thead>
       <tbody>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
-        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STA/ETA</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorSta};">${staEta}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STA/ATA</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorSta};">${staEta}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>PAX ONBOARDED</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('paxOnboardedStr', paxOnboardedStr)}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>IB/BAG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('ibBagArr', valIbBag)}</td></tr>
@@ -7825,7 +7825,7 @@ const parseFlightTime = (rawVal) => {
   };
 
    const stdVal = parseFlightTime(row[11]);
-  const etdVal = parseFlightTime(row[12]);
+  const etdVal = parseFlightTime(row[13]);
   if (stdVal || etdVal) {
     stdEtd = `${stdVal || '---'}/${etdVal || '---'}`;
   }
@@ -7867,7 +7867,7 @@ const parseFlightTime = (rawVal) => {
       mealStr = `${mJ}J ${mW}W ${mY}Y`;
       isMealChanged = true;
     } else {
-      mealStr = "Nil";
+      mealStr = "NIL";
       isMealChanged = false;
     }
 
@@ -7972,7 +7972,7 @@ const parseFlightTime = (rawVal) => {
       </thead>
       <tbody>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>FLT/DT/ROUTE</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorRoute};">${fltDtRoute}</td></tr>
-        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STD/ETD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorStd};">${stdEtd}</td></tr>
+        <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>STD/ATD</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorStd};">${stdEtd}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>REG/CFG</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorReg};">${regCfg}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>GATE/PARKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left;">${renderCell('gateParking', valGate)}</td></tr>
         <tr><td style="border: 1px solid #000; padding: 5px; text-align: left;" colspan="2"><b>BOOKING</b></td><td style="border: 1px solid #000; padding: 5px; text-align: left; font-weight: bold; color: ${colorBooking};">${bookingStr}</td></tr>
