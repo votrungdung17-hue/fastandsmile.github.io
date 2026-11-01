@@ -3595,60 +3595,26 @@ document.addEventListener("DOMContentLoaded", () => {
     btnConfirm.disabled = true;
     btnConfirm.innerHTML = `<span class="spinner"></span> Đang xuất dữ liệu...`;
 
-    let url = API + `?from=${from}&to=${to}&t=${Date.now()}`;
+    // Gọi API Apps Script với action=exportExcel
+    let url = API + `?action=exportExcel&from=${from}&to=${to}&t=${Date.now()}`;
 
     try {
-
       const res = await fetch(url);
       const json = await res.json();
 
-      if (!json.data || json.data.length <= 1) {
-        alert("Không có dữ liệu");
+      if (json.error) {
+        alert("Lỗi từ Server: " + json.error);
         return;
       }
 
-      const rows = json.data.slice(1);
+      if (!json.data || json.data.length <= 1) {
+        alert("Không có dữ liệu trong khoảng thời gian này!");
+        return;
+      }
 
-      const exportData = rows.map(row => ({
-        DATE: formatDateForInput(row[1]),
-        ACREG: row[2],
-        ARR_FLIGHT: row[3],
-        FROM: row[4],
-        STA: formatTimeForInput(row[5]),
-        ETA: formatTimeForInput(row[6]),
-        LANDING: formatTimeForInput(row[7]),
-        ATA: formatTimeForInput(row[8]),
-        DEP_FLIGHT: row[9],
-        TO: row[10],
-        STD: formatTimeForInput(row[11]),
-        ETD: formatTimeForInput(row[12]),
-        ATD: formatTimeForInput(row[13]),
-        FHT: formatTimeForInput(row[14]),
-        PUSHBACK: formatTimeForInput(row[15]),
-        TAKEOFF: formatTimeForInput(row[16]),
-        GT: formatTimeForInput(row[17]),
-        DELAY: row[18],
-        CODE1: row[19],
-        TIME1: row[20],
-        CODE2: row[21],
-        TIME2: row[22],
-        CODE3: row[56],
-        TIME3: row[57],
-        COOR: row[23],
-        WB: row[24],
-        CONFIG: row[25],
-        LOTUS: row[26],
-        MOPLUS: row[27],
-        DETAILS: row[28],
-        ADUL: row[29],
-        CHD: row[30],
-        INF: row[31],
-        TOF: row[32],
-        PAYLOAD: row[33],
-        REP: row[34]
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(exportData);
+      // 🚀 Server đã đóng gói sẵn mảng 2 chiều chuẩn chỉnh (bao gồm tiêu đề và dữ liệu)
+      // Ta đưa thẳng vào SheetJS bằng aoa_to_sheet (Array of Arrays) mà không cần map lại nữa!
+      const ws = XLSX.utils.aoa_to_sheet(json.data);
       const wb = XLSX.utils.book_new();
 
       XLSX.utils.book_append_sheet(wb, ws, "DATA");
@@ -3658,16 +3624,12 @@ document.addEventListener("DOMContentLoaded", () => {
       popup.style.display = "none";
 
     } catch (err) {
-
       console.error(err);
       alert("Lỗi export: " + err.message);
-
     } finally {
-
       // Khôi phục trạng thái nút
       btnConfirm.disabled = false;
       btnConfirm.innerHTML = defaultBtnHTML;
-
     }
 
   };
