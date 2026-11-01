@@ -7204,6 +7204,73 @@ function exportDReport() {
     });
 }
 </script>
+	<script>
+// Hiển thị Popup CAAV (Tự động gán mặc định Từ ngày & Đến ngày = Ngày hiện tại trên Form)
+function showCaavPopup() {
+  const currentDate = document.getElementById("ngay").value || new Date().toISOString().split('T')[0];
+  document.getElementById("caavFromDate").value = currentDate;
+  document.getElementById("caavToDate").value = currentDate;
+  document.getElementById("caavPopup").style.display = "flex";
+}
+
+function closeCaavPopup() {
+  document.getElementById("caavPopup").style.display = "none";
+}
+
+// Gửi Request Xuất CAAV theo khoảng thời gian
+function exportCAAV() {
+  const fromDate = document.getElementById("caavFromDate").value;
+  const toDate = document.getElementById("caavToDate").value;
+  const isVN = document.getElementById("caavVN").checked;
+  const isBL = document.getElementById("caavBL").checked;
+
+  if (!fromDate || !toDate) {
+    alert("Vui lòng chọn đầy đủ 'Từ ngày' và 'Đến ngày'!");
+    return;
+  }
+  
+  if (fromDate > toDate) {
+    alert("'Từ ngày' không được lớn hơn 'Đến ngày'!");
+    return;
+  }
+
+  if (!isVN && !isBL) {
+    alert("Vui lòng chọn ít nhất một hãng (VN hoặc BL)!");
+    return;
+  }
+
+  // Hiển thị Overlay Loading
+  const loading = document.getElementById("loadingOverlay") || document.getElementById("loading");
+  if (loading) loading.style.display = "flex";
+
+  const payload = {
+    action: "exportCAAV",
+    fromDate: fromDate,
+    toDate: toDate,
+    exportVN: isVN,
+    exportBL: isBL
+  };
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (loading) loading.style.display = "none";
+    if (res.status === "success" && res.url) {
+      window.open(res.url, "_blank");
+      closeCaavPopup();
+    } else {
+      alert("Lỗi xuất CAAV: " + (res.error || "Không lấy được liên kết tải file."));
+    }
+  })
+  .catch(err => {
+    if (loading) loading.style.display = "none";
+    alert("Có lỗi kết nối: " + err.message);
+  });
+}
+</script>
 <script>
 // Danh sách định nghĩa các trường dữ liệu có thể chỉnh sửa cho Form Chuyến Đến (BM-CNVN-043B)
 const FORM_ARR_EDIT_FIELDS = [
