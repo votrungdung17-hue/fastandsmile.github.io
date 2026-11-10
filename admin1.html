@@ -2223,7 +2223,7 @@ function upload() {
         <option value="7">Tháng 7</option>
         <option value="8">Tháng 8</option>
         <option value="9">Tháng 9</option>
-        <option value="10" selected>Tháng 10</option>
+        <option value="10">Tháng 10</option>
         <option value="11">Tháng 11</option>
         <option value="12">Tháng 12</option>
       </select>
@@ -2380,7 +2380,20 @@ async function loadConfigMap() {
   }
 
 }
-
+document.addEventListener("DOMContentLoaded", function() {
+  // Lấy tháng hiện tại (getMonth() trả về từ 0-11, nên cần +1)
+  const currentMonth = new Date().getMonth() + 1;
+  
+  const monthSelect = document.getElementById("rosterMonthSelect");
+  if (monthSelect) {
+    monthSelect.value = currentMonth; // Tự động chọn đúng tháng hiện tại
+    
+    // Nếu bạn muốn gọi luôn hàm renderRoster() theo tháng hiện tại:
+    if (typeof renderRoster === "function") {
+      renderRoster();
+    }
+  }
+});
 </script>
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
