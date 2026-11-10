@@ -1775,44 +1775,41 @@ function upload() {
   </button>
     </div>
 
-    <!-- KHUNG HIỂN THỊ BẢNG (KHUNG NÀY SẼ ĐƯỢC CHỤP ẢNH) -->
+    <!-- KHUNG HIỂN THỊ BẢNG VJ -->
     <div id="vjTableCapture">
       <table class="vj-excel-table">
-        <tr class="title-row">
-          <td style="width: 8%;">FROM</td>
-          <td id="lblFrom" style="width: 12%; text-align: left; font-weight: bold;">--</td>
-          <td style="width: 5%;">TO</td>
-          <td id="lblTo" style="width: 12%; text-align: left; font-weight: bold;">--</td>
-          <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; padding: 4px 0;">VIETJET AIR</td>
-        </tr>
-        <tr>
-          <td colspan="5" class="header-arr">ARRIVAL</td>
-          <td colspan="5" class="header-dep">DEPARTURE</td>
-        </tr>
-        <tr class="sub-header">
-          <td>ROUTE</td>
-          <td>CONFIG</td>
-          <td>PAX</td>
-          <td>LF</td>
-          <td>CB</td>
-          <td>ROUTE</td>
-          <td>CONFIG</td>
-          <td>PAX</td>
-          <td>LF</td>
-          <td>CB</td>
-        </tr>
-        <tr>
-          <td>HPH-PQC</td>
-          <td id="vjArrConfig">0</td>
-          <td id="vjArrPax">0</td>
-          <td id="vjArrLF">0%</td>
-          <td id="vjArrCB">0</td>
-          <td>PQC-HPH</td>
-          <td id="vjDepConfig">0</td>
-          <td id="vjDepPax">0</td>
-          <td id="vjDepLF">0%</td>
-          <td id="vjDepCB">0</td>
-        </tr>
+        <thead>
+          <tr class="title-row">
+            <td style="width: 8%;">FROM</td>
+            <td id="lblFrom" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td style="width: 5%;">TO</td>
+            <td id="lblTo" style="width: 12%; text-align: center; border-bottom: 1px solid #000 !important;">--</td>
+            <td colspan="6" style="font-size: 18px; font-weight: bold; text-align: center; font-family: 'Times New Roman', serif;">
+              VIETJET AIR
+            </td>
+          </tr>
+          <tr>
+            <th colspan="5" class="header-arr">ARRIVAL</th>
+            <th colspan="5" class="header-dep">DEPARTURE</th>
+          </tr>
+          <tr class="sub-header">
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+            <th>ROUTE</th>
+            <th>CONFIG</th>
+            <th>PAX</th>
+            <th>LF</th>
+            <th>CB</th>
+          </tr>
+        </thead>
+        <tbody id="vjTableBody">
+          <tr>
+            <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
@@ -6600,7 +6597,7 @@ function take9GSnapshot() {
 }
 </script>
 <script>
-// 1. Định dạng Ngày hiển thị dạng DD-MMM (ví dụ: 28-Jul)
+// 1. Định dạng Ngày hiển thị dạng DD-MMM (ví dụ: 09-Nov)
 function formatDateShort(dateStr) {
   if (!dateStr) return "--";
   const date = new Date(dateStr);
@@ -6609,12 +6606,11 @@ function formatDateShort(dateStr) {
   return `${day}-${months[date.getMonth()]}`;
 }
 
-// 2. Mở Pop-up (Bật tức thì - KHÔNG tự động tải dữ liệu)
+// 2. Mở Pop-up VJ (Mở tức thì - Không tự động tải dữ liệu)
 function openVJModal() {
   document.getElementById("vjModal").style.display = "flex";
   const today = new Date().toISOString().slice(0, 10);
   
-  // Tự động gán ngày mặc định nếu chưa chọn
   if (!document.getElementById("vjFromDate").value) {
     document.getElementById("vjFromDate").value = today;
   }
@@ -6622,35 +6618,32 @@ function openVJModal() {
     document.getElementById("vjToDate").value = today;
   }
 
-  // Cập nhật nhãn ngày lên tiêu đề bảng
+  // Cập nhật nhãn ngày hiển thị
   document.getElementById("lblFrom").innerText = formatDateShort(document.getElementById("vjFromDate").value);
   document.getElementById("lblTo").innerText = formatDateShort(document.getElementById("vjToDate").value);
 
-  // Reset bảng về số 0 ban đầu
+  // Reset bảng về trạng thái chờ an toàn tuyệt đối
   resetVJTable();
-
-  // ❌ ĐÃ BỎ: loadVJData() để tránh bị chờ khi vừa mở popup
 }
 
-// 3. Hàm reset lại dữ liệu trên bảng
-function resetVJTable() {
-  document.getElementById("vjArrConfig").innerText = "0";
-  document.getElementById("vjArrPax").innerText = "0";
-  document.getElementById("vjArrLF").innerText = "0%";
-  document.getElementById("vjArrCB").innerText = "0";
-
-  document.getElementById("vjDepConfig").innerText = "0";
-  document.getElementById("vjDepPax").innerText = "0";
-  document.getElementById("vjDepLF").innerText = "0%";
-  document.getElementById("vjDepCB").innerText = "0";
-}
-
-// 4. Đóng Pop-up
+// 3. Đóng Pop-up VJ
 function closeVJModal() {
   document.getElementById("vjModal").style.display = "none";
 }
 
-// 5. Lấy dữ liệu VJ (Chỉ chạy khi người dùng bấm nút "Xem dữ liệu")
+// 4. Reset lại bảng VJ khi mở Popup (Đã loại bỏ các ID cũ gây lỗi null)
+function resetVJTable() {
+  const tbody = document.getElementById("vjTableBody");
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; color: #777;">Chưa có dữ liệu (Vui lòng chọn ngày và nhấn Xem dữ liệu)</td>
+      </tr>
+    `;
+  }
+}
+
+// 5. Lấy và render toàn bộ các chặng của VJ
 async function loadVJData() {
   const fromDate = document.getElementById("vjFromDate").value;
   const toDate = document.getElementById("vjToDate").value;
@@ -6660,22 +6653,19 @@ async function loadVJData() {
     return;
   }
 
-  // Lấy các phần tử DOM
   const btn = document.getElementById("btnFetchVJ");
   const tableContainer = document.getElementById("vjTableCapture");
+  const tbody = document.getElementById("vjTableBody");
   const originalBtnText = "🔍 Xem dữ liệu";
 
-  // 1. BẬT HIỆU ỨNG ĐANG XỬ LÝ (Loading)
+  // Bật hiệu ứng đang tải
   if (btn) {
     btn.disabled = true;
     btn.classList.add("btn-loading");
     btn.innerHTML = `<span class="spinner-inline"></span> ⏳ Đang tải...`;
   }
-  if (tableContainer) {
-    tableContainer.classList.add("table-loading");
-  }
+  if (tableContainer) tableContainer.classList.add("table-loading");
 
-  // Cập nhật nhãn ngày hiển thị
   document.getElementById("lblFrom").innerText = formatDateShort(fromDate);
   document.getElementById("lblTo").innerText = formatDateShort(toDate);
 
@@ -6687,44 +6677,64 @@ async function loadVJData() {
 
     if (data.error) {
       alert("Lỗi hệ thống: " + data.error);
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: red;">Lỗi: ${data.error}</td></tr>`;
       return;
     }
 
-    const arr = data.arr || { config: 0, pax: 0, cb: 0 };
-    const dep = data.dep || { config: 0, pax: 0, cb: 0 };
+    const arrMap = data.arr || {};
+    const depMap = data.dep || {};
 
-    // Tính Tỷ lệ lấp đầy (Load Factor)
-    const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) : 0;
-    const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) : 0;
+    const stations = Array.from(new Set([...Object.keys(arrMap), ...Object.keys(depMap)]));
+    tbody.innerHTML = "";
 
-    // Cập nhật kết quả lên bảng HTML
-    document.getElementById("vjArrConfig").innerText = arr.config;
-    document.getElementById("vjArrPax").innerText = arr.pax;
-    document.getElementById("vjArrLF").innerText = arrLF + "%";
-    document.getElementById("vjArrCB").innerText = arr.cb;
+    if (stations.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: red;">Không tìm thấy chuyến bay VJ nào trong khoảng thời gian này!</td></tr>`;
+      return;
+    }
 
-    document.getElementById("vjDepConfig").innerText = dep.config;
-    document.getElementById("vjDepPax").innerText = dep.pax;
-    document.getElementById("vjDepLF").innerText = depLF + "%";
-    document.getElementById("vjDepCB").innerText = dep.cb;
+    // Duyệt ghép cặp chặng ARRIVAL và DEPARTURE
+    stations.forEach(st => {
+      const arr = arrMap[st] || { route: `${st}-PQC`, config: 0, pax: 0, cb: 0 };
+      const dep = depMap[st] || { route: `PQC-${st}`, config: 0, pax: 0, cb: 0 };
+
+      const arrLF = arr.config > 0 ? Math.round((arr.pax / arr.config) * 100) + "%" : (arr.cb > 0 ? "#DIV/0!" : "0%");
+      const depLF = dep.config > 0 ? Math.round((dep.pax / dep.config) * 100) + "%" : (dep.cb > 0 ? "#DIV/0!" : "0%");
+
+      const row = `
+        <tr>
+          <!-- ARRIVAL -->
+          <td style="font-weight:bold;">${arr.route}</td>
+          <td style="text-align:right;">${arr.config}</td>
+          <td style="text-align:right;">${arr.pax}</td>
+          <td style="text-align:right;">${arrLF}</td>
+          <td style="text-align:right;">${arr.cb}</td>
+
+          <!-- DEPARTURE -->
+          <td style="font-weight:bold;">${dep.route}</td>
+          <td style="text-align:right;">${dep.config}</td>
+          <td style="text-align:right;">${dep.pax}</td>
+          <td style="text-align:right;">${depLF}</td>
+          <td style="text-align:right;">${dep.cb}</td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML("beforeend", row);
+    });
 
   } catch (err) {
     console.error("Lỗi lấy dữ liệu VJ:", err);
     alert("Không thể kết nối lấy số liệu VJ! ❌");
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: red;">Lỗi kết nối mạng!</td></tr>`;
   } finally {
-    // 2. TẮT HIỆU ỨNG (Trả lại giao diện ban đầu)
     if (btn) {
       btn.disabled = false;
       btn.classList.remove("btn-loading");
       btn.innerHTML = originalBtnText;
     }
-    if (tableContainer) {
-      tableContainer.classList.remove("table-loading");
-    }
+    if (tableContainer) tableContainer.classList.remove("table-loading");
   }
 }
 
-// 6. CHỨC NĂNG SNAPSHOT: Chụp hình bảng và lưu vào Clipboard để Paste (Ctrl+V)
+// 6. CHỨC NĂNG SNAPSHOT VJ: Copy Ảnh vào Clipboard
 function takeVJSnapshot() {
   const target = document.getElementById("vjTableCapture");
 
@@ -6736,13 +6746,11 @@ function takeVJSnapshot() {
   html2canvas(target, { scale: 2 }).then(canvas => {
     canvas.toBlob(blob => {
       try {
-        // Sao chép trực tiếp ảnh vào Clipboard
         const item = new ClipboardItem({ "image/png": blob });
         navigator.clipboard.write([item]).then(() => {
           alert("📸 Đã copy hình ảnh bảng VJ vào Clipboard!\nBạn có thể nhấn Ctrl + V để dán (paste) vào Zalo, Excel, Word...");
         });
       } catch (e) {
-        // Dự phòng nếu trình duyệt chặn Clipboard API -> Tự tải ảnh xuống
         const link = document.createElement('a');
         link.download = `ThongKe_VJ_${document.getElementById("vjFromDate").value}.png`;
         link.href = canvas.toDataURL();
