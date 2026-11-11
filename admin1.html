@@ -2392,6 +2392,36 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 </script>
+	<script>
+		document.getElementById("mvaBtn")?.addEventListener("click", async function() {
+  const testMessage = "xin chào zalo bot";
+
+  try {
+    // Gửi thẳng sang Server Bot trên Render
+    const response = await fetch("https://zalo-bot-server-3gbo.onrender.com/send-mva", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify({
+        groupId: "gdbtflsyfftc8pwyqh24", // Mã nhóm Zalo của bạn
+        message: testMessage
+      })
+    });
+
+    const result = await response.json();
+    
+    if (result.status === "success") {
+      alert("✅ Đã gửi 'xin chào zalo bot' vào nhóm Zalo thành công!");
+    } else {
+      alert("❌ Gửi thất bại: " + (result.error || "Lỗi hệ thống"));
+    }
+  } catch (err) {
+    console.error(err);
+    alert("❌ Không thể kết nối tới máy chủ bot server trên Render.");
+  }
+});
+		</script>
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
       // 👉 CLEAR toàn bộ output khác
