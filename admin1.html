@@ -1966,6 +1966,7 @@ function upload() {
     
     <button onclick="document.getElementById('aiPrompt').value = ''; document.getElementById('aiPrompt').focus();" 
             style="padding: 6px 12px; cursor: pointer; background: #6c757d; color: white; border: none; border-radius: 4px;">Xóa câu hỏi</button>
+	<button type="button" id="btnCopyAnhTraLoi" onclick="copyAnhTraLoi()">📋 Copy ảnh</button>
   </div>
 
   <div id="aiResponse" style="margin-top: 15px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; min-height: 40px; white-space: pre-line;">
@@ -8472,6 +8473,68 @@ window.cancelMainEdit = cancelMainEdit;
 window.saveMainForm = saveMainForm;
 window.clearSignatureCanvas = clearSignatureCanvas;
 window.exportBMToPDF = exportBMToPDF;
+</script>
+<script>
+async function copyAnhTraLoi() {
+  const btn = document.getElementById("btnCopyAnhTraLoi");
+
+  // Tự tìm khung chứa hình biểu đồ hoặc khung chứa chữ "F&S trả lời:"
+  const chartImg = document.querySelector('img[src*="quickchart.io"]');
+  let targetEl = chartImg ? chartImg.closest("div")?.parentElement : null;
+
+  if (!targetEl) {
+    targetEl = Array.from(document.querySelectorAll("div")).find(
+      el => el.innerText && el.innerText.includes("F&S trả lời:") && el.offsetHeight > 60
+    );
+  }
+
+  if (!targetEl) {
+    alert("Chưa tìm thấy khung trả lời có biểu đồ!");
+    return;
+  }
+
+  const oldText = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang copy...";
+  }
+
+  try {
+    // 1. Ưu tiên chụp toàn bộ khung thành ảnh PNG (hoạt động tốt khi chạy trên HTTPS / GitHub Pages)
+    if (typeof html2canvas === "function" && navigator.clipboard && window.ClipboardItem) {
+      const canvas = await html2canvas(targetEl, {
+        backgroundColor: "#fff8e7",
+        useCORS: true,
+        allowTaint: false,
+        scale: 2
+      });
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      if (blob) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        if (btn) btn.innerHTML = "✅ Đã copy ảnh!";
+        return;
+      }
+    }
+    throw new Error("Fallback selection");
+  } catch (err) {
+    // 2. Dự phòng khi mở file:// cục bộ: bôi đen tự động cả khung trả lời và thực hiện lệnh Copy
+    const range = document.createRange();
+    range.selectNodeContents(targetEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+    if (btn) btn.innerHTML = "✅ Đã copy!";
+  } finally {
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = oldText || "📋 Copy ảnh";
+      }
+    }, 1500);
+  }
+}
 </script>
 <script>
 // Hàm tính tổng ngày công trong tháng hiện tại từ bảng #rosterTable
