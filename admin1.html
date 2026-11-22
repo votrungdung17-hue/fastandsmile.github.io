@@ -1425,6 +1425,45 @@ function upload() {
     </div>
   </div>
 </div>
+<!-- NÚT CẢNH BÁO VIP TRÊN THANH ĐIỀU KHIỂN -->
+<button id="btnOpenVipSpeaker" type="button" onclick="toggleVipSpeakerPanel()"
+  style="padding:8px 12px;border-radius:8px;border:1px solid #d97706;background:#fef3c7;color:#92400e;font-weight:700;cursor:pointer;">
+  🔊 Cảnh báo VIP <span id="vipUnreadBadge" style="background:#dc2626;color:#fff;border-radius:999px;padding:1px 6px;font-size:12px;display:none;">0</span>
+</button>
+
+<!-- BẢNG ĐIỀU KHIỂN LOA CCIP / VVIP -->
+<div id="vipSpeakerPanel" style="display:none;position:fixed;right:16px;bottom:16px;width:360px;max-width:calc(100vw - 32px);background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.18);z-index:9999;font-family:sans-serif;overflow:hidden;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0f172a;color:#fff;">
+    <strong>Loa thông báo CCIP / VVIP</strong>
+    <button type="button" onclick="toggleVipSpeakerPanel()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">×</button>
+  </div>
+
+  <div style="padding:12px;">
+    <div id="vipPollStatus" style="font-size:12px;padding:6px 10px;border-radius:8px;background:#f1f5f9;color:#334155;margin-bottom:10px;">
+      Đang tắt loa theo dõi cột CG (5s/lần)
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button id="btnStartVipSpeaker" type="button" onclick="startVipSpeaker()"
+        style="flex:1;padding:8px 10px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;cursor:pointer;">
+        🔊 Bật loa
+      </button>
+      <button id="btnStopVipSpeaker" type="button" onclick="stopVipSpeaker()"
+        style="flex:1;padding:8px 10px;border:none;border-radius:8px;background:#dc2626;color:#fff;font-weight:600;cursor:pointer;">
+        ⏹ Tắt loa
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:13px;font-weight:700;color:#0f172a;">Lịch sử nội dung đã đọc</span>
+      <button type="button" onclick="clearVipHistory()" style="font-size:11px;border:none;background:none;color:#64748b;cursor:pointer;text-decoration:underline;">
+        Xóa lịch sử
+      </button>
+    </div>
+
+    <div id="vipAlertHistory" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
 <!-- THÊM NÚT PBB NÀY NGAY BÊN CẠNH -->
 <button type="button" onclick="showPbbPopup()" style="background:#007bff; color:white;">
     📊 PBB
@@ -2392,6 +2431,472 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 });
+</script>
+<script>
+const VIP_SPEAKER_GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzjRBkgKCPx0FWg_LBo78oNaux39Tvb-a25szr-S41XtoXkTa0r-ZmH8NP2Y47wMyt5yQ/exec";
+const VIP_POLL_INTERVAL_MS = 5000;
+const VIP_REPEAT_GAP_MS = 2200; // Khoảng nghỉ giữa mỗi lần phát lại
+const VIP_STORAGE_KEY = "vip_cg_speaker_history_v1";
+
+let vipPollTimer = null;
+let vipRepeatTimer = null;
+let vipIsChecking = false;
+let vipCurrentAudio = null;
+let vipUnreadCount = 0;
+
+let vipActiveAlert = null; // Cảnh báo đang phát lặp liên tục cho đến khi bấm "Tôi đã biết"
+const vipSeenKeys = new Set();
+const vipAckKeys = new Set();
+let vipHistoryItems = [];
+
+function openVipSpeakerPanelByDefault() {
+  const panel = document.getElementById("vipSpeakerPanel");
+  if (!panel) return;
+  panel.style.display = "block";
+  vipUnreadCount = 0;
+  updateVipBadge();
+}
+
+function removeOnOffSpeakerButtons() {
+  const panel = document.getElementById("vipSpeakerPanel");
+  if (!panel) return;
+  panel.querySelectorAll("button").forEach(btn => {
+    const label = (btn.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+    if (label.includes("bật loa") || label.includes("tắt loa")) {
+      btn.remove();
+    }
+  });
+}
+
+function ensureVipActiveBannerEl() {
+  let banner = document.getElementById("vipActiveAlertBanner");
+  if (banner) return banner;
+
+  const historyEl = document.getElementById("vipAlertHistory");
+  const panelEl = document.getElementById("vipSpeakerPanel");
+  const targetParent = (historyEl && historyEl.parentNode) || panelEl || document.body;
+
+  banner = document.createElement("div");
+  banner.id = "vipActiveAlertBanner";
+  banner.style.display = "none";
+  banner.style.marginBottom = "8px";
+
+  if (historyEl && historyEl.parentNode === targetParent) {
+    targetParent.insertBefore(banner, historyEl);
+  } else {
+    targetParent.appendChild(banner);
+  }
+  return banner;
+}
+
+function buildShortVipSpeech(item) {
+  if (!item) return "";
+  if (item.speechText) return String(item.speechText).trim();
+
+  const rawText = String(item.text || "").trim();
+  const upper = rawText.toUpperCase();
+  const vipType = String(item.vipType || "").trim() || (upper.includes("VVIP") ? "VVIP" : "CCIP");
+  const flightNo = String(item.flightNo || "").trim().toUpperCase();
+
+  return flightNo
+    ? `Chú ý, chú ý, chuyến bay số hiệu ${flightNo} có ${vipType}`
+    : `Chú ý, chú ý, chuyến bay có ${vipType}`;
+}
+
+function loadVipHistory() {
+  removeOnOffSpeakerButtons();
+  ensureVipActiveBannerEl();
+  try {
+    const raw = localStorage.getItem(VIP_STORAGE_KEY);
+    vipHistoryItems = raw ? JSON.parse(raw) : [];
+    vipHistoryItems.forEach(item => {
+      if (item && item.key) vipSeenKeys.add(item.key);
+      if (item && item.ack) vipAckKeys.add(item.key);
+    });
+  } catch (_) {
+    vipHistoryItems = [];
+  }
+  renderActiveVipBanner();
+  renderVipHistory();
+}
+
+function saveVipHistory() {
+  try {
+    localStorage.setItem(VIP_STORAGE_KEY, JSON.stringify(vipHistoryItems.slice(0, 100)));
+  } catch (_) {}
+}
+
+function toggleVipSpeakerPanel() {
+  const panel = document.getElementById("vipSpeakerPanel");
+  if (!panel) return;
+  const willOpen = panel.style.display === "none";
+  panel.style.display = willOpen ? "block" : "none";
+  if (willOpen) {
+    vipUnreadCount = 0;
+    updateVipBadge();
+  }
+}
+
+function updateVipBadge() {
+  const badge = document.getElementById("vipUnreadBadge");
+  if (!badge) return;
+  if (vipUnreadCount > 0) {
+    badge.textContent = String(vipUnreadCount);
+    badge.style.display = "inline-block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function setVipStatus(msg, active = false) {
+  const el = document.getElementById("vipPollStatus");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.background = active ? "#dcfce7" : "#f1f5f9";
+  el.style.color = active ? "#166534" : "#334155";
+}
+
+function stopCurrentSoundOnly() {
+  if (vipRepeatTimer) {
+    clearTimeout(vipRepeatTimer);
+    vipRepeatTimer = null;
+  }
+  if (vipCurrentAudio) {
+    try {
+      vipCurrentAudio.pause();
+      vipCurrentAudio.currentTime = 0;
+    } catch (_) {}
+    vipCurrentAudio = null;
+  }
+  try {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  } catch (_) {}
+}
+
+function stopContinuousVipAlert() {
+  stopCurrentSoundOnly();
+  vipActiveAlert = null;
+  renderActiveVipBanner();
+}
+
+function acknowledgeVipAlert(key) {
+  const targetKey = key || (vipActiveAlert && vipActiveAlert.key);
+  if (targetKey) {
+    vipAckKeys.add(targetKey);
+    vipHistoryItems = vipHistoryItems.map(it =>
+      it.key === targetKey ? Object.assign({}, it, { ack: true }) : it
+    );
+    saveVipHistory();
+  }
+
+  if (!vipActiveAlert || !targetKey || vipActiveAlert.key === targetKey) {
+    stopContinuousVipAlert();
+  }
+
+  renderVipHistory();
+  setVipStatus("🟢 Đã xác nhận — đang theo dõi cột CG (5s/lần)", true);
+}
+
+async function initAutoVipSpeaker() {
+  loadVipHistory();
+  openVipSpeakerPanelByDefault();
+  setVipStatus("🟢 Đang tự động theo dõi cột CG (5s/lần)", true);
+
+  if (vipPollTimer) clearInterval(vipPollTimer);
+  await pollVipCgAlerts();
+  vipPollTimer = setInterval(pollVipCgAlerts, VIP_POLL_INTERVAL_MS);
+}
+
+async function callVipGas(action, extraParams = {}) {
+  if (!VIP_SPEAKER_GAS_URL || VIP_SPEAKER_GAS_URL.startsWith("DÁN_")) {
+    throw new Error("Chưa cấu hình VIP_SPEAKER_GAS_URL");
+  }
+  const url = new URL(VIP_SPEAKER_GAS_URL);
+  url.searchParams.set("action", action);
+  Object.keys(extraParams).forEach(k => {
+    url.searchParams.set(k, extraParams[k]);
+  });
+
+  const res = await fetch(url.toString(), { method: "GET" });
+  const data = await res.json();
+  if (!data || !data.ok) {
+    throw new Error((data && data.error) || "Lỗi gọi GAS");
+  }
+  return data;
+}
+
+async function pollVipCgAlerts() {
+  if (vipIsChecking) return;
+  vipIsChecking = true;
+
+  try {
+    const data = await callVipGas("getVipCgAlerts");
+    const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+
+    // Lần đầu mở trang nếu chưa có lịch sử thì chỉ đồng bộ dữ liệu cũ để không phát tràn lan
+    const isInitialSeed = vipHistoryItems.length === 0 && alerts.length > 0;
+    let latestNewAlert = null;
+    let addedCount = 0;
+
+    for (const item of alerts) {
+      const text = String(item.text || "").trim();
+      if (!text) continue;
+
+      const row = item.row;
+      const upper = text.toUpperCase();
+      const vipType = String(item.vipType || "").trim() || (upper.includes("VVIP") ? "VVIP" : "CCIP");
+      const flightNo = String(item.flightNo || "").trim().toUpperCase();
+      const speechText = buildShortVipSpeech({
+        row,
+        flightNo,
+        vipType,
+        speechText: item.speechText,
+        text
+      });
+
+      const key = `${row}::${flightNo}::${vipType}::${text}`;
+      if (vipSeenKeys.has(key)) continue;
+
+      vipSeenKeys.add(key);
+      addedCount += 1;
+
+      const ack = isInitialSeed;
+      if (ack) vipAckKeys.add(key);
+
+      const timeStr = new Date().toLocaleTimeString("vi-VN", { hour12: false });
+      const flightLabel = flightNo ? ` [${flightNo}]` : "";
+
+      const entry = {
+        key,
+        row,
+        flightNo,
+        vipType,
+        speechText,
+        text,
+        timeStr,
+        ack,
+        summary: `[${timeStr}] Dòng ${row}${flightLabel}: ${text}`
+      };
+
+      vipHistoryItems.unshift(entry);
+
+      if (!isInitialSeed && !vipAckKeys.has(key)) {
+        latestNewAlert = entry;
+      }
+    }
+
+    if (addedCount > 0) {
+      saveVipHistory();
+      renderVipHistory();
+    }
+
+    if (latestNewAlert) {
+      const panel = document.getElementById("vipSpeakerPanel");
+      if (panel && panel.style.display === "none") {
+        panel.style.display = "block";
+      }
+      vipUnreadCount = 0;
+      updateVipBadge();
+      triggerContinuousAlert(latestNewAlert);
+    }
+
+    if (vipActiveAlert) {
+      setVipStatus(`🔴 Đang phát lặp: ${vipActiveAlert.speechText} — Bấm "Tôi đã biết" để dừng`, true);
+    } else if (isInitialSeed) {
+      setVipStatus(`🟢 Đã đồng bộ ${alerts.length} dòng hiện có — đang theo dõi VIP/CIP đến`, true);
+    } else {
+      setVipStatus("🟢 Đang theo dõi VIP/CIP đến", true);
+    }
+  } catch (err) {
+    setVipStatus("⚠️ Lỗi kết nối GAS: " + err.message, false);
+  } finally {
+    vipIsChecking = false;
+  }
+}
+
+function triggerContinuousAlert(entry) {
+  if (!entry || vipAckKeys.has(entry.key)) return;
+  stopCurrentSoundOnly();
+  vipActiveAlert = entry;
+  renderActiveVipBanner();
+  runContinuousLoop(entry);
+}
+
+function runContinuousLoop(entry) {
+  if (!entry) return;
+  if (vipRepeatTimer) {
+    clearTimeout(vipRepeatTimer);
+    vipRepeatTimer = null;
+  }
+
+  async function step() {
+    if (!vipActiveAlert || vipActiveAlert.key !== entry.key || vipAckKeys.has(entry.key)) {
+      return;
+    }
+
+    await speakOnce(entry.speechText);
+
+    // Sau khi đọc xong 1 lượt, nếu vẫn chưa bấm "Tôi đã biết" thì hẹn đọc lại
+    if (vipActiveAlert && vipActiveAlert.key === entry.key && !vipAckKeys.has(entry.key)) {
+      vipRepeatTimer = setTimeout(step, VIP_REPEAT_GAP_MS);
+    }
+  }
+
+  step();
+}
+
+async function speakOnce(text) {
+  const cleanText = String(text || "").trim();
+  if (!cleanText) return;
+
+  try {
+    const res = await callVipGas("getVietnameseAudioBase64", { text: cleanText });
+    if (res.audioBase64) {
+      await playBase64Mp3(res.audioBase64);
+      return;
+    }
+  } catch (_) {}
+
+  await speakFallbackBrowserTTS(cleanText);
+}
+
+function playBase64Mp3(base64Str) {
+  return new Promise((resolve) => {
+    try {
+      const audio = new Audio("data:audio/mp3;base64," + base64Str);
+      vipCurrentAudio = audio;
+      const done = () => {
+        if (vipCurrentAudio === audio) vipCurrentAudio = null;
+        resolve();
+      };
+      audio.onended = done;
+      audio.onerror = done;
+      audio.play().catch(done);
+    } catch (_) {
+      resolve();
+    }
+  });
+}
+
+function speakFallbackBrowserTTS(text) {
+  return new Promise((resolve) => {
+    if (!("speechSynthesis" in window)) return resolve();
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "vi-VN";
+      utter.onend = resolve;
+      utter.onerror = resolve;
+      window.speechSynthesis.speak(utter);
+    } catch (_) {
+      resolve();
+    }
+  });
+}
+
+function renderActiveVipBanner() {
+  const banner = ensureVipActiveBannerEl();
+  if (!banner) return;
+
+  if (!vipActiveAlert) {
+    banner.innerHTML = "";
+    banner.style.display = "none";
+    return;
+  }
+
+  const safeKeyAttr = escapeVipHtml(vipActiveAlert.key);
+  banner.style.display = "block";
+  banner.innerHTML = `
+    <div style="border:1.5px solid #dc2626;background:#fef2f2;border-radius:8px;padding:8px;">
+      <div style="font-size:12px;font-weight:700;color:#991b1b;line-height:1.35;">
+        🔔 ${escapeVipHtml(vipActiveAlert.speechText)}
+      </div>
+      <div style="font-size:11px;color:#475569;margin-top:4px;word-break:break-word;">
+        ${escapeVipHtml(vipActiveAlert.summary)}
+      </div>
+      <button type="button" data-ack-key="${safeKeyAttr}" onclick="acknowledgeVipAlert(this.getAttribute('data-ack-key'))"
+        style="margin-top:8px;width:100%;padding:6px 10px;border-radius:6px;border:none;background:#16a34a;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">
+        ✅ Tôi đã biết
+      </button>
+    </div>
+  `;
+}
+
+function renderVipHistory() {
+  const container = document.getElementById("vipAlertHistory");
+  if (!container) return;
+
+  if (!vipHistoryItems.length) {
+    container.innerHTML = `<div style="font-size:12px;color:#64748b;padding:8px 0;">Chưa có cảnh báo CCIP / VVIP nào.</div>`;
+    return;
+  }
+
+  container.innerHTML = vipHistoryItems.map((item, idx) => {
+    const isAck = Boolean(item.ack || vipAckKeys.has(item.key));
+    const badgeHtml = isAck
+      ? `<span style="display:inline-block;margin-top:4px;font-size:10px;padding:1px 6px;border-radius:999px;background:#dcfce7;color:#166534;">Đã xác nhận</span>`
+      : `<span style="display:inline-block;margin-top:4px;font-size:10px;padding:1px 6px;border-radius:999px;background:#fee2e2;color:#991b1b;">Chưa xác nhận</span>`;
+
+    return `
+      <div style="border:1px solid #e2e8f0;background:#f8fafc;border-radius:8px;padding:8px;font-size:12px;line-height:1.4;margin-bottom:6px;">
+        <div style="color:#0f172a;word-break:break-word;">${escapeVipHtml(item.summary)}</div>
+        <div>${badgeHtml}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" onclick="replayVipText(${idx})" style="padding:2px 8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:11px;">🔊 Đọc lại</button>
+          <button type="button" onclick="copyVipText(${idx})" style="padding:2px 8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:11px;">📋 Copy</button>
+          ${!isAck ? `<button type="button" onclick="acknowledgeVipAlertByIndex(${idx})" style="padding:2px 8px;border-radius:6px;border:1px solid #16a34a;background:#16a34a;color:#fff;cursor:pointer;font-size:11px;">✅ Tôi đã biết</button>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function acknowledgeVipAlertByIndex(idx) {
+  const item = vipHistoryItems[idx];
+  if (!item) return;
+  acknowledgeVipAlert(item.key);
+}
+
+async function replayVipText(idx) {
+  const item = vipHistoryItems[idx];
+  if (!item) return;
+  const textToSpeak = buildShortVipSpeech(item);
+  try {
+    const res = await callVipGas("getVietnameseAudioBase64", { text: textToSpeak });
+    if (res.audioBase64) {
+      await playBase64Mp3(res.audioBase64);
+      return;
+    }
+  } catch (_) {}
+  await speakFallbackBrowserTTS(textToSpeak);
+}
+
+function copyVipText(idx) {
+  const item = vipHistoryItems[idx];
+  if (!item || !navigator.clipboard) return;
+  navigator.clipboard.writeText(item.text).catch(() => {});
+}
+
+function clearVipHistory() {
+  stopContinuousVipAlert();
+  vipHistoryItems = [];
+  vipSeenKeys.clear();
+  vipAckKeys.clear();
+  localStorage.removeItem(VIP_STORAGE_KEY);
+  renderVipHistory();
+}
+
+function escapeVipHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+document.addEventListener("DOMContentLoaded", initAutoVipSpeaker);
 </script>
 <script>
   document.getElementById("lomo").addEventListener("click", function(){
