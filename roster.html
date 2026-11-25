@@ -231,9 +231,12 @@ function getShiftColorClass(code) {
                 <button onclick="switchTab('staff')" id="btn-tab-staff" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/10 text-sky-100">
                     <i class="fa-solid fa-users text-sky-200 mr-1.5"></i>Nhân Viên
                 </button>
-                <button onclick="switchTab('shifts')" id="btn-tab-shifts" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/10 text-sky-100">
+               <button onclick="switchTab('shifts')" id="btn-tab-shifts" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/10 text-sky-100">
                     <i class="fa-solid fa-clock text-sky-200 mr-1.5"></i>Danh Mục Ca
                 </button>
+                <button onclick="switchTab('evaluation')" id="btn-tab-evaluation" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/10 text-sky-100">
+                    <i class="fa-solid fa-clipboard-check text-sky-200 mr-1.5"></i>Đánh giá
+                </button>		
             </div>
         </div>
     </header>
@@ -387,7 +390,229 @@ function getShiftColorClass(code) {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="shifts-cards-container">
             </div>
         </section>
+<!-- TAB 4: EVALUATION (ĐÁNH GIÁ TÁC PHONG & GROOMING) -->
+       <section id="tab-evaluation" class="hidden space-y-4">
+    <!-- Thông báo khi chưa mở khóa chỉnh sửa -->
+    <div id="eval-locked-notice" class="bg-amber-50 border border-amber-300 rounded-xl p-8 text-center space-y-3 shadow-sm">
+        <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+        <div class="text-base font-bold text-slate-800">Tab Đánh Giá Đang Bị Khóa</div>
+        <p class="text-xs text-slate-600 max-w-md mx-auto">
+            Vui lòng bấm <strong>"Mở Khóa Chỉnh Sửa"</strong> và nhập passcode để xem cũng như chỉnh sửa nội dung đánh giá tác phong &amp; grooming.
+        </p>
+        <button onclick="toggleEditMode()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-sm inline-flex items-center">
+            <i class="fa-solid fa-lock-open mr-1.5"></i>Mở Khóa Chỉnh Sửa
+        </button>
+    </div>
 
+    <!-- Nội dung tab Đánh giá chỉ hiển thị khi đã mở khóa -->
+    <div id="eval-unlocked-content" class="hidden space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200 no-print">
+            <div class="text-xs text-slate-600">
+                Tuần đang chọn: <strong id="eval-week-badge" class="text-red-700">23/11-29/11</strong> — Bấm vào ô tiêu chí để đánh dấu <strong>X</strong> (vi phạm).
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="saveGroomingToWeekTab()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center shadow-sm">
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i>Lưu Đánh Giá
+                </button>
+                <button onclick="printEvaluationDirect()" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold flex items-center shadow-sm">
+                    <i class="fa-solid fa-print mr-1.5"></i>In Phiếu
+                </button>
+            </div>
+        </div>
+
+        <div id="evaluation-direct-form" class="bg-white rounded-xl shadow-md border border-slate-300 overflow-hidden text-slate-900 select-none">
+            <!-- Banner ảnh đầu form fix full không cắt -->
+            <div class="w-full border-b-4 border-red-700 bg-white">
+                <img
+                    src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/logosungroup.png"
+                    alt="Phu Quoc International Airport"
+                    class="w-full h-auto object-contain block"
+                    onerror="this.onerror=null; this.src='https://votrungdung17-hue.github.io/fastandsmile.github.io/logosungroup.png';"
+                />
+            </div>
+
+            <!-- Thông tin chung -->
+            <div class="px-5 py-3 space-y-2 text-xs sm:text-sm border-b border-slate-200">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-bold text-red-700 whitespace-nowrap">Bộ phận:</span>
+                    <input type="text" id="eval-dept-direct" value="Hỗ trợ hành khách – Cảng hàng không quốc tế Phú Quốc" class="flex-1 border-b border-dotted border-slate-500 px-1 py-0.5 font-medium text-slate-800 focus:outline-none bg-transparent">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    <div class="md:col-span-5 flex items-center gap-2">
+                        <span class="font-bold text-red-700 whitespace-nowrap">Supervisor:</span>
+                        <input type="text" id="eval-sup-direct" value="Nguyễn Bạch Huệ" class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-semibold text-slate-800 focus:outline-none bg-transparent">
+                    </div>
+                    <div class="md:col-span-4 flex items-center gap-2 md:border-l md:border-slate-300 md:pl-3">
+                        <span class="font-bold text-red-700 whitespace-nowrap">Ca trực:</span>
+                        <input type="text" id="eval-shift-direct" placeholder="Tất cả / theo lịch" class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-medium text-slate-800 focus:outline-none bg-transparent">
+                    </div>
+                    <div class="md:col-span-3 flex items-center gap-2 md:border-l md:border-slate-300 md:pl-3">
+                        <span class="font-bold text-red-700 whitespace-nowrap">Ngày:</span>
+                        <input type="text" id="eval-week-range-input" readonly class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-bold text-red-800 focus:outline-none bg-transparent text-center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mục I + Bảng 14 nhân viên -->
+            <div class="p-5">
+                <div class="flex items-center bg-slate-200/80 border border-slate-300 mb-1">
+                    <div class="bg-red-700 text-white font-bold px-3.5 py-1 text-sm">I.</div>
+                    <div class="px-3 py-1 font-extrabold text-slate-900 text-xs sm:text-sm uppercase">
+                        DANH SÁCH NHÂN VIÊN KIỂM TRA
+                    </div>
+                </div>
+                <p class="text-[11px] italic text-slate-600 mb-2">
+                    (Đánh dấu <strong>[X]</strong> vào ô vi phạm, để trống nếu đạt chuẩn)
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-slate-400 text-xs">
+                        <thead>
+                            <tr class="bg-red-700 text-white text-center">
+                                <th class="border border-slate-400 p-2 w-10">STT</th>
+                                <th class="border border-slate-400 p-2 w-48">Họ và Tên</th>
+                                <th class="border border-slate-400 p-2 w-24">Vị trí</th>
+                                <th class="border border-slate-400 p-2 w-24">Đồng phục</th>
+                                <th class="border border-slate-400 p-2 w-28">Tóc/ Trang điểm</th>
+                                <th class="border border-slate-400 p-2 w-24">Thẻ KSAN</th>
+                                <th class="border border-slate-400 p-2 w-24">Thái độ</th>
+                                <th class="border border-slate-400 p-2 w-28">Vệ sinh quầy</th>
+                                <th class="border border-slate-400 p-2">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eval-14-staff-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+        <!-- MODAL: PHIẾU KIỂM TRA TÁC PHONG & GROOMING HÀNG NGÀY -->
+        <div id="grooming-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 hidden overflow-y-auto">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden border border-slate-300 my-auto">
+                <div class="bg-slate-800 text-white px-4 py-2.5 flex flex-wrap justify-between items-center gap-2 no-print">
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="bg-red-600 px-2 py-0.5 rounded font-bold">BIỂU MẪU PQC</span>
+                        <span id="modal-staff-subtitle" class="text-slate-300">Đang kiểm tra nhân viên...</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="saveGroomingEvaluation()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center">
+                            <i class="fa-solid fa-floppy-disk mr-1.5"></i>Lưu Đánh Giá
+                        </button>
+                        <button onclick="printGroomingForm()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold flex items-center">
+                            <i class="fa-solid fa-print mr-1.5"></i>In Phiếu
+                        </button>
+                        <button onclick="closeGroomingModal()" class="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold flex items-center">
+                            <i class="fa-solid fa-xmark mr-1"></i>Đóng
+                        </button>
+                    </div>
+                </div>
+<div id="grooming-printable-area" class="bg-white text-slate-900 select-none">
+    <!-- BANNER ĐẦU FORM FIX KHUNG, KHÔNG CẮT ẢNH -->
+    <div class="w-full border-b-4 border-red-700 bg-white">
+        <img
+            src="https://raw.githubusercontent.com/votrungdung17-hue/fastandsmile.github.io/main/logosungroup.png"
+            alt="Phu Quoc International Airport - Sun Group"
+            class="w-full h-auto object-contain block"
+            onerror="this.onerror=null; this.src='https://votrungdung17-hue.github.io/fastandsmile.github.io/logosungroup.png';"
+        />
+    </div>
+
+    <!-- Thông tin Bộ phận / Supervisor / Ca trực / Ngày -->
+    <div class="px-6 py-3 space-y-2 text-xs sm:text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-bold text-red-700 whitespace-nowrap">Bộ phận:</span>
+            <input type="text" id="eval-department" value="Hỗ trợ hành khách – Cảng hàng không quốc tế Phú Quốc" class="flex-1 border-b border-dotted border-slate-500 px-1 py-0.5 font-medium text-slate-800 focus:outline-none focus:border-red-700 bg-transparent">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            <div class="md:col-span-5 flex items-center gap-2">
+                <span class="font-bold text-red-700 whitespace-nowrap">Supervisor:</span>
+                <input type="text" id="eval-supervisor" value="Nguyễn Bạch Huệ" placeholder="Nhập tên Supervisor..." class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-medium text-slate-800 focus:outline-none focus:border-red-700 bg-transparent">
+            </div>
+            <div class="md:col-span-4 flex items-center gap-2 md:border-l md:border-slate-300 md:pl-3">
+                <span class="font-bold text-red-700 whitespace-nowrap">Ca trực:</span>
+                <input type="text" id="eval-shift" placeholder="VD: CA 1 (06:00-14:00)" class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-semibold text-slate-800 focus:outline-none focus:border-red-700 bg-transparent">
+            </div>
+            <div class="md:col-span-3 flex items-center gap-2 md:border-l md:border-slate-300 md:pl-3">
+                <span class="font-bold text-red-700 whitespace-nowrap">Ngày:</span>
+                <input type="text" id="eval-date" class="w-full border-b border-dotted border-slate-500 px-1 py-0.5 font-semibold text-slate-800 focus:outline-none focus:border-red-700 bg-transparent text-center">
+            </div>
+        </div>
+    </div>
+
+    <!-- Mục I + Bảng đánh giá -->
+    <div class="px-6 mt-1">
+        <div class="flex items-center bg-slate-200/80 border border-slate-300">
+            <div class="bg-red-700 text-white font-bold px-3.5 py-1 text-sm" style="clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%);">I.</div>
+            <div class="px-3 py-1 font-extrabold text-slate-900 text-xs sm:text-sm uppercase tracking-wide">
+                DANH SÁCH NHÂN VIÊN KIỂM TRA
+            </div>
+        </div>
+        <p class="text-[11px] italic text-slate-600 mt-1 mb-2">
+            (Đánh dấu <strong>[X]</strong> vào ô vi phạm, để trống nếu đạt chuẩn)
+        </p>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+                <thead>
+                    <tr class="bg-red-700 text-white text-center">
+                        <th class="border border-slate-400 p-2 w-10 font-bold">STT</th>
+                        <th class="border border-slate-400 p-2 w-44 font-bold">
+                            <i class="fa-solid fa-user block text-sm mb-1"></i>
+                            Họ và Tên
+                        </th>
+                        <th class="border border-slate-400 p-2 w-28 font-bold">
+                            <i class="fa-solid fa-location-dot block text-sm mb-1"></i>
+                            Vị trí
+                        </th>
+                        <th class="border border-slate-400 p-2 w-24 font-bold">
+                            <i class="fa-solid fa-shirt block text-sm mb-1"></i>
+                            Đồng phục
+                        </th>
+                        <th class="border border-slate-400 p-2 w-28 font-bold">
+                            <i class="fa-solid fa-user-tie block text-sm mb-1"></i>
+                            Tóc/ Trang điểm
+                        </th>
+                        <th class="border border-slate-400 p-2 w-24 font-bold">
+                            <i class="fa-solid fa-id-card block text-sm mb-1"></i>
+                            Thẻ KSAN
+                        </th>
+                        <th class="border border-slate-400 p-2 w-24 font-bold">
+                            <i class="fa-solid fa-gear block text-sm mb-1"></i>
+                            Thái độ
+                        </th>
+                        <th class="border border-slate-400 p-2 w-28 font-bold">
+                            <i class="fa-solid fa-pump-soap block text-sm mb-1"></i>
+                            Vệ sinh quầy
+                        </th>
+                        <th class="border border-slate-400 p-2 font-bold">
+                            <i class="fa-solid fa-file-lines block text-sm mb-1"></i>
+                            Ghi chú
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="grooming-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+            <!-- Silhouette máy bay & nhà ga chân trang + dải đỏ -->
+        <div class="relative h-8 overflow-hidden flex items-end justify-between border-b-4 border-red-700">
+            <svg viewBox="0 0 800 40" preserveAspectRatio="none" class="w-full h-7 text-slate-300 fill-current">
+                <rect x="20" y="12" width="6" height="28"/>
+                <polygon points="15,12 31,12 28,18 18,18"/>
+                <rect x="40" y="24" width="90" height="16"/>
+                <path d="M220,28 L330,22 L345,25 L332,31 L250,36 L225,39 L218,37 L226,32 Z"/>
+                <path d="M520,28 L630,22 L645,25 L632,31 L550,36 L525,39 L518,37 L526,32 Z"/>
+                <rect x="740" y="26" width="45" height="14"/>
+            </svg>
+        </div>
+    </div>
+</div>
     </main>
 
     <!-- MODAL: PASSCODE UNLOCK PROMPT -->
@@ -563,9 +788,9 @@ function getShiftColorClass(code) {
             if (dateParam && !isNaN(Date.parse(dateParam))) {
                 currentStartDate = dateParam;
             }
-            if (tabParam && ['schedule', 'staff', 'shifts'].includes(tabParam)) {
-                currentTab = tabParam;
-            }
+            if (tabParam && ['schedule', 'staff', 'shifts', 'evaluation'].includes(tabParam)) {
+    currentTab = tabParam;
+}
         }
 
         async function loadDataFromGoogleSheet() {
@@ -605,6 +830,7 @@ function getShiftColorClass(code) {
                     renderShiftsCards();
                     renderLegend();
                     renderScheduleTable();
+		    renderEvaluationStaffList();
 
                     isDataLoaded = true;
                     console.log("Đã tải xong toàn bộ dữ liệu & Passcode từ Google Sheet!");
@@ -836,6 +1062,18 @@ function getMondayOfCurrentWeek() {
                 btnAddStaff.disabled = true;
                 btnAddShift.disabled = true;
             }
+const evalLockedNotice = document.getElementById('eval-locked-notice');
+const evalUnlockedContent = document.getElementById('eval-unlocked-content');
+if (evalLockedNotice && evalUnlockedContent) {
+    if (isEditMode) {
+        evalLockedNotice.classList.add('hidden');
+        evalUnlockedContent.classList.remove('hidden');
+        renderEvaluationFormByWeek();
+    } else {
+        evalLockedNotice.classList.remove('hidden');
+        evalUnlockedContent.classList.add('hidden');
+    }
+}
 
             renderScheduleTable();
             renderStaffTable();
@@ -1418,22 +1656,32 @@ function getMondayOfCurrentWeek() {
         }
 
         function switchTab(tabName, shouldSyncUrl = true) {
-            currentTab = tabName;
-            ['schedule', 'staff', 'shifts'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${t}`).classList.remove('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
-                document.getElementById(`btn-tab-${t}`).classList.add('hover:bg-white/10', 'text-sky-100');
-            });
-
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`btn-tab-${tabName}`);
-            activeBtn.classList.add('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
-            activeBtn.classList.remove('hover:bg-white/10', 'text-sky-100');
-
-            if (shouldSyncUrl) {
-                syncUrlState();
-            }
+    currentTab = tabName;
+    ['schedule', 'staff', 'shifts', 'evaluation'].forEach(t => {
+        const tabEl = document.getElementById(`tab-${t}`);
+        const btnEl = document.getElementById(`btn-tab-${t}`);
+        if (tabEl) tabEl.classList.add('hidden');
+        if (btnEl) {
+            btnEl.classList.remove('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
+            btnEl.classList.add('hover:bg-white/10', 'text-sky-100');
         }
+    });
+
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    const activeBtn = document.getElementById(`btn-tab-${tabName}`);
+    if (activeTab) activeTab.classList.remove('hidden');
+    if (activeBtn) {
+        activeBtn.classList.add('bg-white/20', 'text-white', 'shadow-inner', 'border', 'border-white/30');
+        activeBtn.classList.remove('hover:bg-white/10', 'text-sky-100');
+    }
+
+ if (tabName === 'evaluation') {
+    updateUIForMode();
+}
+    if (shouldSyncUrl) {
+        syncUrlState();
+    }
+}
 
        async function exportToExcel() {
     const weekKey = currentStartDate;
@@ -1766,6 +2014,424 @@ function getMondayOfCurrentWeek() {
 
     if (typeof showToast === 'function') {
         showToast("Đã xuất file Excel thành công!");
+    }
+}
+let currentEvaluatingStaff = null;
+
+function renderEvaluationStaffList() {
+    const grid = document.getElementById('eval-staff-grid');
+    if (!grid) return;
+
+    const keyword = (document.getElementById('eval-search-input')?.value || "").toLowerCase().trim();
+    const filtered = staffList.filter(s => {
+        const isSupervisor = s.name.toLowerCase().trim() === "nguyễn bạch huệ";
+        if (isSupervisor) return false;
+        return s.name.toLowerCase().includes(keyword) || s.id.toLowerCase().includes(keyword);
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-400 italic">Chưa có nhân viên hoặc không tìm thấy kết quả.</div>`;
+        return;
+    }
+
+    grid.innerHTML = filtered.map((s, idx) => `
+        <button onclick="openGroomingModal('${s.id}')" class="group text-left bg-white hover:bg-red-50/50 p-4 rounded-xl border border-slate-200 hover:border-red-500 shadow-sm hover:shadow-md transition-all flex items-center justify-between">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-red-100 group-hover:bg-red-700 text-red-700 group-hover:text-white font-bold flex items-center justify-center flex-shrink-0 transition-colors text-sm">
+                    ${idx + 1}
+                </div>
+                <div class="truncate">
+                    <div class="font-bold text-slate-900 group-hover:text-red-800 text-sm truncate">${s.name}</div>
+                    <div class="text-xs text-slate-500 font-mono mt-0.5">Mã NV: ${s.id}</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-red-600 transition-transform group-hover:translate-x-1 ml-2"></i>
+        </button>
+    `).join('');
+}
+
+function getTodayShiftForStaff(staffId) {
+    const mondayKey = getMondayOfCurrentWeek();
+    const today = new Date();
+    const dayIdx = (today.getDay() === 0 ? 6 : today.getDay() - 1);
+    return scheduleData[mondayKey]?.[staffId]?.[dayIdx] || "";
+}
+
+function openGroomingModal(staffId) {
+    const staff = staffList.find(s => s.id === staffId);
+    if (!staff) return;
+    currentEvaluatingStaff = staff;
+
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    document.getElementById('eval-date').value = `${dd} / ${mm} / ${yyyy}`;
+
+    const shiftCode = getTodayShiftForStaff(staff.id);
+    const shiftObj = shiftList.find(sh => sh.code === shiftCode);
+    document.getElementById('eval-shift').value = shiftObj ? `${shiftObj.code} (${shiftObj.time})` : shiftCode;
+
+    document.getElementById('modal-staff-subtitle').innerText = `Nhân viên: ${staff.name} (${staff.id})`;
+    document.getElementById('eval-supervisor').value = "Nguyễn Bạch Huệ";
+    
+
+    const tbody = document.getElementById('grooming-table-body');
+    const criteriaKeys = ['uniform', 'hair', 'ksan', 'attitude', 'counter'];
+    let rowsHtml = '';
+
+    for (let r = 0; r < 5; r++) {
+        const defaultName = (r === 0) ? staff.name : "";
+        const cells = criteriaKeys.map(key => `
+            <td onclick="toggleGroomingCheck(this)" data-key="${key}" class="border border-slate-400 p-1.5 text-center font-extrabold text-sm cursor-pointer hover:bg-red-50 text-red-700"></td>
+        `).join('');
+
+        rowsHtml += `
+            <tr class="h-9 ${r === 0 ? 'bg-amber-50/30' : 'bg-white'}">
+                <td class="border border-slate-400 p-1.5 text-center font-bold bg-slate-100 text-slate-700">${r + 1}</td>
+                <td class="border border-slate-400 p-1"><input type="text" data-field="name" value="${defaultName}" class="w-full px-1.5 py-0.5 text-xs font-semibold text-slate-900 bg-transparent focus:outline-none"></td>
+                <td class="border border-slate-400 p-1"><input type="text" data-field="position" class="w-full px-1.5 py-0.5 text-xs text-center text-slate-800 bg-transparent focus:outline-none"></td>
+                ${cells}
+                <td class="border border-slate-400 p-1"><input type="text" data-field="note" class="w-full px-1.5 py-0.5 text-xs text-slate-800 bg-transparent focus:outline-none"></td>
+            </tr>
+        `;
+    }
+    tbody.innerHTML = rowsHtml;
+
+   document.getElementById('eval-supervisor').oninput = function() {
+        document.getElementById('sign-supervisor-name').innerText = this.value;
+    };
+
+    document.getElementById('grooming-modal').classList.remove('hidden');
+}
+
+function closeGroomingModal() {
+    document.getElementById('grooming-modal').classList.add('hidden');
+}
+
+function toggleGroomingCheck(cell) {
+    cell.innerText = cell.innerText.trim() === 'X' ? '' : 'X';
+}
+
+function saveGroomingEvaluation() {
+    if (!currentEvaluatingStaff) return;
+    const today = new Date();
+    const keyDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const rows = Array.from(document.querySelectorAll('#grooming-table-body tr')).map(tr => {
+        const obj = {
+            name: tr.querySelector('input[data-field="name"]').value.trim(),
+            position: tr.querySelector('input[data-field="position"]').value.trim(),
+            note: tr.querySelector('input[data-field="note"]').value.trim()
+        };
+        tr.querySelectorAll('td[data-key]').forEach(td => obj[td.getAttribute('data-key')] = td.innerText.trim());
+        return obj;
+    });
+    localStorage.setItem(`grooming_${currentEvaluatingStaff.id}_${keyDate}`, JSON.stringify({
+        staffId: currentEvaluatingStaff.id,
+        supervisor: document.getElementById('eval-supervisor').value,
+        shift: document.getElementById('eval-shift').value,
+        date: document.getElementById('eval-date').value,
+        rows
+    }));
+    showToast(`Đã lưu phiếu đánh giá của ${currentEvaluatingStaff.name}!`);
+}
+
+function printGroomingForm() {
+    const printContent = document.getElementById('grooming-printable-area').innerHTML;
+    const win = window.open('', '_blank', 'width=1000,height=750');
+    win.document.write(`
+        <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Phiếu Grooming</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } @page { size: A4 landscape; margin: 10mm; }</style>
+        </head><body class="p-2">${printContent}</body></html>
+    `);
+    const srcInputs = document.querySelectorAll('#grooming-printable-area input');
+    const dstInputs = win.document.querySelectorAll('input');
+    srcInputs.forEach((inp, i) => { if (dstInputs[i]) dstInputs[i].setAttribute('value', inp.value); });
+    win.document.close();
+    win.onload = () => setTimeout(() => { win.print(); win.close(); }, 400);
+}
+function getWeekRangeShort(startDateStr) {
+    const base = new Date(startDateStr);
+    const day = base.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const mon = new Date(base);
+    mon.setDate(base.getDate() + diff);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+
+    const fmt = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return `${fmt(mon)}-${fmt(sun)}`;
+}
+
+function getWeekTabName(startDateStr) {
+    const base = new Date(startDateStr);
+    const day = base.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const mon = new Date(base);
+    mon.setDate(base.getDate() + diff);
+
+    const firstJan = new Date(mon.getFullYear(), 0, 1);
+    const days = Math.floor((mon - firstJan) / 86400000);
+    const weekNum = Math.ceil((days + firstJan.getDay() + 1) / 7);
+
+    const fmtShort = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const fmtDot = (d) => `${d.getDate()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+
+    // Khớp định dạng tab như "Tuần 48 (23-11)" trên Google Sheet của bạn
+    return `Tuần ${weekNum} (${fmtDot(mon)})`;
+}
+
+function getWeekRangeFromCurrent() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawDate = (typeof currentStartDate !== 'undefined' && currentStartDate)
+        ? currentStartDate
+        : (urlParams.get('date') || '2026-11-23');
+
+    const parts = rawDate.split('-').map(Number);
+    const base = (parts.length === 3)
+        ? new Date(parts[0], parts[1] - 1, parts[2])
+        : new Date(rawDate);
+
+    if (isNaN(base.getTime())) return '23/11-29/11';
+
+    const day = base.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const mon = new Date(base.getFullYear(), base.getMonth(), base.getDate() + diff);
+    const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+
+    const fmt = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return `${fmt(mon)}-${fmt(sun)}`;
+}
+
+function renderEvaluationFormByWeek() {
+    const tbody = document.getElementById('eval-14-staff-tbody');
+    if (!tbody) return;
+
+    const rangeStr = getWeekRangeFromCurrent();
+    const rangeInput = document.getElementById('eval-week-range-input');
+    const badge = document.getElementById('eval-week-badge');
+    if (rangeInput) rangeInput.value = rangeStr;
+    if (badge) badge.innerText = rangeStr;
+
+    const supInput = document.getElementById('eval-sup-direct');
+    if (supInput && !supInput.value.trim()) {
+        supInput.value = "Nguyễn Bạch Huệ";
+    }
+
+    const sourceStaff = Array.isArray(window.staffList)
+        ? window.staffList
+        : (typeof staffList !== 'undefined' && Array.isArray(staffList) ? staffList : []);
+
+    const filteredStaff = sourceStaff
+        .filter(s => String(s.name || s.hoTen || '').toLowerCase().trim() !== "nguyễn bạch huệ")
+        .slice(0, 14);
+
+    if (filteredStaff.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="border border-slate-400 p-4 text-center text-slate-500 italic">
+                    Đang tải danh sách nhân viên... (Nếu vẫn trống, kiểm tra lại dữ liệu staffList).
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const weekKey = (typeof currentStartDate !== 'undefined' && currentStartDate) ? currentStartDate : '2026-11-23';
+    const savedLocal = JSON.parse(localStorage.getItem(`grooming_week_${weekKey}`) || "{}");
+    const criteriaCols = ['vitri', 'dongphuc', 'toctrangdiem', 'theksan', 'thaido', 'vesinhquay'];
+
+    tbody.innerHTML = filteredStaff.map((staff, idx) => {
+        const sId = String(staff.id || staff.maNV || idx + 1);
+        const sName = String(staff.name || staff.hoTen || '');
+        const rowSaved = savedLocal[sId] || {};
+
+        const cellsHtml = criteriaCols.map(col => {
+            const checked = rowSaved[col] === 'X';
+            return `
+                <td onclick="toggleEvalCell(this)" data-col="${col}" class="border border-slate-400 p-1.5 text-center font-extrabold text-sm cursor-pointer hover:bg-red-50 ${checked ? 'text-red-700 bg-red-50' : 'text-slate-800'}">
+                    ${checked ? 'X' : ''}
+                </td>
+            `;
+        }).join('');
+
+        return `
+            <tr data-staff-id="${sId}" data-staff-name="${sName}" class="hover:bg-slate-50">
+                <td class="border border-slate-400 p-1.5 text-center font-bold bg-slate-100">${idx + 1}</td>
+                <td class="border border-slate-400 p-1.5 font-semibold text-slate-900">${sName}</td>
+                ${cellsHtml}
+                <td class="border border-slate-400 p-1 align-top">
+    <textarea
+        data-col="ghichu"
+        rows="1"
+        oninput="autoResizeNote(this)"
+        ${!isEditMode ? 'disabled' : ''}
+        placeholder="..."
+        class="w-full px-1.5 py-0.5 text-xs leading-snug bg-transparent resize-none overflow-hidden break-words whitespace-pre-wrap focus:outline-none focus:bg-sky-50 disabled:opacity-70 disabled:cursor-not-allowed"
+    >${rowSaved.ghichu || ''}</textarea>
+</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Tự render ngay khi DOM sẵn sàng nếu đang ở tab evaluation
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (document.getElementById('eval-14-staff-tbody')) {
+            renderEvaluationFormByWeek();
+        }
+    }, 300);
+});
+function autoResizeNote(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+}
+
+function toggleEvalCell(td) {
+    if (!isEditMode) {
+        showToast("Vui lòng mở khóa chỉnh sửa trước!", true);
+        return;
+    }
+    if (td.innerText.trim() === 'X') {
+        td.innerText = '';
+        td.classList.remove('text-red-700', 'bg-red-50');
+    } else {
+        td.innerText = 'X';
+        td.classList.add('text-red-700', 'bg-red-50');
+    }
+}
+
+async function saveGroomingToWeekTab() {
+    if (!isEditMode) {
+        showToast("Vui lòng mở khóa chỉnh sửa trước khi lưu!", true);
+        return;
+    }
+
+    const trs = document.querySelectorAll('#eval-14-staff-tbody tr[data-staff-id]');
+    if (trs.length === 0) {
+        showToast("Chưa có dữ liệu nhân viên để lưu!", true);
+        return;
+    }
+
+    const items = [];
+    const mapSave = {};
+
+    trs.forEach(tr => {
+        const staffId = tr.getAttribute('data-staff-id');
+        const staffName = tr.getAttribute('data-staff-name');
+        const rowData = {
+            staffId,
+            staffName,
+            vitri: '',
+            dongphuc: '',
+            toctrangdiem: '',
+            theksan: '',
+            thaido: '',
+            vesinhquay: '',
+            ghichu: tr.querySelector('textarea[data-col="ghichu"]')?.value.trim() || ''
+        };
+        tr.querySelectorAll('td[data-col]').forEach(td => {
+            rowData[td.getAttribute('data-col')] = td.innerText.trim();
+        });
+        items.push(rowData);
+        mapSave[staffId] = rowData;
+    });
+
+    localStorage.setItem(`grooming_week_${currentStartDate}`, JSON.stringify(mapSave));
+
+    const tabName = getWeekTabName(currentStartDate);
+    try {
+        showToast(`Đang lưu đánh giá vào tab "${tabName}"...`);
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "saveGroomingEvaluation",
+                weekKey: currentStartDate,
+                tabName: tabName,
+                supervisor: document.getElementById('eval-sup-direct')?.value.trim() || "Nguyễn Bạch Huệ",
+                weekRange: document.getElementById('eval-week-range-input')?.value || "",
+                evaluations: items
+            })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+            showToast(`Đã lưu vào tab "${tabName}" thành công!`);
+        } else {
+            showToast("Đã lưu tạm trên máy (Sheet báo: " + (data.message || "chưa hỗ trợ action") + ")");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("Đã lưu tạm trên máy, không gửi được tới Google Sheet!", true);
+    }
+}
+
+function printEvaluationDirect() {
+    const srcForm = document.getElementById('evaluation-direct-form');
+    if (!srcForm) return;
+
+    const srcInputs = Array.from(srcForm.querySelectorAll('input'));
+    const inputValues = srcInputs.map(inp => inp.value);
+
+    const srcNotes = Array.from(srcForm.querySelectorAll('textarea[data-col="ghichu"]'));
+    const noteData = srcNotes.map(ta => ({
+        val: ta.value,
+        height: ta.style.height || (ta.scrollHeight + 'px')
+    }));
+
+    const win = window.open('', '_blank', 'width=1100,height=800');
+    if (!win) return;
+
+    win.document.open();
+    win.document.write(`
+        <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Phiếu Grooming</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <style>
+            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            textarea { overflow: hidden !important; resize: none !important; word-break: break-word; }
+            @page { size: A4 landscape; margin: 8mm; }
+        </style>
+        </head><body>${srcForm.innerHTML}</body></html>
+    `);
+    win.document.close();
+
+    const applyValuesAndPrint = () => {
+        const dstInputs = win.document.querySelectorAll('input');
+        inputValues.forEach((val, i) => {
+            if (dstInputs[i]) {
+                dstInputs[i].value = val;
+                dstInputs[i].setAttribute('value', val);
+            }
+        });
+
+        const dstNotes = win.document.querySelectorAll('textarea[data-col="ghichu"]');
+        noteData.forEach((item, i) => {
+            if (dstNotes[i]) {
+                dstNotes[i].value = item.val;
+                dstNotes[i].textContent = item.val;
+                dstNotes[i].style.height = 'auto';
+                dstNotes[i].style.height = Math.max(dstNotes[i].scrollHeight, parseInt(item.height, 10) || 0) + 'px';
+            }
+        });
+
+        setTimeout(() => {
+            win.focus();
+            win.print();
+            win.close();
+        }, 400);
+    };
+
+    if (win.document.readyState === 'complete') {
+        applyValuesAndPrint();
+    } else {
+        win.onload = applyValuesAndPrint;
     }
 }
     </script>
