@@ -4166,118 +4166,99 @@ document.addEventListener("DOMContentLoaded", () => {
     toEl.value = todayStr;
   }
 });
-///DOM FHT POPUP
 document.addEventListener("DOMContentLoaded", () => {
+  const fhtPopup   = document.getElementById("fhtPopup");
+  const fhtBtn     = document.getElementById("fhtBtn");
+  const closeFhtBtn = document.getElementById("closeFHT");
+  const confirmBtn = document.getElementById("confirmFHT");
+  const fromInput  = document.getElementById("fhtFrom");
+  const toInput    = document.getElementById("fhtTo");
+  const blCheckbox = document.getElementById("fhtBL");
 
-  const fhtPopup = document.getElementById("fhtPopup");
-  const fhtBtn   = document.getElementById("fhtBtn");
+  const today = new Date().toISOString().split("T")[0];
+  if (fromInput && !fromInput.value) fromInput.value = today;
+  if (toInput && !toInput.value)     toInput.value   = today;
 
-  fhtBtn.onclick = () => {
-    fhtPopup.style.display = "flex";
-  };
+  if (fhtBtn && fhtPopup) {
+    fhtBtn.onclick = () => {
+      fhtPopup.style.display = "flex";
+    };
+  }
 
-  document.getElementById("closeFHT").onclick = () => {
-    fhtPopup.style.display = "none";
-  };
+  if (closeFhtBtn && fhtPopup) {
+    closeFhtBtn.onclick = () => {
+      fhtPopup.style.display = "none";
+    };
+  }
 
-});
-///// GẮN SỰ KIỆN FHT
-document.addEventListener("DOMContentLoaded", () => {
+  if (!confirmBtn) return;
 
-  document.getElementById("confirmFHT").onclick = async () => {
-    console.log("CLICK FHT");
+  confirmBtn.onclick = async () => {
+    const from = fromInput ? fromInput.value : "";
+    const to   = toInput ? toInput.value : "";
+    const includeBL = blCheckbox ? blCheckbox.checked : false;
 
-    const from = document.getElementById("fhtFrom").value;
-    const to   = document.getElementById("fhtTo").value;
-    const includeBL = document.getElementById("fhtBL").checked;
-
-    console.log(from, to, includeBL);
-
-    if(!from || !to){
+    if (!from || !to) {
       alert("Chọn đủ From - To");
       return;
     }
 
-    let url = API + `?from=${from}&to=${to}&t=${Date.now()}`;
-    console.log("URL:", url);
+    const url =
+      `${API}?action=calcFHT` +
+      `&from=${encodeURIComponent(from)}` +
+      `&to=${encodeURIComponent(to)}` +
+      `&includeBL=${includeBL}` +
+      `&t=${Date.now()}`;
 
-    try{
+    const oldText = confirmBtn.textContent;
+
+    try {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Đang tính...";
+
+      const t0 = performance.now();
       const res = await fetch(url);
       const json = await res.json();
+      console.log("FHT fetch ms:", Math.round(performance.now() - t0), json);
 
-      console.log("DATA:", json);
-
-      if(!json.data || json.data.length <= 1){
-        alert("Không có dữ liệu");
+      if (!json.success) {
+        alert("Lỗi: " + (json.error || "Không có phản hồi hợp lệ"));
         return;
       }
 
-      const rows = json.data.slice(1);
+      const total = Number(json.total) || 0;
+      const pass  = Number(json.pass) || 0;
+      const rate  = json.rate ?? (total > 0 ? ((pass / total) * 100).toFixed(2) : "0.00");
 
-      let total = 0;
-      let pass  = 0;
-
-      rows.forEach(row => {
-
-        const depFlight = (row[9] || "").toUpperCase();
-
-        // filter hãng bay
-        if(!includeBL && depFlight.startsWith("BL")) return;
-        if(!depFlight.startsWith("VN") && !depFlight.startsWith("BL")) return;
-
-        const fht = formatTimeForInput(row[14]);
-        const ata = formatTimeForInput(row[8]);
-        const etd = formatTimeForInput(row[12]);
-
-        if(!fht || !ata || !etd) return;
-
-        const fhtMin = parseTime(fht);
-        const ataMin = parseTime(ata);
-        const etdMin = parseTime(etd);
-
-        const gt = fhtMin - ataMin;
-        const diff = fhtMin - etdMin;
-
-        total++;
-
-        if(gt <= 35 || diff <= 0){
-          pass++;
-        }
-      });
-
-      console.log("TOTAL:", total, "PASS:", pass);
-
-      let percent = total ? ((pass / total) * 100).toFixed(2) : 0;
+      if (total === 0) {
+        alert("Không có dữ liệu");
+        return;
+      }
 
       const result = `FHT REPORT
 FROM ${from} TO ${to}
 TOTAL: ${total}
 PASS: ${pass}
-RATE: ${percent}%`;
+RATE: ${rate}%`;
 
-  document.getElementById("occOutput").textContent = "";
-  document.getElementById("mvdOutput").textContent = "";
-  document.getElementById("fhtOutput").textContent = "";
-  document.getElementById("mvaOutput").textContent = "";  
+      document.getElementById("occOutput").textContent = "";
+      document.getElementById("mvdOutput").textContent = "";
+      document.getElementById("fhtOutput").textContent = "";
+      document.getElementById("mvaOutput").textContent = "";
       document.getElementById("lomoResult").innerHTML = "";
       document.getElementById("fhtOutput").textContent = result;
 
-      fhtPopup.style.display = "none";
-
-    }catch(err){
+      if (fhtPopup) {
+        fhtPopup.style.display = "none";
+      }
+    } catch (err) {
       alert("Lỗi: " + err.message);
       console.error(err);
+    } finally {
+      confirmBtn.textContent = oldText;
+      confirmBtn.disabled = false;
     }
-
   };
-
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const today = new Date().toISOString().split("T")[0];
-
-  document.getElementById("fhtFrom").value = today;
-  document.getElementById("fhtTo").value   = today;
 });
 /////IMPORT BUTTON
 
